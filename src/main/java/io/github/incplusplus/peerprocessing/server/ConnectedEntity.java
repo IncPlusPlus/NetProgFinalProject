@@ -8,6 +8,7 @@ import java.util.UUID;
  */
 public class ConnectedEntity {
 	private UUID id;
+	private String name;
 	
 	public UUID getId() {
 		return id;
@@ -24,6 +25,4 @@ public class ConnectedEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	private String name;
 }
