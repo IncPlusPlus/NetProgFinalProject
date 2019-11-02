@@ -1,5 +1,8 @@
 package io.github.incplusplus.peerprocessing.common;
 
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
@@ -7,9 +10,10 @@ import java.util.SplittableRandom;
 
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.MESSAGE;
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
+import static org.javatuples.Pair.with;
 
 public class MiscUtils {
-	public static Socket promptForSocket() throws IOException {
+	public static Pair<String, Integer> promptForHostPortTuple() {
 		Scanner in = new Scanner(System.in);
 		String host;
 		int port;
@@ -19,7 +23,19 @@ public class MiscUtils {
 		port = in.nextInt();
 		//gotta love the Scanner bug
 		in.nextLine();
-		return new Socket(host, port);
+		return with(host, port);
+	}
+	
+	public static Socket promptForSocket() throws IOException {
+		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
+		return new Socket(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
+	}
+	
+	public static Triplet<String, Integer, Socket> promptForHostPortSocket() throws IOException {
+		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
+		String host = hostAndPortPair.getValue0();
+		int port = hostAndPortPair.getValue1();
+		return Triplet.with(host, port, new Socket(host,port));
 	}
 	
 	/**
@@ -29,6 +45,7 @@ public class MiscUtils {
 	 *
 	 * @param intendedMessage the message to be prefixed
 	 * @return a prefixed copy of the provided string
+	 * @deprecated As this is leftover code from the chat server
 	 */
 	public static String msg(String intendedMessage) {
 		return msg(intendedMessage, MESSAGE);
@@ -91,7 +108,7 @@ public class MiscUtils {
 	 * Credit to https://stackoverflow.com/a/38342964 for this elegant solution
 	 */
 	public static String getIp() throws SocketException, UnknownHostException {
-		try(final DatagramSocket socket = new DatagramSocket()){
+		try (final DatagramSocket socket = new DatagramSocket()) {
 			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
 			return socket.getLocalAddress().getHostAddress();
 		}

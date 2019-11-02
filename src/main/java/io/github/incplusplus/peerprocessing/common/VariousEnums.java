@@ -57,5 +57,6 @@ public enum VariousEnums {
 	 * Indicates that this is to be treated as a
 	 * regular chat message from a client.
 	 */
+	@Deprecated
 	MESSAGE;
 }
