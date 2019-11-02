@@ -84,7 +84,7 @@ public class ServerMethods {
 //	 * synchronize on the handlers parameter. Therefore YOU MUST
 //	 * RUN THIS METHOD IN A BLOCK SYNCHRONIZED ON handlers.
 //	 */
-//	static int getNewRegKey(List<Server.ClientHandler> handlers) {
+//	static int getNewRegKey(List<Server.ConnectionHandler> handlers) {
 //		int possiblyUsableKey = randInt(1, 100);
 //		if (getHandlerForKey(handlers, possiblyUsableKey) == null) {
 //			return possiblyUsableKey;
@@ -95,15 +95,15 @@ public class ServerMethods {
 //	}
 //
 //	/**
-//	 * Find a {@link io.github.incplusplus.chatroom.server.Server.ClientHandler} that
+//	 * Find a {@link io.github.incplusplus.chatroom.server.Server.ConnectionHandler} that
 //	 * contains the provided registration key.
 //	 *
 //	 * @param handlers the list of handlers
 //	 * @param key      a registration key
-//	 * @return a ClientHandler that contains the provided registration key; else null
+//	 * @return a ConnectionHandler that contains the provided registration key; else null
 //	 * @implNote YOU MUST RUN THIS METHOD IN A BLOCK SYNCHRONIZED ON handlers.
 //	 */
-//	static Server.ClientHandler getHandlerForKey(List<Server.ClientHandler> handlers, int key) {
+//	static Server.ConnectionHandler getHandlerForKey(List<Server.ConnectionHandler> handlers, int key) {
 //		return handlers.stream()
 //				//this should grab clients that still have a registration key
 //				.filter(clientHandler -> clientHandler.getClientState().equals(REGISTERED))

@@ -18,7 +18,7 @@ public class Server {
 	private static String serverName = "Processing Server";
 	private static final List<ClientObj> clients = Collections.synchronizedList(new ArrayList<>());
 	private static final List<SlaveObj> slaves = Collections.synchronizedList(new ArrayList<>());
-	private static final List<ClientHandler> connections = Collections.synchronizedList(new ArrayList<>());
+	private static final List<ConnectionHandler> connections = Collections.synchronizedList(new ArrayList<>());
 	
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
@@ -53,7 +53,7 @@ public class Server {
 					System.out.println("Ready and waiting!");
 					while (true) {
 						try {
-							ClientHandler ch = new ClientHandler(socket.accept());
+							ConnectionHandler ch = new ConnectionHandler(socket.accept());
 							connections.add(ch);
 							Thread handlerThread = new Thread(ch);
 							handlerThread.setDaemon(true);
