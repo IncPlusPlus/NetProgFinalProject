@@ -60,7 +60,7 @@ public class MiscUtils {
 	 * @param header          the particular header to prefix the string with
 	 * @return a prefixed copy of the provided string
 	 */
-	public static String msg(String intendedMessage, VariousEnums header) {
+	public static String msg(String intendedMessage, Header header) {
 		return String.valueOf(header) +
 				HEADER_SEPARATOR +
 				intendedMessage;
@@ -96,8 +96,8 @@ public class MiscUtils {
 	 * @param fullPayload the message to get the header from
 	 * @return the header of the supplied message
 	 */
-	public static VariousEnums getHeader(String fullPayload) {
-		return VariousEnums.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
+	public static Header getHeader(String fullPayload) {
+		return Header.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
 	}
 	
 	public static int randInt(int lowerBoundInclusive, int upperBoundInclusive) {

@@ -3,6 +3,7 @@ package io.github.incplusplus.peerprocessing.common;
 import java.util.UUID;
 
 public class Introduction {
+	//unused for now
 	private UUID id;
 	private String name;
 	private ClientType type;

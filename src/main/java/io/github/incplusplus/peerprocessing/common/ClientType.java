@@ -1,6 +1,6 @@
 package io.github.incplusplus.peerprocessing.common;
 
-public enum ClientType {
+public enum ClientType implements Header {
 	CLIENT,
-	SLAVE
+	SLAVE;
 }

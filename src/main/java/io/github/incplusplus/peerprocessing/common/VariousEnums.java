@@ -4,7 +4,7 @@ package io.github.incplusplus.peerprocessing.common;
  * This enum contains values that are processed by the server
  * and/or client
  */
-public enum VariousEnums {
+public enum VariousEnums implements Header {
 	/**
 	 * Indicates to the server that the new connection it has
 	 * just received is for a headless-style client where
