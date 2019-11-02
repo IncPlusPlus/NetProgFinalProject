@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.Scanner;
 import java.util.SplittableRandom;
 
-import static io.github.incplusplus.peerprocessing.common.Constants.ConstantEnum.MESSAGE;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.MESSAGE;
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
 
 public class MiscUtils {
@@ -24,7 +24,7 @@ public class MiscUtils {
 	
 	/**
 	 * Prefixes the provided string such that it begins with
-	 * the message value from the {@link Constants.ConstantEnum} enum
+	 * the message value from the {@link VariousEnums} enum
 	 * and is also separated from the header by {@link Constants#HEADER_SEPARATOR}
 	 *
 	 * @param intendedMessage the message to be prefixed
@@ -43,7 +43,7 @@ public class MiscUtils {
 	 * @param header          the particular header to prefix the string with
 	 * @return a prefixed copy of the provided string
 	 */
-	public static String msg(String intendedMessage, Constants.ConstantEnum header) {
+	public static String msg(String intendedMessage, VariousEnums header) {
 		return String.valueOf(header) +
 				HEADER_SEPARATOR +
 				intendedMessage;
@@ -66,7 +66,7 @@ public class MiscUtils {
 	
 	/**
 	 * This is the same as {@link #decode(String)} except it
-	 * specifically expects the incoming header to be a {@link io.github.incplusplus.chatroom.shared.Constants.ConstantEnum#MESSAGE}
+	 * specifically expects the incoming header to be a {@link VariousEnums#MESSAGE}
 	 */
 	public static String decodeMessage(String receivedMessage) {
 		assert getHeader(receivedMessage).equals(MESSAGE);
@@ -79,8 +79,8 @@ public class MiscUtils {
 	 * @param fullPayload the message to get the header from
 	 * @return the header of the supplied message
 	 */
-	public static Constants.ConstantEnum getHeader(String fullPayload) {
-		return Constants.ConstantEnum.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
+	public static VariousEnums getHeader(String fullPayload) {
+		return VariousEnums.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
 	}
 	
 	public static int randInt(int lowerBoundInclusive, int upperBoundInclusive) {

@@ -1,4 +1,4 @@
 package io.github.incplusplus.peerprocessing.client;
 
-public class Client {
+public class Client implements Personable {
 }

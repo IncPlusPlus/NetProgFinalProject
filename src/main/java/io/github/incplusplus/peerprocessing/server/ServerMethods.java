@@ -1,6 +1,8 @@
 package io.github.incplusplus.peerprocessing.server;
 
-import io.github.incplusplus.peerprocessing.common.Constants;
+import io.github.incplusplus.peerprocessing.common.Demands;
+import io.github.incplusplus.peerprocessing.common.Responses;
+import io.github.incplusplus.peerprocessing.common.VariousEnums;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +30,7 @@ public class ServerMethods {
 	 * @param inFromClient   a {@link BufferedReader} from the client
 	 * @return the string content of the reply from the client
 	 */
-	public static String negotiate(Constants.ConstantEnum serverDemand, Constants.ConstantEnum properResponse,
+	public static String negotiate(Demands serverDemand, Responses properResponse,
 	                               PrintWriter outToClient, BufferedReader inFromClient) throws IOException {
 		//tell the client what we want
 		outToClient.println(serverDemand);
@@ -45,7 +47,7 @@ public class ServerMethods {
 	 *
 	 * @return whether the right header was sent back
 	 */
-	private static boolean expected(Constants.ConstantEnum serverDemand, Constants.ConstantEnum properResponse,
+	private static boolean expected(Demands serverDemand, Responses properResponse,
 	                                String clientResponse) {
 		String clientHeader = clientResponse;
 		if (clientResponse == null) {
@@ -64,8 +66,8 @@ public class ServerMethods {
 		}
 	}
 	
-	private static void logFailedExpectations(Constants.ConstantEnum serverDemand,
-	                                          Constants.ConstantEnum properResponse,
+	private static void logFailedExpectations(Demands serverDemand,
+	                                          Responses properResponse,
 	                                          String actual) {
 		log("Expected '" + properResponse + "' for demand '" + serverDemand + "' but got '" + actual + "' instead.");
 	}

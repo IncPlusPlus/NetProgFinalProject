@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing.shared;
+package io.github.incplusplus.peerprocessing.common;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -11,7 +11,7 @@ public class Problem {
 	private String originalExpression;
 	private boolean solved;
 	private BigDecimal result;
-	private UUID id;
+	private UUID problemId;
 	
 	public String getOriginalExpression() {
 		return originalExpression;
@@ -37,11 +37,11 @@ public class Problem {
 		this.result = result;
 	}
 	
-	public UUID getId() {
-		return id;
+	public UUID getProblemId() {
+		return problemId;
 	}
 	
-	public void setId(UUID id) {
-		this.id = id;
+	public void setProblemId(UUID problemId) {
+		this.problemId = problemId;
 	}
 }
