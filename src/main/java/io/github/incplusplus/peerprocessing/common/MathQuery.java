@@ -7,11 +7,12 @@ import java.util.UUID;
  * Serves as the holder of the bulk of information
  * regarding
  */
-public class Problem {
+public class MathQuery {
 	private String originalExpression;
 	private boolean solved;
 	private BigDecimal result;
 	private UUID problemId;
+	private Throwable reasonUnsolved;
 	
 	public String getOriginalExpression() {
 		return originalExpression;
@@ -43,5 +44,13 @@ public class Problem {
 	
 	public void setProblemId(UUID problemId) {
 		this.problemId = problemId;
+	}
+	
+	public Throwable getReasonUnsolved() {
+		return reasonUnsolved;
+	}
+	
+	public void setReasonUnsolved(Throwable reasonUnsolved) {
+		this.reasonUnsolved = reasonUnsolved;
 	}
 }
