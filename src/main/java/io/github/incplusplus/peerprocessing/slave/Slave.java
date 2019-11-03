@@ -17,8 +17,7 @@ import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPE
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.enable;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
@@ -63,13 +62,13 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void introduce() throws JsonProcessingException {
-		log("Introducing self to server. Connecting...");
+		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
 		introduction.setName(name);
 		introduction.setId(uuid);
 		introduction.setType(ClientType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
-		log("Connected");
+		debug("Connected");
 	}
 	
 	/**
@@ -102,7 +101,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(SOLVE)) {
 						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
-						log("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
+						debug("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
 						sendSolvedMathQuery(solve(job));
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
@@ -110,12 +109,12 @@ public class Slave implements ProperClient, Personable {
 					}
 				}
 				catch (IOException e) {
-					e.printStackTrace();
+					printStackTrace(e);
 					try {
 						disconnect();
 					}
 					catch (IOException ex) {
-						log("There was an exception during the disconnect which began due to a previous exception!");
+						debug("There was an exception during the disconnect which began due to a previous exception!");
 						ex.printStackTrace();
 					}
 					break;
@@ -142,7 +141,7 @@ public class Slave implements ProperClient, Personable {
 			job.getMathQuery().setSolved(true);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			printStackTrace(e);
 			job.getMathQuery().setSolved(false);
 			job.getMathQuery().setReasonUnsolved(e);
 		}
