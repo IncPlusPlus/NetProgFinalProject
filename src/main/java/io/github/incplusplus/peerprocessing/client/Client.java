@@ -132,14 +132,14 @@ public class Client implements ProperClient, Personable {
 		serverInteractionThread.start();
 	}
 	
-	private void printSolution(MathQuery convertValue) {
-		if (convertValue.isSolved()) {
-			log("The solution for the problem \"" + convertValue.getOriginalExpression() + "\" is: \"" + convertValue.getResult() + "\"");
+	private void printSolution(MathQuery query) {
+		if (query.isSolved()) {
+			log("The solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
 		}
 		else {
-			log("The solution for the problem \"" + convertValue.getOriginalExpression() + "\" could not be found.");
-			log("The reason for this is: " + convertValue.getReasonUnsolved().toString());
-			log("Stacktrace: \n" + Arrays.toString(convertValue.getReasonUnsolved().getStackTrace()));
+			log("The solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
+			log("The reason for this is: " + query.getReasonUnsolved().toString());
+			log("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
 		}
 	}
 }

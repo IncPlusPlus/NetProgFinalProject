@@ -8,18 +8,19 @@ import java.util.UUID;
  * regarding
  */
 public class MathQuery {
-	private String originalExpression;
+	private final String originalExpression;
+	private final UUID problemId;
 	private boolean solved;
 	private BigDecimal result;
-	private UUID problemId;
 	private Throwable reasonUnsolved;
+	
+	public MathQuery(String originalExpression) {
+		this.problemId = UUID.randomUUID();
+		this.originalExpression = originalExpression;
+	}
 	
 	public String getOriginalExpression() {
 		return originalExpression;
-	}
-	
-	public void setOriginalExpression(String originalExpression) {
-		this.originalExpression = originalExpression;
 	}
 	
 	public boolean isSolved() {
@@ -40,10 +41,6 @@ public class MathQuery {
 	
 	public UUID getProblemId() {
 		return problemId;
-	}
-	
-	public void setProblemId(UUID problemId) {
-		this.problemId = problemId;
 	}
 	
 	public Throwable getReasonUnsolved() {
