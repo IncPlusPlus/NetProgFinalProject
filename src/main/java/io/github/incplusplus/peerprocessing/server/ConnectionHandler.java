@@ -20,8 +20,8 @@ public class ConnectionHandler implements Runnable {
 	private final PrintWriter outToClient;
 	private final BufferedReader inToClient;
 	private Socket socket;
-	private volatile ConnectionState connectionState;
 	private UUID connectionUUID;
+	private volatile ConnectionState connectionState;
 	
 	public ConnectionHandler(Socket incomingConnection) throws IOException {
 		this.connectionUUID = UUID.randomUUID();
@@ -35,6 +35,20 @@ public class ConnectionHandler implements Runnable {
 		try {
 			Introduction clientIntroduction = SHARED_MAPPER.readValue(
 					negotiate(IDENTIFY, IDENTITY, outToClient, inToClient), Introduction.class);
+			if (clientIntroduction.getType().equals(ClientType.CLIENT)) {
+				ClientObj client = new ClientObj(outToClient,inToClient,socket,connectionUUID);
+				Thread clientThread = new Thread(client);
+				clientThread.setDaemon(true);
+				clientThread.start();
+				Server.clients.add(client);
+			}
+			else if (clientIntroduction.getType().equals(ClientType.SLAVE)) {
+				SlaveObj slave = new SlaveObj(outToClient,inToClient,socket,connectionUUID);
+				Thread clientThread = new Thread(slave);
+				clientThread.setDaemon(true);
+				clientThread.start();
+				Server.slaves.add(slave);
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();

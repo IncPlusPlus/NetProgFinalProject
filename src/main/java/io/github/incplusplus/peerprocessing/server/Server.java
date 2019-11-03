@@ -16,8 +16,8 @@ public class Server {
 	private static ServerSocket socket;
 	private final static int port = 1234;
 	private static String serverName = "Processing Server";
-	private static final List<ClientObj> clients = Collections.synchronizedList(new ArrayList<>());
-	private static final List<SlaveObj> slaves = Collections.synchronizedList(new ArrayList<>());
+	static final List<ClientObj> clients = Collections.synchronizedList(new ArrayList<>());
+	static final List<SlaveObj> slaves = Collections.synchronizedList(new ArrayList<>());
 	private static final List<ConnectionHandler> connections = Collections.synchronizedList(new ArrayList<>());
 	
 	public static void main(String[] args) throws IOException {
