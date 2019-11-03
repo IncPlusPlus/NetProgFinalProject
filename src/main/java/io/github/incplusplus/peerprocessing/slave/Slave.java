@@ -83,7 +83,7 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
-	
+		//TODO implement
 	}
 	
 	private void dealWithServer() {
@@ -96,6 +96,7 @@ public class Slave implements ProperClient, Personable {
 					if (header.equals(IDENTIFY)) {
 						introduce();
 					}
+					//TODO add clause for solve request
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}

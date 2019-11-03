@@ -95,7 +95,7 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
-	
+		//TODO implement
 	}
 	
 	private void dealWithServer() {

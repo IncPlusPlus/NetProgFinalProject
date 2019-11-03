@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.Job;
 import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.common.ClientType;
@@ -15,6 +16,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.server.JobState.SENDING_TO_CLIENT;
+import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_ON_SLAVE;
 
 public class Server {
 	private static ServerSocket socket;
@@ -169,6 +172,13 @@ public class Server {
 	
 	//</editor-fold>
 	
+	/**
+	 * Add a job to the server. The server will then add this job
+	 * to the job queue where it will be removed and processed.
+	 * The job will also be added to a map of jobs to determine
+	 * the source and destination of jobs received by slaves.
+	 * @param job the job to be processed
+	 */
 	static void submitJob(Job job) {
 		Job shouldBeNull = null;
 		//Put this slave in the slaves map
@@ -180,7 +190,25 @@ public class Server {
 		jobsAwaitingProcessing.add(job);
 	}
 	
-	private static void sendToLeastBusySlave(Job job) throws InterruptedException {
+	/**
+	 * Remove a job from the jobs list. At this point,
+	 * the job has just been processed by a slave.
+	 * It's internal status will still be {@link JobState#WAITING_ON_SLAVE}
+	 * @param jobId the id of the job to remove
+	 */
+	static Job removeJob(UUID jobId) {
+		Job removedJob = jobs.remove(jobId);
+		assert removedJob.getJobState().equals(WAITING_ON_SLAVE);
+		removedJob.setJobState(SENDING_TO_CLIENT);
+		return removedJob;
+	}
+	
+	static void relayToAppropriateClient(Job job) throws JsonProcessingException {
+		ClientObj requestSource = clients.get(job.getRequestingClientUUID());
+		requestSource.acceptCompleted(job.getMathQuery());
+	}
+	
+	private static void sendToLeastBusySlave(Job job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
 			log("Tried to send job with id " + job.getJobId() + " to a slave.\n" +
 					"However, no slaves were available. Queueing thread sleeping " +
@@ -203,7 +231,7 @@ public class Server {
 					Job currentJob = jobsAwaitingProcessing.take();
 					sendToLeastBusySlave(currentJob);
 				}
-				catch (InterruptedException e) {
+				catch (InterruptedException | JsonProcessingException e) {
 					e.printStackTrace();
 				}
 			}

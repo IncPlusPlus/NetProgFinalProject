@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Job;
 import io.github.incplusplus.peerprocessing.common.MathQuery;
@@ -10,9 +11,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.UUID;
 
+import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.getHeader;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 
 public class ClientObj extends ConnectedEntity {
 	public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
@@ -49,10 +51,13 @@ public class ClientObj extends ConnectedEntity {
 		}
 	}
 	
+	void acceptCompleted(MathQuery mathQuery) throws JsonProcessingException {
+		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), SOLUTION));
+	}
+	
 	private void offload(String mathQuery) {
 		Server.submitJob(
 				new Job(new MathQuery(mathQuery), getConnectionUUID())
 		);
 	}
-	
 }
