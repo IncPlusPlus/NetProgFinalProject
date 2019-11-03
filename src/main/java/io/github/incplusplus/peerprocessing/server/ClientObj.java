@@ -9,12 +9,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
 
 public class ClientObj extends ConnectedEntity {
 	public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
@@ -40,6 +42,15 @@ public class ClientObj extends ConnectedEntity {
 				Header header = getHeader(lineFromClient);
 				if (header.equals(SOLVE)) {
 					offload(decode(lineFromClient));
+				}
+			}
+			catch (SocketException e) {
+				deRegister(this);
+				try {
+					getSocket().close();
+				}
+				catch (IOException ex) {
+					ex.printStackTrace();
 				}
 			}
 			catch (IOException e) {
