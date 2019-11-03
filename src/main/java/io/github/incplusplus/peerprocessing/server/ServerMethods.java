@@ -2,13 +2,13 @@ package io.github.incplusplus.peerprocessing.server;
 
 import io.github.incplusplus.peerprocessing.common.Demands;
 import io.github.incplusplus.peerprocessing.common.Responses;
-import io.github.incplusplus.peerprocessing.common.VariousEnums;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.getHeader;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
 
 /**
