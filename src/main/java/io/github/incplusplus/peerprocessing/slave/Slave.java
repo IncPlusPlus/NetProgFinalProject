@@ -45,7 +45,7 @@ public class Slave implements ProperClient, Personable {
 	
 	public void init() throws IOException {
 		this.sock = new Socket(serverHostname, serverPort);
-		this.outToServer = new PrintWriter(sock.getOutputStream());
+		this.outToServer = new PrintWriter(sock.getOutputStream(), true);
 		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	}
 	
@@ -55,6 +55,7 @@ public class Slave implements ProperClient, Personable {
 	@Override
 	public void begin() throws IOException {
 		dealWithServer();
+		while (!sock.isClosed()) {}
 	}
 	
 	/**
@@ -125,6 +126,7 @@ public class Slave implements ProperClient, Personable {
 	/**
 	 * Solves and returns a MathQuery. If an exception occurs,
 	 * it will be contained within the returned MathQuery.
+	 *
 	 * @param query the query to solve
 	 * @return the completed query or a query containing a
 	 * stacktrace if incomplete
