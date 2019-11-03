@@ -177,6 +177,7 @@ public class Server {
 	 * to the job queue where it will be removed and processed.
 	 * The job will also be added to a map of jobs to determine
 	 * the source and destination of jobs received by slaves.
+	 *
 	 * @param job the job to be processed
 	 */
 	static void submitJob(Job job) {
@@ -194,6 +195,7 @@ public class Server {
 	 * Remove a job from the jobs list. At this point,
 	 * the job has just been processed by a slave.
 	 * It's internal status will still be {@link JobState#WAITING_ON_SLAVE}
+	 *
 	 * @param jobId the id of the job to remove
 	 */
 	static Job removeJob(UUID jobId) {
@@ -220,7 +222,7 @@ public class Server {
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
-		slaves.get((UUID) slaves.keySet().toArray()[randInt(1, slaves.size())])
+		slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)])
 				.accept(job);
 	}
 	
