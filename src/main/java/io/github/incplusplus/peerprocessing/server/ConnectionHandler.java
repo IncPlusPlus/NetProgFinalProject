@@ -21,8 +21,8 @@ import static io.github.incplusplus.peerprocessing.server.Server.register;
 import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
 
 public class ConnectionHandler implements Runnable {
-	private final PrintWriter outToClient;
-	private final BufferedReader inToClient;
+	private volatile PrintWriter outToClient;
+	private volatile BufferedReader inToClient;
 	private Socket socket;
 	private UUID connectionUUID;
 	private volatile ConnectionState connectionState;
@@ -45,6 +45,7 @@ public class ConnectionHandler implements Runnable {
 				Thread clientThread = new Thread(client);
 				clientThread.setDaemon(true);
 				clientThread.start();
+				log("Registering new client");
 				register(client);
 			}
 			else if (clientIntroduction.getType().equals(ClientType.SLAVE)) {
@@ -52,6 +53,7 @@ public class ConnectionHandler implements Runnable {
 				Thread clientThread = new Thread(slave);
 				clientThread.setDaemon(true);
 				clientThread.start();
+				log("Registering new slave");
 				register(slave);
 			}
 			this.connectionState = INVALID;
