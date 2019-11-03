@@ -6,8 +6,8 @@ import java.net.Socket;
 import java.util.UUID;
 
 public class SlaveObj extends ConnectedEntity {
-	public SlaveObj(PrintWriter outToClient, BufferedReader inToClient, Socket socket,
-	                UUID connectionUUID) {super(outToClient, inToClient, socket, connectionUUID);}
+	public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+	                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 	
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used

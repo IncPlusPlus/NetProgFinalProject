@@ -11,15 +11,15 @@ import java.util.UUID;
  */
 public abstract class ConnectedEntity implements Runnable {
 	private final PrintWriter outToClient;
-	private final BufferedReader inToClient;
+	private final BufferedReader inFromClient;
 	private final Socket socket;
 	private final UUID connectionUUID;
 	private volatile ConnectionState connectionState;
 	
-	public ConnectedEntity(PrintWriter outToClient, BufferedReader inToClient, Socket socket,
+	public ConnectedEntity(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                       UUID connectionUUID) {
 		this.outToClient = outToClient;
-		this.inToClient = inToClient;
+		this.inFromClient = inFromClient;
 		this.socket = socket;
 		this.connectionUUID = connectionUUID;
 	}
@@ -28,8 +28,8 @@ public abstract class ConnectedEntity implements Runnable {
 		return outToClient;
 	}
 	
-	public BufferedReader getInToClient() {
-		return inToClient;
+	public BufferedReader getInFromClient() {
+		return inFromClient;
 	}
 	
 	public Socket getSocket() {

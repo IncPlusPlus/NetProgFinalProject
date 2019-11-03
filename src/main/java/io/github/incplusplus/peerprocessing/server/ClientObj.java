@@ -6,8 +6,8 @@ import java.net.Socket;
 import java.util.UUID;
 
 public class ClientObj extends ConnectedEntity {
-	public ClientObj(PrintWriter outToClient, BufferedReader inToClient, Socket socket,
-	                 UUID connectionUUID) {super(outToClient, inToClient, socket, connectionUUID);}
+	public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+	                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 	
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used

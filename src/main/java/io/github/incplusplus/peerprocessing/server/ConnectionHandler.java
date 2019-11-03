@@ -22,7 +22,7 @@ import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiat
 
 public class ConnectionHandler implements Runnable {
 	private volatile PrintWriter outToClient;
-	private volatile BufferedReader inToClient;
+	private volatile BufferedReader inFromClient;
 	private Socket socket;
 	private UUID connectionUUID;
 	private volatile ConnectionState connectionState;
@@ -32,16 +32,16 @@ public class ConnectionHandler implements Runnable {
 		this.connectionUUID = UUID.randomUUID();
 		this.connectionState = CONNECTING;
 		this.socket = incomingConnection;
-		this.inToClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		this.inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		this.outToClient = new PrintWriter(socket.getOutputStream(), true);
 	}
 	
 	public void run() {
 		try {
 			Introduction clientIntroduction = SHARED_MAPPER.readValue(
-					negotiate(IDENTIFY, IDENTITY, outToClient, inToClient), Introduction.class);
+					negotiate(IDENTIFY, IDENTITY, outToClient, inFromClient), Introduction.class);
 			if (clientIntroduction.getType().equals(ClientType.CLIENT)) {
-				ClientObj client = new ClientObj(outToClient, inToClient, socket, connectionUUID);
+				ClientObj client = new ClientObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(client);
 				clientThread.setDaemon(true);
 				clientThread.start();
@@ -49,7 +49,7 @@ public class ConnectionHandler implements Runnable {
 				register(client);
 			}
 			else if (clientIntroduction.getType().equals(ClientType.SLAVE)) {
-				SlaveObj slave = new SlaveObj(outToClient, inToClient, socket, connectionUUID);
+				SlaveObj slave = new SlaveObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(slave);
 				clientThread.setDaemon(true);
 				clientThread.start();
