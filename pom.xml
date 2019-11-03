@@ -17,6 +17,7 @@
     </properties>
 
     <dependencies>
+        <!--<editor-fold desc="Jackson">-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -37,16 +38,29 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.9.9</version>
         </dependency>
+        <!--</editor-fold>-->
+        <!--<editor-fold desc="JavaTuples">-->
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
             <version>1.2</version>
         </dependency>
+        <!--</editor-fold>-->
+        <!--<editor-fold desc="EvalEx">-->
         <dependency>
             <groupId>com.udojava</groupId>
             <artifactId>EvalEx</artifactId>
             <version>2.4</version>
         </dependency>
+        <!--</editor-fold>-->
+        <!--<editor-fold desc="JCDP">-->
+        <dependency>
+            <groupId>com.diogonunes</groupId>
+            <artifactId>JCDP</artifactId>
+            <version>2.0.3.1</version>
+        </dependency>
+        <!--</editor-fold>-->
+
     </dependencies>
 
     <build>

@@ -3,7 +3,6 @@ package io.github.incplusplus.peerprocessing.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Job;
-import io.github.incplusplus.peerprocessing.common.MathQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,9 +14,8 @@ import java.util.UUID;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static io.github.incplusplus.peerprocessing.server.Server.*;
 
 public class SlaveObj extends ConnectedEntity {
@@ -65,7 +63,7 @@ public class SlaveObj extends ConnectedEntity {
 				}
 			}
 			catch (IOException e) {
-				e.printStackTrace();
+				printStackTrace(e);
 			}
 		}
 	}

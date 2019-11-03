@@ -1,8 +1,8 @@
 package io.github.incplusplus.peerprocessing.common;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static java.util.Arrays.asList;
 
 /**
@@ -20,7 +20,7 @@ public interface Header {
 				enumValue = Enum.valueOf(i, name);
 			}
 			catch (IllegalArgumentException e) {
-//				e.printStackTrace();
+				printStackTrace(e);
 			}
 		}
 		if (enumValue == null)
