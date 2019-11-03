@@ -47,7 +47,7 @@ public class Client implements ProperClient, Personable {
 	
 	public void init() throws IOException {
 		this.sock = new Socket(serverHostname, serverPort);
-		this.outToServer = new PrintWriter(sock.getOutputStream());
+		this.outToServer = new PrintWriter(sock.getOutputStream(), true);
 		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	}
 	
