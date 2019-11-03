@@ -1,6 +1,7 @@
 package io.github.incplusplus.peerprocessing.slave;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
 import org.javatuples.Pair;
 
@@ -13,9 +14,9 @@ import java.util.Scanner;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
-import static io.github.incplusplus.peerprocessing.common.Demands.PROVIDE_CLIENT_NAME;
+import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.enable;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
 
@@ -96,7 +97,10 @@ public class Slave implements ProperClient, Personable {
 					if (header.equals(IDENTIFY)) {
 						introduce();
 					}
-					//TODO add clause for solve request
+					else if (header.equals(SOLVE)) {
+						MathQuery query = SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class);
+						sendSolvedMathQuery(solve(query));
+					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
@@ -116,5 +120,30 @@ public class Slave implements ProperClient, Personable {
 		});
 		serverInteractionThread.setDaemon(true);
 		serverInteractionThread.start();
+	}
+	
+	/**
+	 * Solves and returns a MathQuery. If an exception occurs,
+	 * it will be contained within the returned MathQuery.
+	 * @param query the query to solve
+	 * @return the completed query or a query containing a
+	 * stacktrace if incomplete
+	 */
+	private MathQuery solve(MathQuery query) {
+		Expression expression = new Expression(query.getOriginalExpression());
+		try {
+			query.setResult(expression.eval());
+			query.setSolved(true);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			query.setSolved(false);
+			query.setReasonUnsolved(e);
+		}
+		return query;
+	}
+	
+	private void sendSolvedMathQuery(MathQuery mathQuery) throws JsonProcessingException {
+		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), SOLUTION));
 	}
 }
