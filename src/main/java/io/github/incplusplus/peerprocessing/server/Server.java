@@ -160,10 +160,10 @@ public class Server {
 	 */
 	static void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			slaves.remove((SlaveObj) connectedEntity);
+			slaves.remove(connectedEntity.getConnectionUUID());
 		}
 		else if (connectedEntity instanceof ClientObj) {
-			clients.remove((ClientObj) connectedEntity);
+			clients.remove(connectedEntity.getConnectionUUID());
 		}
 		else {
 			throw new IllegalArgumentException("Argument 'connectedEntity' must be a SlaveObj or ClientObj.");
