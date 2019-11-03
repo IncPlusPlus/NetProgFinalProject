@@ -222,8 +222,9 @@ public class Server {
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
-		slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)])
-				.accept(job);
+		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
+		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
+		designatedSlave.accept(job);
 	}
 	
 	private static void startJobIngestionThread() {

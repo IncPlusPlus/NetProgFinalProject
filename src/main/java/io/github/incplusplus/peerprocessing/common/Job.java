@@ -2,6 +2,7 @@ package io.github.incplusplus.peerprocessing.common;
 
 import io.github.incplusplus.peerprocessing.server.JobState;
 
+import java.beans.ConstructorProperties;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_FOR_AVAILABLE_SLAVES;
@@ -13,6 +14,7 @@ public class Job {
 	private UUID solvingSlaveUUID;
 	private JobState jobState;
 	
+	@ConstructorProperties({"mathQuery", "requestingClientUUID"})
 	public Job(MathQuery mathQuery, UUID requestingClientUUID) {
 		this.mathQuery = mathQuery;
 		this.requestingClientUUID = requestingClientUUID;

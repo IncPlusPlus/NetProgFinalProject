@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.common;
 
+import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ public class MathQuery {
 	private BigDecimal result;
 	private Throwable reasonUnsolved;
 	
+	@ConstructorProperties("originalExpression")
 	public MathQuery(String originalExpression) {
 		this.problemId = UUID.randomUUID();
 		this.originalExpression = originalExpression;

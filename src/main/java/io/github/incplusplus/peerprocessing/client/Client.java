@@ -112,7 +112,7 @@ public class Client implements ProperClient, Personable {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 					else if (header.equals(SOLUTION)) {
-						printSolution(SHARED_MAPPER.convertValue(decode(lineFromServer), MathQuery.class));
+						printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
 					}
 				}
 				catch (IOException e) {

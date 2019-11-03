@@ -63,11 +63,13 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void introduce() throws JsonProcessingException {
+		log("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
 		introduction.setName(name);
 		introduction.setId(uuid);
 		introduction.setType(ClientType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
+		log("Connected");
 	}
 	
 	/**
@@ -99,8 +101,9 @@ public class Slave implements ProperClient, Personable {
 						introduce();
 					}
 					else if (header.equals(SOLVE)) {
-						MathQuery query = SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class);
-						sendSolvedMathQuery(solve(query));
+						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
+						log("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
+						sendSolvedMathQuery(solve(job));
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
@@ -124,28 +127,29 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	/**
-	 * Solves and returns a MathQuery. If an exception occurs,
-	 * it will be contained within the returned MathQuery.
+	 * Solves and returns a job. If an exception occurs,
+	 * it will be contained in the query enclosed by the specified job.
 	 *
-	 * @param query the query to solve
-	 * @return the completed query or a query containing a
-	 * stacktrace if incomplete
+	 * @param job the job to complete
+	 * @return the job containing the
+	 * completed query or a query containing a stacktrace if incomplete
 	 */
-	private MathQuery solve(MathQuery query) {
-		Expression expression = new Expression(query.getOriginalExpression());
+	private Job solve(Job job) {
+		
+		Expression expression = new Expression(job.getMathQuery().getOriginalExpression());
 		try {
-			query.setResult(expression.eval());
-			query.setSolved(true);
+			job.getMathQuery().setResult(expression.eval());
+			job.getMathQuery().setSolved(true);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			query.setSolved(false);
-			query.setReasonUnsolved(e);
+			job.getMathQuery().setSolved(false);
+			job.getMathQuery().setReasonUnsolved(e);
 		}
-		return query;
+		return job;
 	}
 	
-	private void sendSolvedMathQuery(MathQuery mathQuery) throws JsonProcessingException {
-		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), SOLUTION));
+	private void sendSolvedMathQuery(Job job) throws JsonProcessingException {
+		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(job), SOLUTION));
 	}
 }
