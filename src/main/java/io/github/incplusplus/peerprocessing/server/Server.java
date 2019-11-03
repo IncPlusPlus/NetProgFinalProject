@@ -7,14 +7,21 @@ import io.github.incplusplus.peerprocessing.common.ClientType;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
 
 public class Server {
 	private static ServerSocket socket;
+	/**
+	 * The time to sleep in milliseconds when there are no slaves around to process requests
+	 */
+	private static long NO_SLAVES_SLEEP_TIME = 1000 * 30;
 	private final static int port = 1234;
 	private static String serverName = "Processing Server";
 	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
@@ -26,7 +33,10 @@ public class Server {
 	 */
 	private static final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
 	private static final ConcurrentHashMap<UUID, Job> jobs = new ConcurrentHashMap<>();
-	//	private static final List<ConnectedEntity> connectedEntities = Collections.synchronizedList(new ArrayList<>());
+	/**
+	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
+	 */
+	private static final BlockingDeque<Job> jobsAwaitingProcessing = new LinkedBlockingDeque<>();
 	
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
@@ -59,6 +69,7 @@ public class Server {
 			public void run() {
 				try {
 					System.out.println("Ready and waiting!");
+					startJobIngestionThread();
 					while (true) {
 						try {
 							ConnectionHandler ch = new ConnectionHandler(socket.accept());
@@ -166,14 +177,38 @@ public class Server {
 		//only returns null if there was no previous mapping. We want to assure there was no
 		//duplicate mapping before this put() operation.
 		assert shouldBeNull == null;
-		sendToLeastBusySlave(job);
+		jobsAwaitingProcessing.add(job);
 	}
 	
-	private static void sendToLeastBusySlave(Job job) {
+	private static void sendToLeastBusySlave(Job job) throws InterruptedException {
+		while (slaves.size() < 1) {
+			log("Tried to send job with id " + job.getJobId() + " to a slave.\n" +
+					"However, no slaves were available. Queueing thread sleeping " +
+					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " seconds...");
+			Thread.sleep(NO_SLAVES_SLEEP_TIME);
+		}
 		/*
 		 * TODO: Determining the business of slaves is not yet implemented as the
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
+		slaves.get((UUID) slaves.keySet().toArray()[randInt(1, slaves.size())])
+				.accept(job);
+	}
+	
+	private static void startJobIngestionThread() {
+		Thread ingestionThread = new Thread(() -> {
+			while (!socket.isClosed()) {
+				try {
+					Job currentJob = jobsAwaitingProcessing.take();
+					sendToLeastBusySlave(currentJob);
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		ingestionThread.setDaemon(true);
+		ingestionThread.start();
 	}
 }

@@ -1,5 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import io.github.incplusplus.peerprocessing.common.Job;
+
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -22,6 +24,10 @@ public class SlaveObj extends ConnectedEntity {
 	 */
 	@Override
 	public void run() {
+	
+	}
+	
+	public void accept(Job job) {
 	
 	}
 }
