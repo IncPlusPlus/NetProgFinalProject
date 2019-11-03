@@ -63,7 +63,7 @@ public class Client implements ProperClient, Personable {
 				"as you may be interrupted by the first result while you type the second expression.");
 		dealWithServer();
 		while(!sock.isClosed()) {
-			System.out.print("Evaluate: ");
+			printEvalLine();
 			outToServer.println(msg(in.nextLine(), SOLVE));
 		}
 	}
@@ -141,5 +141,10 @@ public class Client implements ProperClient, Personable {
 			log("The reason for this is: " + query.getReasonUnsolved().toString());
 			log("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
 		}
+		printEvalLine();
+	}
+	
+	private void printEvalLine() {
+		System.out.print("Evaluate: ");
 	}
 }
