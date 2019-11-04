@@ -1,12 +1,14 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.common.Job;
 import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.common.ClientType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +49,6 @@ public class Server {
 		StupidSimpleLogger.enable();
 		if (serverName != null)
 			info("Server name: " + serverName);
-		socket = new ServerSocket(port);
 		start(port);
 		info("Server started on " + getIp() + ":" + port + ".");
 		info("Hit enter to stop the server.");
@@ -65,12 +66,14 @@ public class Server {
 	
 	public static void start(int serverPort) {
 		class ServerStartTask implements Runnable {
-			int port;
-			
-			ServerStartTask(int p) {port = p;}
+			private int port;
+			ServerStartTask(int p) {
+				port = p;
+			}
 			
 			public void run() {
 				try {
+					socket = new ServerSocket(port);
 					info("Ready and waiting!");
 					startJobIngestionThread();
 					while (true) {
@@ -81,20 +84,49 @@ public class Server {
 							handlerThread.setDaemon(true);
 							handlerThread.start();
 						}
+						catch (SocketException e) {
+							info("Server shutting down.");
+							debug("Disconnecting clients.");
+							synchronized (clients) {
+								for (Map.Entry<UUID, ClientObj> i : clients.entrySet()) {
+									i.getValue().disconnect();
+									debug("Dropped connection for client " + i.getValue().getConnectionUUID());
+								}
+							}
+							debug("Disconnecting slaves.");
+							synchronized (slaves) {
+								for (Map.Entry<UUID, SlaveObj> i : slaves.entrySet()) {
+									i.getValue().disconnect();
+									debug("Dropped connection for slave " + i.getValue().getConnectionUUID());
+									for (UUID jobId : i.getValue().getJobsResponsibleFor()) {
+										debug("From slave " + i.getValue().getConnectionUUID() + ", dropped job " + jobId.toString());
+									}
+								}
+							}
+							
+							info("Server shut down.");
+						}
 						catch (IOException e) {
 							printStackTrace(e);
 							debug("FATAL ERROR. THE CLIENT HANDLER ENCOUNTERED AN ERROR DURING CLOSING TIME");
 						}
 					}
 				}
+				catch (IOException e) {
+					printStackTrace(e);
+				}
 				finally {
 					debug("Server shutting down!");
 				}
 			}
 		}
-		Thread t = new Thread(new ServerStartTask(port));
+		Thread t = new Thread(new ServerStartTask(serverPort));
 		t.setDaemon(true);
 		t.start();
+	}
+	
+	public static void stop() throws IOException {
+		socket.close();
 	}
 	
 	//<editor-fold desc="register() methods">
