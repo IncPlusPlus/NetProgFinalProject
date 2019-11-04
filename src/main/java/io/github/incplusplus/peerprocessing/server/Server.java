@@ -1,10 +1,9 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.common.Job;
 import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
-import io.github.incplusplus.peerprocessing.common.ClientType;
+import io.github.incplusplus.peerprocessing.common.MemberType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -30,14 +29,16 @@ public class Server {
 	 */
 	private static long NO_SLAVES_SLEEP_TIME = 1000 * 30;
 	private final static int port = 1234;
-	private static String serverName = "Processing Server";
+	//mostly unused
+	final static UUID serverId = UUID.randomUUID();
+	final static String serverName = "Processing Server";
 	private static volatile AtomicBoolean started = new AtomicBoolean(false);
 	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private static final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
 	 * Should probably be replaced with {@link Executors#newCachedThreadPool()} at some point.
 	 * Elements of this list exist while an incoming connection is established and are removed
-	 * after it has been established what {@linkplain ClientType} the incoming connection is.
+	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
 	private static final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
 	private static final ConcurrentHashMap<UUID, Job> jobs = new ConcurrentHashMap<>();

@@ -16,6 +16,7 @@ import java.util.UUID;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
@@ -57,6 +58,10 @@ public class SlaveObj extends ConnectedEntity {
 					storedJob.getMathQuery().setSolved(completedJob.getMathQuery().isSolved());
 					relayToAppropriateClient(storedJob);
 					jobsResponsibleFor.remove(storedJob.getJobId());
+				}
+				else if (header.equals(IDENTIFY)) {
+					getOutToClient().println(
+							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
 				}
 			}
 			catch (SocketException e) {

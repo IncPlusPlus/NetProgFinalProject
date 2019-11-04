@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
@@ -67,9 +68,9 @@ public class Slave implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setName(name);
-		introduction.setId(uuid);
-		introduction.setType(ClientType.SLAVE);
+		introduction.setSenderName(name);
+		introduction.setSenderId(uuid);
+		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
 		debug("Connected");
 	}
@@ -103,6 +104,11 @@ public class Slave implements ProperClient, Personable {
 					Header header = getHeader(lineFromServer);
 					if (header.equals(IDENTIFY)) {
 						introduce();
+						//demand the server identify and also tell us our UUID
+						outToServer.println(IDENTIFY);
+					}
+					else if (header.equals(IDENTITY)) {
+						this.uuid = UUID.fromString(decode(lineFromServer));
 					}
 					else if (header.equals(SOLVE)) {
 						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);

@@ -1,6 +1,6 @@
 package io.github.incplusplus.peerprocessing.server;
 
-import io.github.incplusplus.peerprocessing.common.ClientType;
+import io.github.incplusplus.peerprocessing.common.MemberType;
 import io.github.incplusplus.peerprocessing.common.Introduction;
 
 import java.io.BufferedReader;
@@ -41,7 +41,7 @@ public class ConnectionHandler implements Runnable {
 		try {
 			Introduction clientIntroduction = SHARED_MAPPER.readValue(
 					negotiate(IDENTIFY, IDENTITY, outToClient, inFromClient), Introduction.class);
-			if (clientIntroduction.getType().equals(ClientType.CLIENT)) {
+			if (clientIntroduction.getSenderType().equals(MemberType.CLIENT)) {
 				ClientObj client = new ClientObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(client);
 				clientThread.setDaemon(true);
@@ -50,7 +50,7 @@ public class ConnectionHandler implements Runnable {
 				debug("Registering new client");
 				register(client);
 			}
-			else if (clientIntroduction.getType().equals(ClientType.SLAVE)) {
+			else if (clientIntroduction.getSenderType().equals(MemberType.SLAVE)) {
 				SlaveObj slave = new SlaveObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(slave);
 				clientThread.setDaemon(true);

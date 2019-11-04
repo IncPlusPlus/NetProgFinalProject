@@ -1,5 +1,8 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import io.github.incplusplus.peerprocessing.common.Introduction;
+import io.github.incplusplus.peerprocessing.common.MemberType;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,6 +48,15 @@ public abstract class ConnectedEntity implements Runnable {
 	
 	public ConnectionState getConnectionState() {
 		return connectionState;
+	}
+	
+	Introduction provideIntroductionFromServer() {
+		Introduction introduction = new Introduction();
+		introduction.setSenderId(Server.serverId);
+		introduction.setReceiverId(getConnectionUUID());
+		introduction.setSenderName(Server.serverName);
+		introduction.setSenderType(MemberType.SERVER);
+		return introduction;
 	}
 	
 	public void disconnect() throws IOException {

@@ -28,18 +28,23 @@ import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNEC
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
+	/**
+	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
+	 */
+	private boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private Scanner in = new Scanner(System.in);
 	private String name;
-	private UUID uuid = UUID.randomUUID();
+	private UUID uuid;
 	
 	public static void main(String[] args) throws IOException {
 		enable();
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
 		Client mainClient = new Client(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
+		mainClient.usedWithConsole = true;
 		mainClient.init();
 		mainClient.begin();
 	}
@@ -70,7 +75,8 @@ public class Client implements ProperClient, Personable {
 		dealWithServer();
 		String consoleLine;
 		while (!sock.isClosed()) {
-			printEvalLine();
+			if (usedWithConsole)
+				printEvalLine();
 			try {
 				consoleLine = getConsoleLine();
 				if (consoleLine == null) {
@@ -96,11 +102,13 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void introduce() throws JsonProcessingException {
+		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setName(name);
-		introduction.setId(uuid);
-		introduction.setType(ClientType.CLIENT);
+		introduction.setSenderName(name);
+		introduction.setSenderId(uuid);
+		introduction.setSenderType(MemberType.CLIENT);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), IDENTITY));
+		debug("Connected");
 	}
 	
 	/**
@@ -132,6 +140,11 @@ public class Client implements ProperClient, Personable {
 					Header header = getHeader(lineFromServer);
 					if (header.equals(IDENTIFY)) {
 						introduce();
+						//demand the server identify and also tell us our UUID
+						outToServer.println(IDENTIFY);
+					}
+					else if (header.equals(IDENTITY)) {
+						this.uuid = UUID.fromString(decode(lineFromServer));
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
@@ -142,7 +155,8 @@ public class Client implements ProperClient, Personable {
 						debug("Disconnected.");
 					}
 					else if (header.equals(SOLUTION)) {
-						printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
+						if (usedWithConsole)
+							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
 					}
 				}
 				catch (SocketException e) {

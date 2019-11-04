@@ -13,8 +13,10 @@ import java.net.SocketException;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
 import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
@@ -44,6 +46,10 @@ public class ClientObj extends ConnectedEntity {
 				Header header = getHeader(lineFromClient);
 				if (header.equals(SOLVE)) {
 					offload(decode(lineFromClient));
+				}
+				else if (header.equals(IDENTIFY)) {
+					getOutToClient().println(
+							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
 				}
 			}
 			catch (SocketException e) {
