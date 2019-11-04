@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.server.JobState.SENDING_TO_CLIENT;
 import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_ON_SLAVE;
 
@@ -46,11 +46,11 @@ public class Server {
 		//Set up my custom logging implementation
 		StupidSimpleLogger.enable();
 		if (serverName != null)
-			System.out.println("Server name: " + serverName);
+			info("Server name: " + serverName);
 		socket = new ServerSocket(port);
 		start(port);
-		System.out.println("Server started on " + getIp() + ":" + port + ".");
-		System.out.println("Hit enter to stop the server.");
+		info("Server started on " + getIp() + ":" + port + ".");
+		info("Hit enter to stop the server.");
 		/*
 		 * Wait for newline from user.
 		 * This call will block the main thread
@@ -60,7 +60,7 @@ public class Server {
 		 * on the main thread.
 		 */
 		in.nextLine();
-		System.out.println("Server stopped.");
+		info("Server stopped.");
 	}
 	
 	public static void start(int serverPort) {
@@ -71,7 +71,7 @@ public class Server {
 			
 			public void run() {
 				try {
-					System.out.println("Ready and waiting!");
+					info("Ready and waiting!");
 					startJobIngestionThread();
 					while (true) {
 						try {
@@ -82,13 +82,13 @@ public class Server {
 							handlerThread.start();
 						}
 						catch (IOException e) {
-							e.printStackTrace();
-							log("FATAL ERROR. THE CLIENT HANDLER ENCOUNTERED AN ERROR DURING CLOSING TIME");
+							printStackTrace(e);
+							debug("FATAL ERROR. THE CLIENT HANDLER ENCOUNTERED AN ERROR DURING CLOSING TIME");
 						}
 					}
 				}
 				finally {
-					log("Server shutting down!");
+					debug("Server shutting down!");
 				}
 			}
 		}
@@ -160,10 +160,10 @@ public class Server {
 	 */
 	static void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			slaves.remove((SlaveObj) connectedEntity);
+			slaves.remove(connectedEntity.getConnectionUUID());
 		}
 		else if (connectedEntity instanceof ClientObj) {
-			clients.remove((ClientObj) connectedEntity);
+			clients.remove(connectedEntity.getConnectionUUID());
 		}
 		else {
 			throw new IllegalArgumentException("Argument 'connectedEntity' must be a SlaveObj or ClientObj.");
@@ -212,7 +212,7 @@ public class Server {
 	
 	private static void sendToLeastBusySlave(Job job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
-			log("Tried to send job with id " + job.getJobId() + " to a slave.\n" +
+			debug("Tried to send job with id " + job.getJobId() + " to a slave.\n" +
 					"However, no slaves were available. Queueing thread sleeping " +
 					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " seconds...");
 			Thread.sleep(NO_SLAVES_SLEEP_TIME);
@@ -235,7 +235,7 @@ public class Server {
 					sendToLeastBusySlave(currentJob);
 				}
 				catch (InterruptedException | JsonProcessingException e) {
-					e.printStackTrace();
+					printStackTrace(e);
 				}
 			}
 		});

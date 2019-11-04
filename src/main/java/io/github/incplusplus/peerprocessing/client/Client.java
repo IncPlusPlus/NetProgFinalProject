@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
-import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.javatuples.Pair;
 
 import java.io.BufferedReader;
@@ -19,8 +18,7 @@ import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.enable;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
@@ -56,13 +54,13 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() {
-		System.out.println("If you want to enter an expression, type it and hit enter.");
-		System.out.println("After you have entered your expression, it may take a moment for the server to respond.");
-		System.out.println("You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-				"or you may attempt to enter a second expression while the first processes.\nThis is not recommended " +
-				"as you may be interrupted by the first result while you type the second expression.");
+		info("\n\nIf you want to enter an expression, type it and hit enter.\n" +
+				"After you have entered your expression, it may take a moment for the server to respond.\n" +
+				"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
+				"or you may attempt to enter a second expression while the first processes. This is not recommended " +
+				"as you may be interrupted by the first result while you type the second expression.\n\n");
 		dealWithServer();
-		while(!sock.isClosed()) {
+		while (!sock.isClosed()) {
 			printEvalLine();
 			outToServer.println(msg(in.nextLine(), SOLVE));
 		}
@@ -116,12 +114,12 @@ public class Client implements ProperClient, Personable {
 					}
 				}
 				catch (IOException e) {
-					e.printStackTrace();
+					printStackTrace(e);
 					try {
 						disconnect();
 					}
 					catch (IOException ex) {
-						log("There was an exception during the disconnect which began due to a previous exception!");
+						debug("There was an exception during the disconnect which began due to a previous exception!");
 						ex.printStackTrace();
 					}
 					break;
@@ -134,17 +132,17 @@ public class Client implements ProperClient, Personable {
 	
 	private void printSolution(MathQuery query) {
 		if (query.isSolved()) {
-			log("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
+			debug("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
 		}
 		else {
-			log("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
-			log("The reason for this is: " + query.getReasonUnsolved().toString());
-			log("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
+			debug("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
+			debug("The reason for this is: " + query.getReasonUnsolved().toString());
+			debug("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
 		}
 		printEvalLine();
 	}
 	
 	private void printEvalLine() {
-		System.out.print("Evaluate: ");
+		info("Evaluate: ");
 	}
 }

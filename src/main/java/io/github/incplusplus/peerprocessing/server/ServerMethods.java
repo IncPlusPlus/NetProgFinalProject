@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.log;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 
 /**
  * A collection of methods that I moved to here to keep {@link Server} concise.
@@ -68,7 +68,7 @@ public class ServerMethods {
 	private static void logFailedExpectations(Demands serverDemand,
 	                                          Responses properResponse,
 	                                          String actual) {
-		log("Expected '" + properResponse + "' for demand '" + serverDemand + "' but got '" + actual + "' instead.");
+		debug("Expected '" + properResponse + "' for demand '" + serverDemand + "' but got '" + actual + "' instead.");
 	}
 	
 //	/**
