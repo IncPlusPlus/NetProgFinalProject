@@ -19,8 +19,7 @@ public interface Header {
 			try {
 				enumValue = Enum.valueOf(i, name);
 			}
-			catch (IllegalArgumentException e) {
-//				printStackTrace(e);
+			catch (IllegalArgumentException ignored) {
 			}
 		}
 		if (enumValue == null)
