@@ -29,6 +29,9 @@ public class ConsoleInputReadTask implements Callable<String> {
 					}
 				}
 				input = br.readLine();
+ 				if(input.equals("/q")) {
+				    throw new InterruptedException("The user chose to quit");
+			    }
 			} catch (InterruptedException e) {
 				debug("Ending input reader task");
 				return null;

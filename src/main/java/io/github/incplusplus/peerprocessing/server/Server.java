@@ -8,6 +8,7 @@ import io.github.incplusplus.peerprocessing.common.ClientType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
@@ -87,9 +88,11 @@ public class Server {
 					startJobIngestionThread();
 					while (started.get()) {
 						try {
-							ConnectionHandler ch = new ConnectionHandler(socket.accept());
+							Socket incomingConnection = socket.accept();
+							ConnectionHandler ch = new ConnectionHandler(incomingConnection);
 							register(ch);
 							Thread handlerThread = new Thread(ch);
+							handlerThread.setName("ConnectionHandler thread for " + incomingConnection.getLocalAddress().getHostAddress());
 							handlerThread.setDaemon(true);
 							handlerThread.start();
 						}
@@ -111,12 +114,13 @@ public class Server {
 			}
 		}
 		Thread t = new Thread(new ServerStartTask(serverPort));
+		t.setName("Server socket acceptance thread");
 		t.setDaemon(true);
 		t.start();
 	}
 	
 	public static void stop() throws IOException {
-		started.compareAndSet(true,false);
+		started.compareAndSet(true, false);
 		info("Server shutting down.");
 		debug("Disconnecting clients.");
 		synchronized (clients) {
@@ -249,7 +253,14 @@ public class Server {
 	
 	static void relayToAppropriateClient(Job job) throws JsonProcessingException {
 		ClientObj requestSource = clients.get(job.getRequestingClientUUID());
-		requestSource.acceptCompleted(job.getMathQuery());
+		if (requestSource == null) {
+			error("Tried to tell client " + job.getRequestingClientUUID() + " that " +
+					job.getMathQuery().getOriginalExpression() + " = " +
+					job.getMathQuery().getResult() + " but the client disappeared!");
+		}
+		else {
+			requestSource.acceptCompleted(job.getMathQuery());
+		}
 	}
 	
 	private static void sendToLeastBusySlave(Job job) throws InterruptedException, JsonProcessingException {
@@ -281,6 +292,7 @@ public class Server {
 				}
 			}
 		});
+		ingestionThread.setName("Job Ingestion Thread");
 		ingestionThread.setDaemon(true);
 		ingestionThread.start();
 	}

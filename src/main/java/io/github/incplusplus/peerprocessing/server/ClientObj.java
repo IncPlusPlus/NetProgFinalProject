@@ -16,13 +16,14 @@ import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPE
 import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
 
 public class ClientObj extends ConnectedEntity {
 	public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
-	                 
+	
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used
 	 * to create a thread, starting the thread causes the object's
@@ -46,6 +47,7 @@ public class ClientObj extends ConnectedEntity {
 				}
 			}
 			catch (SocketException e) {
+				debug("Client " + getConnectionUUID() + " disconnected.");
 				deRegister(this);
 				try {
 					getSocket().close();

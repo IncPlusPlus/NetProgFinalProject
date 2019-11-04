@@ -55,7 +55,8 @@ public class StupidSimpleLogger {
 	public static void error(String message) {
 		if (enabled) {
 			cp.clear();
-			cp.errorPrintln(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.print(cp.getDateFormatted(), Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.errorPrintln(" " + message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 			cp.clear();
 		}
 	}

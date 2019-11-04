@@ -29,7 +29,7 @@ public class ConnectionHandler implements Runnable {
 	private volatile ConnectionState connectionState;
 	
 	public ConnectionHandler(Socket incomingConnection) throws IOException {
-		debug("New connection at " + incomingConnection.getLocalAddress() + ":" + incomingConnection.getLocalPort());
+		debug("New connection at " + incomingConnection.getLocalAddress().getHostAddress() + ":" + incomingConnection.getLocalPort());
 		this.connectionUUID = UUID.randomUUID();
 		this.connectionState = CONNECTING;
 		this.socket = incomingConnection;
@@ -45,6 +45,7 @@ public class ConnectionHandler implements Runnable {
 				ClientObj client = new ClientObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(client);
 				clientThread.setDaemon(true);
+				clientThread.setName("Client at " + socket.getLocalAddress().getHostAddress());
 				clientThread.start();
 				debug("Registering new client");
 				register(client);
@@ -53,6 +54,7 @@ public class ConnectionHandler implements Runnable {
 				SlaveObj slave = new SlaveObj(outToClient, inFromClient, socket, connectionUUID);
 				Thread clientThread = new Thread(slave);
 				clientThread.setDaemon(true);
+				clientThread.setName("Slave at " + socket.getLocalAddress().getHostAddress());
 				clientThread.start();
 				debug("Registering new slave");
 				register(slave);

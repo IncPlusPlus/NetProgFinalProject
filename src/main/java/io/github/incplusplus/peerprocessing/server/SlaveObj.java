@@ -17,14 +17,16 @@ import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPE
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static io.github.incplusplus.peerprocessing.server.Server.*;
 
 public class SlaveObj extends ConnectedEntity {
 	private List<UUID> jobsResponsibleFor = new ArrayList<>();
+	
 	public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
-	                
+	
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used
 	 * to create a thread, starting the thread causes the object's
@@ -58,6 +60,7 @@ public class SlaveObj extends ConnectedEntity {
 				}
 			}
 			catch (SocketException e) {
+				debug("Slave " + getConnectionUUID() + " disconnected.");
 				deRegister(this);
 				try {
 					getSocket().close();
@@ -85,7 +88,6 @@ public class SlaveObj extends ConnectedEntity {
 	}
 	
 	/**
-	 *
 	 * @return the list of UUIDs representing jobs that this slave is currently
 	 * responsible for. Useful for recovering a job if a slave suddenly disconnects.
 	 */

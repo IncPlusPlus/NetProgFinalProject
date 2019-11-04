@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -114,6 +115,16 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
+					}
+				}
+				catch (SocketException e) {
+					printStackTrace(e);
+					error("The server suddenly disconnected");
+					try {
+						disconnect();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
 					}
 				}
 				catch (IOException e) {

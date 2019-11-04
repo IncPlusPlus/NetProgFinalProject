@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.UUID;
@@ -59,11 +60,13 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() {
-		info("\n\nIf you want to enter an expression, type it and hit enter.\n" +
+		info("\nIf you want to enter an expression, type it and hit enter.\n" +
 				"After you have entered your expression, it may take a moment for the server to respond.\n" +
 				"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-				"or you may attempt to enter a second expression while the first processes. This is not recommended " +
-				"as you may be interrupted by the first result while you type the second expression.\n\n");
+				"or you may attempt to enter a second expression while the first processes. \n"+
+				"This is not recommended " +
+				"as you may be interrupted by the first result while you type the second expression.\n" +
+				"To exit, type /q and hit enter.\n");
 		dealWithServer();
 		while (!sock.isClosed()) {
 			printEvalLine();
@@ -135,6 +138,16 @@ public class Client implements ProperClient, Personable {
 					}
 					else if (header.equals(SOLUTION)) {
 						printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
+					}
+				}
+				catch (SocketException e) {
+					printStackTrace(e);
+					error("The server suddenly disconnected");
+					try {
+						disconnect();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
 					}
 				}
 				catch (IOException e) {
