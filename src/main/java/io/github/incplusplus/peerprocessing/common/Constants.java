@@ -1,8 +1,6 @@
 package io.github.incplusplus.peerprocessing.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * A class of constants that the server and/or the client understand
@@ -22,10 +20,6 @@ public class Constants {
 	 */
 	public final static String QUIT_STRING = "/q";
 	
-	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper()
-//			.registerModule(new ParameterNamesModule())
-//			.registerModule(new Jdk8Module())
-			.registerModule(new JavaTimeModule())
-			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper();
 	
 }
