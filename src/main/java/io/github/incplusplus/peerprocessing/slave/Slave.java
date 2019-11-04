@@ -112,7 +112,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(SOLVE)) {
 						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
-						debug("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
+						debug("Solving: " + job.getMathJob().getProblemId() + " - " + job.getMathJob().getOriginalExpression());
 						sendSolvedMathQuery(solve(job));
 					}
 					else if (header.equals(DISCONNECT)) {
@@ -160,15 +160,15 @@ public class Slave implements ProperClient, Personable {
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
 	private Job solve(Job job) {
-		Expression expression = new Expression(job.getMathQuery().getOriginalExpression());
+		Expression expression = new Expression(job.getMathJob().getOriginalExpression());
 		try {
-			job.getMathQuery().setResult(expression.eval());
-			job.getMathQuery().setSolved(true);
+			job.getMathJob().setResult(expression.eval());
+			job.getMathJob().setSolved(true);
 		}
 		catch (Exception e) {
 			printStackTrace(e);
-			job.getMathQuery().setSolved(false);
-			job.getMathQuery().setReasonUnsolved(e);
+			job.getMathJob().setSolved(false);
+			job.getMathJob().setReasonUnsolved(e);
 		}
 		return job;
 	}

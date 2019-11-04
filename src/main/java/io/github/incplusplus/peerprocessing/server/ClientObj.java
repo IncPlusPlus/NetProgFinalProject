@@ -3,7 +3,7 @@ package io.github.incplusplus.peerprocessing.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Job;
-import io.github.incplusplus.peerprocessing.common.MathQuery;
+import io.github.incplusplus.peerprocessing.common.MathJob;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,13 +71,13 @@ public class ClientObj extends ConnectedEntity {
 		}
 	}
 	
-	void acceptCompleted(MathQuery mathQuery) throws JsonProcessingException {
-		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), SOLUTION));
+	void acceptCompleted(MathJob mathJob) throws JsonProcessingException {
+		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(mathJob), SOLUTION));
 	}
 	
 	private void offload(String mathQuery) {
 		Server.submitJob(
-				new Job(new MathQuery(mathQuery), getConnectionUUID())
+				new Job(new MathJob(mathQuery), getConnectionUUID())
 		);
 	}
 }

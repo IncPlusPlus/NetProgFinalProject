@@ -156,7 +156,7 @@ public class Client implements ProperClient, Personable {
 					}
 					else if (header.equals(SOLUTION)) {
 						if (usedWithConsole)
-							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
+							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathJob.class));
 					}
 				}
 				catch (SocketException e) {
@@ -186,7 +186,7 @@ public class Client implements ProperClient, Personable {
 		serverInteractionThread.start();
 	}
 	
-	private void printSolution(MathQuery query) {
+	private void printSolution(MathJob query) {
 		if (query.isSolved()) {
 			System.out.println();
 			debug("The solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");

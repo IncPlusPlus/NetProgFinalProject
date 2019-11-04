@@ -8,22 +8,22 @@ import java.util.UUID;
 import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_FOR_AVAILABLE_SLAVES;
 
 public class Job {
-	private final MathQuery mathQuery;
+	private final MathJob mathJob;
 	private final UUID requestingClientUUID;
 	private final UUID jobId;
 	private UUID solvingSlaveUUID;
 	private JobState jobState;
 	
-	@ConstructorProperties({"mathQuery", "requestingClientUUID"})
-	public Job(MathQuery mathQuery, UUID requestingClientUUID) {
-		this.mathQuery = mathQuery;
+	@ConstructorProperties({"mathJob", "requestingClientUUID"})
+	public Job(MathJob mathJob, UUID requestingClientUUID) {
+		this.mathJob = mathJob;
 		this.requestingClientUUID = requestingClientUUID;
 		this.jobState = WAITING_FOR_AVAILABLE_SLAVES;
 		this.jobId = UUID.randomUUID();
 	}
 	
-	public MathQuery getMathQuery() {
-		return mathQuery;
+	public MathJob getMathJob() {
+		return mathJob;
 	}
 	
 	public UUID getRequestingClientUUID() {

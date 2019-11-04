@@ -252,11 +252,11 @@ public class Server {
 		ClientObj requestSource = clients.get(job.getRequestingClientUUID());
 		if (requestSource == null) {
 			error("Tried to tell client " + job.getRequestingClientUUID() + " that " +
-					job.getMathQuery().getOriginalExpression() + " = " +
-					job.getMathQuery().getResult() + " but the client disappeared!");
+					job.getMathJob().getOriginalExpression() + " = " +
+					job.getMathJob().getResult() + " but the client disappeared!");
 		}
 		else {
-			requestSource.acceptCompleted(job.getMathQuery());
+			requestSource.acceptCompleted(job.getMathJob());
 		}
 	}
 	

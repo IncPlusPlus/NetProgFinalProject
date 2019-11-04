@@ -8,7 +8,7 @@ import java.util.UUID;
  * Serves as the holder of the bulk of information
  * regarding
  */
-public class MathQuery {
+public class MathJob {
 	private final String originalExpression;
 	private final UUID problemId;
 	private boolean solved;
@@ -16,7 +16,7 @@ public class MathQuery {
 	private Throwable reasonUnsolved;
 	
 	@ConstructorProperties("originalExpression")
-	public MathQuery(String originalExpression) {
+	public MathJob(String originalExpression) {
 		this.problemId = UUID.randomUUID();
 		this.originalExpression = originalExpression;
 	}

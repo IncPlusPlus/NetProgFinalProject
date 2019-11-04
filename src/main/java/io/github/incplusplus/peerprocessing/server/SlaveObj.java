@@ -53,9 +53,9 @@ public class SlaveObj extends ConnectedEntity {
 					//slave's data. This is to prevent possibly malicious slaves from compromising
 					//our good and pure clients who can do nothing wrong.
 					storedJob.setJobState(JobState.COMPLETE);
-					storedJob.getMathQuery().setReasonUnsolved(completedJob.getMathQuery().getReasonUnsolved());
-					storedJob.getMathQuery().setResult(completedJob.getMathQuery().getResult());
-					storedJob.getMathQuery().setSolved(completedJob.getMathQuery().isSolved());
+					storedJob.getMathJob().setReasonUnsolved(completedJob.getMathJob().getReasonUnsolved());
+					storedJob.getMathJob().setResult(completedJob.getMathJob().getResult());
+					storedJob.getMathJob().setSolved(completedJob.getMathJob().isSolved());
 					relayToAppropriateClient(storedJob);
 					jobsResponsibleFor.remove(storedJob.getJobId());
 				}
