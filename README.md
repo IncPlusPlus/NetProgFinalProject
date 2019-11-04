@@ -13,16 +13,19 @@ This is the final project for Network Programming (COMP-2100). The goal is to cr
 ## Features 
 Features in order of priority
 1.	The server can communicate with a client
-2.	The server can communicate with slave nodes
-3.	A client can provide some sort of list of commands to the server which will be processed and returned
-4.	The server can offload individual commands to slaves and send back the aggregate result to the client
-5.	Have the slaves each send a constant heartbeat to the server which will also tell the server the utilization of the slave. The server will then determine how many tasks to give to each slave to optimize utilization.
-6.	The commands can be sophisticated and invoked using reflection (likely won’t happen)
-7.	The tasks can be transported and executed using bytecode manipulation (way too ambitious)
-8.  The server will be able to deal with big matrices.
+1.	The server can communicate with slave nodes
+1.	A client can provide some sort of list of commands to the server which will be processed and returned
+1.	The server can offload individual commands to slaves and send back the aggregate result to the client
+1.	Have the slaves each send a constant heartbeat to the server which will also tell the server the utilization of the slave. The server will then determine how many tasks to give to each slave to optimize utilization.
+1.	The commands can be sophisticated and invoked using reflection (likely won’t happen)
+1.	The tasks can be transported and executed using bytecode manipulation (way too ambitious)
+1.  The server will be able to deal with big matrices.
 
 ## Team members
 
 * Ryan Cloherty ([@IncPlusPlus](https://github.com/IncPlusPlus)), Team Lead, Developer
 * Joey Demeo([demeoj1](https://github.com/demeoj1)), Developer
 
+## Usage
+
+Coming soon...
