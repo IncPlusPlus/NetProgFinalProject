@@ -63,15 +63,20 @@ public class Client implements ProperClient, Personable {
 		info("\nIf you want to enter an expression, type it and hit enter.\n" +
 				"After you have entered your expression, it may take a moment for the server to respond.\n" +
 				"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-				"or you may attempt to enter a second expression while the first processes. \n"+
+				"or you may attempt to enter a second expression while the first processes. \n" +
 				"This is not recommended " +
 				"as you may be interrupted by the first result while you type the second expression.\n" +
 				"To exit, type /q and hit enter.\n");
 		dealWithServer();
+		String consoleLine;
 		while (!sock.isClosed()) {
 			printEvalLine();
 			try {
-				outToServer.println(msg(getConsoleLine(), SOLVE));
+				consoleLine = getConsoleLine();
+				if (consoleLine == null) {
+					break;
+				}
+				outToServer.println(msg(consoleLine, SOLVE));
 			}
 			catch (ExecutionException | InterruptedException e) {
 				e.printStackTrace();
@@ -131,7 +136,7 @@ public class Client implements ProperClient, Personable {
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
-					else if(header.equals(DISCONNECT)) {
+					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
 						close();
 						debug("Disconnected.");
@@ -169,10 +174,12 @@ public class Client implements ProperClient, Personable {
 	
 	private void printSolution(MathQuery query) {
 		if (query.isSolved()) {
-			debug("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
+			System.out.println();
+			debug("The solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
 		}
 		else {
-			debug("\nThe solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
+			System.out.println();
+			debug("The solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
 			debug("The reason for this is: " + query.getReasonUnsolved().toString());
 			debug("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
 		}

@@ -265,8 +265,8 @@ public class Server {
 	
 	private static void sendToLeastBusySlave(Job job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
-			debug("Tried to send job with id " + job.getJobId() + " to a slave.\n" +
-					"However, no slaves were available. Queueing thread sleeping " +
+			debug("Tried to send job with id " + job.getJobId() + " to a slave. " +
+					"However, no slaves were available. Job queue thread sleeping " +
 					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " seconds...");
 			Thread.sleep(NO_SLAVES_SLEEP_TIME);
 		}
