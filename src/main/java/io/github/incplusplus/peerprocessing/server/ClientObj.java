@@ -22,12 +22,7 @@ import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
 public class ClientObj extends ConnectedEntity {
 	public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
-	
-	@Override
-	public void disconnect() {
-	
-	}
-	
+	                 
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used
 	 * to create a thread, starting the thread causes the object's

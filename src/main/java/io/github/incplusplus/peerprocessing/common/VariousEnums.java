@@ -50,7 +50,8 @@ public enum VariousEnums implements Header {
 	CONTINUE,
 	/**
 	 * This tells the server to kill off the
-	 * client connections.
+	 * client connections. Also works vice versa where this
+	 * is sent by the server telling the client to disconnect.
 	 */
 	DISCONNECT,
 	/**

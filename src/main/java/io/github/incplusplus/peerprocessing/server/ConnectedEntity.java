@@ -1,6 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.UUID;
@@ -44,5 +45,9 @@ public abstract class ConnectedEntity implements Runnable {
 		return connectionState;
 	}
 	
-	public abstract void disconnect();
+	public void disconnect() throws IOException {
+		getOutToClient().close();
+		getInFromClient().close();
+		getSocket().close();
+	}
 }

@@ -24,12 +24,7 @@ public class SlaveObj extends ConnectedEntity {
 	private List<UUID> jobsResponsibleFor = new ArrayList<>();
 	public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
-	
-	@Override
-	public void disconnect() {
-	
-	}
-	
+	                
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used
 	 * to create a thread, starting the thread causes the object's

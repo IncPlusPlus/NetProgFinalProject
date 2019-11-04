@@ -19,6 +19,7 @@ import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
@@ -109,6 +110,11 @@ public class Client implements ProperClient, Personable {
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
+					else if(header.equals(DISCONNECT)) {
+						debug("Told by server to disconnect. Disconnecting..");
+						close();
+						debug("Disconnected.");
+					}
 					else if (header.equals(SOLUTION)) {
 						printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
 					}
@@ -143,6 +149,6 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	private void printEvalLine() {
-		info("Evaluate: ");
+		infoNoLine("Evaluate: ");
 	}
 }

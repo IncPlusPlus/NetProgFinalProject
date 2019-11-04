@@ -18,6 +18,7 @@ import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
@@ -103,6 +104,11 @@ public class Slave implements ProperClient, Personable {
 						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
 						debug("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
 						sendSolvedMathQuery(solve(job));
+					}
+					else if(header.equals(DISCONNECT)) {
+						debug("Told by server to disconnect. Disconnecting..");
+						close();
+						debug("Disconnected.");
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");

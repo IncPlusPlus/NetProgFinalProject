@@ -39,10 +39,23 @@ public class StupidSimpleLogger {
 		}
 	}
 	
+	/**
+	 * Same as {@link #info(String)} but without printing linefeed afterwards.
+	 */
+	public static void infoNoLine(String message) {
+		if (enabled) {
+			cp.clear();
+			//See https://github.com/dialex/JCDP/issues/21
+			cp.print("", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			System.out.print(message);
+			cp.clear();
+		}
+	}
+	
 	public static void error(String message) {
 		if (enabled) {
 			cp.clear();
-			cp.println(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.errorPrintln(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 			cp.clear();
 		}
 	}
@@ -52,7 +65,7 @@ public class StupidSimpleLogger {
 			StringWriter errors = new StringWriter();
 			e.printStackTrace(new PrintWriter(errors));
 			cp.clear();
-			cp.println(errors.toString(), Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.errorPrint(errors.toString(), Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 			cp.clear();
 		}
 	}

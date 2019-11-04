@@ -14,6 +14,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
@@ -29,6 +30,7 @@ public class Server {
 	private static long NO_SLAVES_SLEEP_TIME = 1000 * 30;
 	private final static int port = 1234;
 	private static String serverName = "Processing Server";
+	private static volatile AtomicBoolean started = new AtomicBoolean(false);
 	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private static final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -43,7 +45,7 @@ public class Server {
 	 */
 	private static final BlockingDeque<Job> jobsAwaitingProcessing = new LinkedBlockingDeque<>();
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		Scanner in = new Scanner(System.in);
 		//Set up my custom logging implementation
 		StupidSimpleLogger.enable();
@@ -61,22 +63,29 @@ public class Server {
 		 * on the main thread.
 		 */
 		in.nextLine();
+		stop();
 		info("Server stopped.");
+		while (true) {
+			System.out.println(true);
+			Thread.sleep(2000);
+		}
 	}
 	
 	public static void start(int serverPort) {
 		class ServerStartTask implements Runnable {
 			private int port;
+			
 			ServerStartTask(int p) {
 				port = p;
 			}
 			
 			public void run() {
 				try {
+					started.compareAndSet(false, true);
 					socket = new ServerSocket(port);
 					info("Ready and waiting!");
 					startJobIngestionThread();
-					while (true) {
+					while (started.get()) {
 						try {
 							ConnectionHandler ch = new ConnectionHandler(socket.accept());
 							register(ch);
@@ -85,26 +94,7 @@ public class Server {
 							handlerThread.start();
 						}
 						catch (SocketException e) {
-							info("Server shutting down.");
-							debug("Disconnecting clients.");
-							synchronized (clients) {
-								for (Map.Entry<UUID, ClientObj> i : clients.entrySet()) {
-									i.getValue().disconnect();
-									debug("Dropped connection for client " + i.getValue().getConnectionUUID());
-								}
-							}
-							debug("Disconnecting slaves.");
-							synchronized (slaves) {
-								for (Map.Entry<UUID, SlaveObj> i : slaves.entrySet()) {
-									i.getValue().disconnect();
-									debug("Dropped connection for slave " + i.getValue().getConnectionUUID());
-									for (UUID jobId : i.getValue().getJobsResponsibleFor()) {
-										debug("From slave " + i.getValue().getConnectionUUID() + ", dropped job " + jobId.toString());
-									}
-								}
-							}
-							
-							info("Server shut down.");
+							stop();
 						}
 						catch (IOException e) {
 							printStackTrace(e);
@@ -126,6 +116,26 @@ public class Server {
 	}
 	
 	public static void stop() throws IOException {
+		started.compareAndSet(true,false);
+		info("Server shutting down.");
+		debug("Disconnecting clients.");
+		synchronized (clients) {
+			for (Map.Entry<UUID, ClientObj> i : clients.entrySet()) {
+				i.getValue().disconnect();
+				debug("Dropped connection for client " + i.getValue().getConnectionUUID());
+			}
+		}
+		debug("Disconnecting slaves.");
+		synchronized (slaves) {
+			for (Map.Entry<UUID, SlaveObj> i : slaves.entrySet()) {
+				i.getValue().disconnect();
+				debug("Dropped connection for slave " + i.getValue().getConnectionUUID());
+				for (UUID jobId : i.getValue().getJobsResponsibleFor()) {
+					debug("From slave " + i.getValue().getConnectionUUID() + ", dropped job " + jobId.toString());
+				}
+			}
+		}
+		info("Server shut down.");
 		socket.close();
 	}
 	
