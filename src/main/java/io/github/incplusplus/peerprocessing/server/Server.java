@@ -66,10 +66,6 @@ public class Server {
 		in.nextLine();
 		stop();
 		info("Server stopped.");
-		while (true) {
-			System.out.println(true);
-			Thread.sleep(2000);
-		}
 	}
 	
 	public static void start(int serverPort) {
