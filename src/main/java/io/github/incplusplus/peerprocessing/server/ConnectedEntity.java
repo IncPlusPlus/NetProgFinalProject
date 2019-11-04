@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.UUID;
 
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+
 /**
  * Represents a type of object that can
  * connect to a server.
@@ -46,6 +48,7 @@ public abstract class ConnectedEntity implements Runnable {
 	}
 	
 	public void disconnect() throws IOException {
+		getOutToClient().println(DISCONNECT);
 		getOutToClient().close();
 		getInFromClient().close();
 		getSocket().close();
