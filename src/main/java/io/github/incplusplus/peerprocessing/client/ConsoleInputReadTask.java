@@ -34,7 +34,6 @@ public class ConsoleInputReadTask implements Callable<String> {
 				return null;
 			}
 		} while ("".equals(input));
-		System.out.println("Thank You for providing input!");
 		return input;
 	}
 }
