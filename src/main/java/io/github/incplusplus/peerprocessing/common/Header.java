@@ -20,11 +20,11 @@ public interface Header {
 				enumValue = Enum.valueOf(i, name);
 			}
 			catch (IllegalArgumentException e) {
-				printStackTrace(e);
+//				printStackTrace(e);
 			}
 		}
 		if (enumValue == null)
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("No enum constant found with name " + name);
 		return (Header) enumValue;
 	}
 }
