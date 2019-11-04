@@ -12,6 +12,10 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
@@ -63,8 +67,20 @@ public class Client implements ProperClient, Personable {
 		dealWithServer();
 		while (!sock.isClosed()) {
 			printEvalLine();
-			outToServer.println(msg(in.nextLine(), SOLVE));
+			try {
+				outToServer.println(msg(getConsoleLine(), SOLVE));
+			}
+			catch (ExecutionException | InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	private String getConsoleLine() throws ExecutionException, InterruptedException {
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		Future<String> future = executorService.submit(new ConsoleInputReadTask(sock));
+		executorService.shutdown();
+		return future.get();
 	}
 	
 	/**
