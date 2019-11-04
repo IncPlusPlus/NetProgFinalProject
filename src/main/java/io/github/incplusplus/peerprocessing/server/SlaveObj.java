@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
@@ -19,8 +21,14 @@ import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.pri
 import static io.github.incplusplus.peerprocessing.server.Server.*;
 
 public class SlaveObj extends ConnectedEntity {
+	private List<UUID> jobsResponsibleFor = new ArrayList<>();
 	public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+	
+	@Override
+	public void disconnect() {
+	
+	}
 	
 	/**
 	 * When an object implementing interface <code>Runnable</code> is used
@@ -51,6 +59,7 @@ public class SlaveObj extends ConnectedEntity {
 					storedJob.getMathQuery().setResult(completedJob.getMathQuery().getResult());
 					storedJob.getMathQuery().setSolved(completedJob.getMathQuery().isSolved());
 					relayToAppropriateClient(storedJob);
+					jobsResponsibleFor.remove(storedJob.getJobId());
 				}
 			}
 			catch (SocketException e) {
@@ -76,6 +85,16 @@ public class SlaveObj extends ConnectedEntity {
 	 */
 	void accept(Job job) throws JsonProcessingException {
 		job.setJobState(JobState.WAITING_ON_SLAVE);
+		jobsResponsibleFor.add(job.getJobId());
 		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(job), SOLVE));
+	}
+	
+	/**
+	 *
+	 * @return the list of UUIDs representing jobs that this slave is currently
+	 * responsible for. Useful for recovering a job if a slave suddenly disconnects.
+	 */
+	public List<UUID> getJobsResponsibleFor() {
+		return jobsResponsibleFor;
 	}
 }

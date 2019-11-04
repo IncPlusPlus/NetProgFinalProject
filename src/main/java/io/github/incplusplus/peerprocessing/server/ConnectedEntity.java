@@ -43,4 +43,6 @@ public abstract class ConnectedEntity implements Runnable {
 	public ConnectionState getConnectionState() {
 		return connectionState;
 	}
+	
+	public abstract void disconnect();
 }
