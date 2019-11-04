@@ -16,6 +16,7 @@ import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPE
 import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
 
 public class ClientObj extends ConnectedEntity {
@@ -54,7 +55,7 @@ public class ClientObj extends ConnectedEntity {
 				}
 			}
 			catch (IOException e) {
-				e.printStackTrace();
+				printStackTrace(e);
 			}
 			finally {
 			
