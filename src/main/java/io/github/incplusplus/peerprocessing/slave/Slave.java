@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
@@ -25,6 +26,7 @@ public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
+	private AtomicBoolean running;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private Scanner in;
@@ -56,7 +58,6 @@ public class Slave implements ProperClient, Personable {
 	@Override
 	public void begin() throws IOException {
 		dealWithServer();
-		while (!sock.isClosed()) {}
 	}
 	
 	/**
@@ -108,7 +109,7 @@ public class Slave implements ProperClient, Personable {
 						debug("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
 						sendSolvedMathQuery(solve(job));
 					}
-					else if(header.equals(DISCONNECT)) {
+					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
 						close();
 						debug("Disconnected.");
@@ -124,7 +125,7 @@ public class Slave implements ProperClient, Personable {
 						disconnect();
 					}
 					catch (IOException ex) {
-						ex.printStackTrace();
+						printStackTrace(ex);
 					}
 				}
 				catch (IOException e) {
@@ -134,13 +135,13 @@ public class Slave implements ProperClient, Personable {
 					}
 					catch (IOException ex) {
 						debug("There was an exception during the disconnect which began due to a previous exception!");
-						ex.printStackTrace();
+						printStackTrace(ex);
 					}
 					break;
 				}
 			}
 		});
-		serverInteractionThread.setDaemon(true);
+		serverInteractionThread.setName("Slave server interaction");
 		serverInteractionThread.start();
 	}
 	
@@ -153,7 +154,6 @@ public class Slave implements ProperClient, Personable {
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
 	private Job solve(Job job) {
-		
 		Expression expression = new Expression(job.getMathQuery().getOriginalExpression());
 		try {
 			job.getMathQuery().setResult(expression.eval());
