@@ -27,10 +27,12 @@ public class Slave implements ProperClient, Personable {
 	private final int serverPort;
 	private Socket sock;
 	private AtomicBoolean running = new AtomicBoolean();
+	/** Whether or not this client has introduced itself */
+	private AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private String name;
-	private UUID uuid = UUID.randomUUID();
+	private volatile UUID uuid = UUID.randomUUID();
 	
 	public static void main(String[] args) throws IOException {
 		enable();
@@ -77,7 +79,6 @@ public class Slave implements ProperClient, Personable {
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
-		debug("Connected");
 	}
 	
 	/**
@@ -122,6 +123,8 @@ public class Slave implements ProperClient, Personable {
 					else if (header.equals(IDENTITY)) {
 						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
 						this.uuid = introduction.getReceiverId();
+						debug(this + " connected");
+						this.polite.compareAndSet(false, true);
 					}
 					else if (header.equals(QUERY)) {
 						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);

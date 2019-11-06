@@ -35,8 +35,10 @@ public class Client implements ProperClient, Personable {
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private String name;
-	private UUID uuid;
+	private volatile UUID uuid;
 	private AtomicBoolean running = new AtomicBoolean();
+	/** Whether or not this client has introduced itself */
+	private AtomicBoolean polite = new AtomicBoolean();
 	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public static void main(String[] args) throws IOException {
@@ -127,7 +129,6 @@ public class Client implements ProperClient, Personable {
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.CLIENT);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), IDENTITY));
-		debug("Connected");
 	}
 	
 	/**
@@ -176,6 +177,8 @@ public class Client implements ProperClient, Personable {
 					else if (header.equals(IDENTITY)) {
 						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
 						this.uuid = introduction.getReceiverId();
+						debug(this + " connected");
+						this.polite.compareAndSet(false, true);
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
@@ -268,6 +271,11 @@ public class Client implements ProperClient, Personable {
 		
 		@Override
 		public BigDecimal call() throws Exception {
+			//If the client hasn't introduced itself yet,
+			//don't throw a wrench into the mix.
+			while (!polite.get()) {
+				Thread.sleep(50);
+			}
 			MathQuery query = new MathQuery(this.expression, uuid);
 			UUID correspondingQueryId = query.getQueryId();
 			futureQueries.put(query.getQueryId(), query);

@@ -65,9 +65,11 @@ public class SlaveObj extends ConnectedEntity {
 							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
 				}
 				else if (header.equals(DISCONNECT)) {
+					deRegister(this);
 					//the client already is ending their connection.
 					//we don't want to write back
 					kill();
+					break;
 				}
 			}
 			catch (SocketException e) {
@@ -95,6 +97,7 @@ public class SlaveObj extends ConnectedEntity {
 	void accept(Query query) throws JsonProcessingException {
 		query.setQueryState(QueryState.WAITING_ON_SLAVE);
 		jobsResponsibleFor.add(query.getQueryId());
+		debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
 		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 	}
 	

@@ -49,9 +49,11 @@ public class ClientObj extends ConnectedEntity {
 							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
 				}
 				else if (header.equals(DISCONNECT)) {
+					deRegister(this);
 					//the client already is ending their connection.
 					//we don't want to write back
 					kill();
+					break;
 				}
 			}
 			catch (SocketException e) {
@@ -78,6 +80,7 @@ public class ClientObj extends ConnectedEntity {
 	}
 	
 	private void solve(Query query) {
+		debug("Got query " + query.getQueryId() + " from client " + getConnectionUUID());
 		query.setRequestingClientUUID(getConnectionUUID());
 		Server.submitJob(query);
 	}

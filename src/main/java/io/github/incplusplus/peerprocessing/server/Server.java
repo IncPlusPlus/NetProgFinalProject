@@ -70,7 +70,7 @@ public class Server {
 	}
 	
 	public static void start(int serverPort, boolean verbose) {
-		if(verbose)
+		if (verbose)
 			StupidSimpleLogger.enable();
 		start(serverPort);
 	}
@@ -95,7 +95,8 @@ public class Server {
 							ConnectionHandler ch = new ConnectionHandler(incomingConnection);
 							register(ch);
 							Thread handlerThread = new Thread(ch);
-							handlerThread.setName("ConnectionHandler thread for " + incomingConnection.getLocalAddress().getHostAddress());
+							handlerThread.setName(
+									"ConnectionHandler thread for " + incomingConnection.getLocalAddress().getHostAddress());
 							handlerThread.setDaemon(true);
 							handlerThread.start();
 						}
@@ -103,7 +104,7 @@ public class Server {
 							error(e.getMessage());
 						}
 						catch (SocketException e) {
-							if(started.get())
+							if (started.get())
 								stop();
 						}
 						catch (IOException e) {
@@ -143,6 +144,7 @@ public class Server {
 			}
 		}
 		socket.close();
+		socket = null;
 	}
 	
 	public static boolean started() {
@@ -212,6 +214,7 @@ public class Server {
 	 */
 	static void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
+			//TODO add responsibility reassignment if the slave held jobs
 			slaves.remove(connectedEntity.getConnectionUUID());
 		}
 		else if (connectedEntity instanceof ClientObj) {
@@ -284,6 +287,7 @@ public class Server {
 		 */
 		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
 		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
+		debug("Sending query " + job.getQueryId() + " to slave " + designatedSlave.getConnectionUUID());
 		designatedSlave.accept(job);
 	}
 	
