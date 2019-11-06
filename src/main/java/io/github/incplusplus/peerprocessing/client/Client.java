@@ -148,6 +148,10 @@ public class Client implements ProperClient, Personable {
 		sock.close();
 	}
 	
+	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
+		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
+	}
+	
 	private void dealWithServer() {
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
@@ -220,5 +224,18 @@ public class Client implements ProperClient, Personable {
 	
 	private void printEvalLine() {
 		infoNoLine("Evaluate: ");
+	}
+	
+	class ExpressionEvaluator implements Callable<BigDecimal> {
+		private final String expression;
+		
+		ExpressionEvaluator(String mathExpression) {
+			this.expression = mathExpression;
+		}
+		
+		@Override
+		public BigDecimal call() throws Exception {
+			return null;
+		}
 	}
 }
