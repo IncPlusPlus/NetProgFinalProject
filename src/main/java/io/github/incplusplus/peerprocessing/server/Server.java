@@ -87,7 +87,6 @@ public class Server {
 				try {
 					started.compareAndSet(false, true);
 					socket = new ServerSocket(port);
-					info("Ready and waiting!");
 					startJobIngestionThread();
 					while (started.get()) {
 						try {
