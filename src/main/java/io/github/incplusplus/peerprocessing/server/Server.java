@@ -66,7 +66,7 @@ public class Server {
 		 */
 		in.nextLine();
 		stop();
-		info("Server stopped.");
+		debug("Server stopped.");
 	}
 	
 	public static void start(int serverPort) {
@@ -134,7 +134,6 @@ public class Server {
 				}
 			}
 		}
-		info("Server shut down.");
 		socket.close();
 	}
 	
