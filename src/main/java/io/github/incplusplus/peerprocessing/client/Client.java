@@ -293,7 +293,7 @@ public class Client implements ProperClient, Personable {
 				throw new IllegalStateException("The corresponding query disappeared from the map!");
 			}
 			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
-				Thread.sleep(500);
+				Thread.sleep(50);
 			}
 			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());
 		}
