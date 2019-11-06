@@ -19,10 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClientIT {
 	public static boolean VERBOSE_TEST_OUTPUT = false;
+	private static int serverPort;
 	
 	@BeforeAll
-	static void setUp() {
-		Server.start(1234, VERBOSE_TEST_OUTPUT);
+	static void setUp() throws IOException {
+		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
 		while (!Server.started()) {}
 	}
 	
@@ -35,8 +36,8 @@ public class ClientIT {
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
 	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
-		try (Client myClient = new Client("localhost", 1234);
-		     Slave mySlave = new Slave("localhost", 1234)) {
+		try (Client myClient = new Client("localhost", serverPort);
+		     Slave mySlave = new Slave("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.init();
 			myClient.begin();

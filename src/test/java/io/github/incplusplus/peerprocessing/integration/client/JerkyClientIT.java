@@ -22,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * starting up and shutting down between tests.
  */
 class JerkyClientIT {
+	private int serverPort;
+	
 	@BeforeEach
-	void setUp() {
-		Server.start(1234, VERBOSE_TEST_OUTPUT);
+	void setUp() throws IOException {
+		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
 		while (!Server.started()) {}
 	}
 	
@@ -37,8 +39,8 @@ class JerkyClientIT {
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
 	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
-		try (Client myClient = new Client("localhost", 1234);
-		     Slave mySlave = new Slave("localhost", 1234)) {
+		try (Client myClient = new Client("localhost", serverPort);
+		     Slave mySlave = new Slave("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.init();
 			myClient.begin();
