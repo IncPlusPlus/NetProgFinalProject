@@ -65,7 +65,8 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() {
-		assert running.compareAndSet(false, true);
+		boolean firstStart = running.compareAndSet(false, true);
+		assert firstStart;
 		dealWithServer();
 		if (usedWithConsole) {
 			info("\nIf you want to enter an expression, type it and hit enter.\n" +
@@ -142,7 +143,8 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
-		assert running.compareAndSet(true, false);
+		boolean notAlreadyClosed = running.compareAndSet(true, false);
+		assert notAlreadyClosed;
 		outToServer.close();
 		inFromServer.close();
 		sock.close();

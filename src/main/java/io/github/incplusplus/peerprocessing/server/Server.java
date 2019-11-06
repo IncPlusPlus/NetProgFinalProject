@@ -240,7 +240,8 @@ public class Server {
 	 */
 	static Query removeJob(UUID queryId) {
 		Query removedJob = queries.remove(queryId);
-		assert removedJob.getQueryState().equals(WAITING_ON_SLAVE);
+		boolean sanity = removedJob.getQueryState().equals(WAITING_ON_SLAVE);
+		assert sanity;
 		removedJob.setQueryState(SENDING_TO_CLIENT);
 		return removedJob;
 	}

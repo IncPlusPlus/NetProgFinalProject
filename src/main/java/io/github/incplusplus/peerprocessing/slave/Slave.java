@@ -57,7 +57,8 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() throws IOException {
-		assert running.compareAndSet(false, true);
+		boolean firstStart = running.compareAndSet(false, true);
+		assert firstStart;
 		dealWithServer();
 	}
 	
@@ -90,7 +91,8 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
-		assert running.compareAndSet(true, false);
+		boolean notAlreadyClosed = running.compareAndSet(true, false);
+		assert notAlreadyClosed;
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
