@@ -1,29 +1,29 @@
 package io.github.incplusplus.peerprocessing.common;
 
-import io.github.incplusplus.peerprocessing.server.JobState;
+import io.github.incplusplus.peerprocessing.server.QueryState;
 
 import java.beans.ConstructorProperties;
 import java.util.UUID;
 
-import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_FOR_AVAILABLE_SLAVES;
+import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_FOR_AVAILABLE_SLAVES;
 
 public class Job {
-	private final MathQuery mathQuery;
+	private final MathJob mathJob;
 	private final UUID requestingClientUUID;
 	private final UUID jobId;
 	private UUID solvingSlaveUUID;
-	private JobState jobState;
+	private QueryState queryState;
 	
-	@ConstructorProperties({"mathQuery", "requestingClientUUID"})
-	public Job(MathQuery mathQuery, UUID requestingClientUUID) {
-		this.mathQuery = mathQuery;
+	@ConstructorProperties({"mathJob", "requestingClientUUID"})
+	public Job(MathJob mathJob, UUID requestingClientUUID) {
+		this.mathJob = mathJob;
 		this.requestingClientUUID = requestingClientUUID;
-		this.jobState = WAITING_FOR_AVAILABLE_SLAVES;
+		this.queryState = WAITING_FOR_AVAILABLE_SLAVES;
 		this.jobId = UUID.randomUUID();
 	}
 	
-	public MathQuery getMathQuery() {
-		return mathQuery;
+	public MathJob getMathJob() {
+		return mathJob;
 	}
 	
 	public UUID getRequestingClientUUID() {
@@ -42,11 +42,11 @@ public class Job {
 		this.solvingSlaveUUID = solvingSlaveUUID;
 	}
 	
-	public JobState getJobState() {
-		return jobState;
+	public QueryState getQueryState() {
+		return queryState;
 	}
 	
-	public void setJobState(JobState jobState) {
-		this.jobState = jobState;
+	public void setQueryState(QueryState queryState) {
+		this.queryState = queryState;
 	}
 }

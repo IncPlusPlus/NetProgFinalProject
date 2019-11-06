@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.common;
 
 import java.util.List;
 
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static java.util.Arrays.asList;
 
 /**
@@ -11,7 +10,7 @@ import static java.util.Arrays.asList;
  * a client, server, or slave.
  */
 public interface Header {
-	List<Class<? extends Enum>> members = asList(Demands.class, ClientType.class, Responses.class, VariousEnums.class);
+	List<Class<? extends Enum>> members = asList(Demands.class, MemberType.class, Responses.class, VariousEnums.class);
 	
 	static Header valueOf(String name) {
 		Enum enumValue = null;
