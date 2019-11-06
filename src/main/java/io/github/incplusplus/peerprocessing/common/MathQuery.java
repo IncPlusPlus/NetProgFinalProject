@@ -1,20 +1,8 @@
 package io.github.incplusplus.peerprocessing.common;
 
 public class MathQuery extends Query {
-	private String originalExpression;
-	private String result;
-	
-	@Override
-	public String getResult() {
-		return result;
-	}
-	
 	public void setOriginalExpression(String expression) {
-		this.originalExpression = expression;
-	}
-	
-	public String getQueryString() {
-		return originalExpression;
+		setQueryString(expression);
 	}
 	
 	/**
@@ -25,9 +13,5 @@ public class MathQuery extends Query {
 	@Override
 	public void complete() {
 		throw new IllegalStateException("MathQuery does not have a complete() implementation. See its JavaDoc");
-	}
-	
-	public void setResult(String result) {
-		this.result = result;
 	}
 }

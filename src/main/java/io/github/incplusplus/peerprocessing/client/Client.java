@@ -21,8 +21,7 @@ import java.util.concurrent.Future;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
@@ -74,6 +73,16 @@ public class Client implements ProperClient, Personable {
 				"To exit, type /q and hit enter.\n");
 		dealWithServer();
 		String consoleLine;
+		MathQuery mathQuery = null;
+		try {
+			//Sleep for 2 secs just to let the server
+			//identification process complete
+			//without making a mess of the console
+			Thread.sleep(2000);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		while (!sock.isClosed()) {
 			if (usedWithConsole)
 				printEvalLine();
@@ -82,9 +91,12 @@ public class Client implements ProperClient, Personable {
 				if (consoleLine == null) {
 					break;
 				}
-				outToServer.println(msg(consoleLine, SOLVE));
+				mathQuery = new MathQuery();
+				mathQuery.setOriginalExpression(consoleLine);
+				mathQuery.setRequestingClientUUID(uuid);
+				outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
 			}
-			catch (ExecutionException | InterruptedException e) {
+			catch (ExecutionException | InterruptedException | JsonProcessingException e) {
 				e.printStackTrace();
 			}
 		}
@@ -144,7 +156,8 @@ public class Client implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						this.uuid = UUID.fromString(decode(lineFromServer));
+						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						this.uuid = introduction.getSenderId();
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
@@ -154,9 +167,9 @@ public class Client implements ProperClient, Personable {
 						close();
 						debug("Disconnected.");
 					}
-					else if (header.equals(SOLUTION)) {
+					else if (header.equals(RESULT)) {
 						if (usedWithConsole)
-							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathJob.class));
+							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
 					}
 				}
 				catch (SocketException e) {
@@ -186,16 +199,16 @@ public class Client implements ProperClient, Personable {
 		serverInteractionThread.start();
 	}
 	
-	private void printSolution(MathJob query) {
-		if (query.isSolved()) {
+	private void printSolution(MathQuery query) {
+		if (query.isCompleted()) {
 			System.out.println();
-			debug("The solution for the problem \"" + query.getOriginalExpression() + "\" is: \"" + query.getResult() + "\"");
+			debug("The solution for the problem \"" + query.getQueryString() + "\" is: \"" + query.getResult() + "\"");
 		}
 		else {
 			System.out.println();
-			debug("The solution for the problem \"" + query.getOriginalExpression() + "\" could not be found.");
-			debug("The reason for this is: " + query.getReasonUnsolved().toString());
-			debug("Stacktrace: \n" + Arrays.toString(query.getReasonUnsolved().getStackTrace()));
+			debug("The solution for the problem \"" + query.getQueryString() + "\" could not be found.");
+			debug("The reason for this is: " + query.getReasonIncomplete().toString());
+			debug("Stacktrace: \n" + Arrays.toString(query.getReasonIncomplete().getStackTrace()));
 		}
 		printEvalLine();
 	}

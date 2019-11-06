@@ -1,7 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.common.Job;
+import io.github.incplusplus.peerprocessing.common.Query;
 import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.common.MemberType;
 
@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
-import static io.github.incplusplus.peerprocessing.server.JobState.SENDING_TO_CLIENT;
-import static io.github.incplusplus.peerprocessing.server.JobState.WAITING_ON_SLAVE;
+import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_CLIENT;
+import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
 
 public class Server {
 	private static ServerSocket socket;
@@ -41,11 +41,11 @@ public class Server {
 	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
 	private static final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
-	private static final ConcurrentHashMap<UUID, Job> jobs = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<UUID, Query>();
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
 	 */
-	private static final BlockingDeque<Job> jobsAwaitingProcessing = new LinkedBlockingDeque<>();
+	private static final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Scanner in = new Scanner(System.in);
@@ -94,7 +94,8 @@ public class Server {
 							handlerThread.start();
 						}
 						catch (SocketException e) {
-							stop();
+							if(started.get())
+								stop();
 						}
 						catch (IOException e) {
 							printStackTrace(e);
@@ -104,9 +105,6 @@ public class Server {
 				}
 				catch (IOException e) {
 					printStackTrace(e);
-				}
-				finally {
-					debug("Server shutting down!");
 				}
 			}
 		}
@@ -118,7 +116,7 @@ public class Server {
 	
 	public static void stop() throws IOException {
 		started.compareAndSet(true, false);
-		info("Server shutting down.");
+		debug("Server shutting down.");
 		debug("Disconnecting clients.");
 		synchronized (clients) {
 			for (Map.Entry<UUID, ClientObj> i : clients.entrySet()) {
@@ -216,53 +214,53 @@ public class Server {
 	//</editor-fold>
 	
 	/**
-	 * Add a job to the server. The server will then add this job
-	 * to the job queue where it will be removed and processed.
-	 * The job will also be added to a map of jobs to determine
+	 * Add a query to the server. The server will then add this query
+	 * to the query queue where it will be removed and processed.
+	 * The query will also be added to a map of jobs to determine
 	 * the source and destination of jobs received by slaves.
 	 *
-	 * @param job the job to be processed
+	 * @param query the query to be processed
 	 */
-	static void submitJob(Job job) {
-		Job shouldBeNull = null;
+	static void submitJob(Query query) {
+		Query shouldBeNull = null;
 		//Put this slave in the slaves map
-		shouldBeNull = jobs.put(job.getJobId(), job);
+		shouldBeNull = queries.put(query.getQueryId(), query);
 		//ConcurrentHashMap does not support null entries. Because of this, the put() method
 		//only returns null if there was no previous mapping. We want to assure there was no
 		//duplicate mapping before this put() operation.
 		assert shouldBeNull == null;
-		jobsAwaitingProcessing.add(job);
+		jobsAwaitingProcessing.add(query);
 	}
 	
 	/**
-	 * Remove a job from the jobs list. At this point,
-	 * the job has just been processed by a slave.
-	 * It's internal status will still be {@link JobState#WAITING_ON_SLAVE}
+	 * Remove a query from the jobs list. At this point,
+	 * the query has just been processed by a slave.
+	 * It's internal status will still be {@link QueryState#WAITING_ON_SLAVE}
 	 *
-	 * @param jobId the id of the job to remove
+	 * @param queryId the id of the query to remove
 	 */
-	static Job removeJob(UUID jobId) {
-		Job removedJob = jobs.remove(jobId);
-		assert removedJob.getJobState().equals(WAITING_ON_SLAVE);
-		removedJob.setJobState(SENDING_TO_CLIENT);
+	static Query removeJob(UUID queryId) {
+		Query removedJob = queries.remove(queryId);
+		assert removedJob.getQueryState().equals(WAITING_ON_SLAVE);
+		removedJob.setQueryState(SENDING_TO_CLIENT);
 		return removedJob;
 	}
 	
-	static void relayToAppropriateClient(Job job) throws JsonProcessingException {
-		ClientObj requestSource = clients.get(job.getRequestingClientUUID());
+	static void relayToAppropriateClient(Query query) throws JsonProcessingException {
+		ClientObj requestSource = clients.get(query.getRequestingClientUUID());
 		if (requestSource == null) {
-			error("Tried to tell client " + job.getRequestingClientUUID() + " that " +
-					job.getMathJob().getOriginalExpression() + " = " +
-					job.getMathJob().getResult() + " but the client disappeared!");
+			error("Tried to tell client " + query.getRequestingClientUUID() + " that " +
+					query.getQueryString() + " = " +
+					query.getResult() + " but the client disappeared!");
 		}
 		else {
-			requestSource.acceptCompleted(job.getMathJob());
+			requestSource.acceptCompleted(query);
 		}
 	}
 	
-	private static void sendToLeastBusySlave(Job job) throws InterruptedException, JsonProcessingException {
+	private static void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
-			debug("Tried to send job with id " + job.getJobId() + " to a slave. " +
+			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
 					"However, no slaves were available. Job queue thread sleeping " +
 					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " seconds...");
 			Thread.sleep(NO_SLAVES_SLEEP_TIME);
@@ -281,7 +279,7 @@ public class Server {
 		Thread ingestionThread = new Thread(() -> {
 			while (!socket.isClosed()) {
 				try {
-					Job currentJob = jobsAwaitingProcessing.take();
+					Query currentJob = jobsAwaitingProcessing.take();
 					sendToLeastBusySlave(currentJob);
 				}
 				catch (InterruptedException | JsonProcessingException e) {

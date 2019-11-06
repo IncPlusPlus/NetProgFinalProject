@@ -21,8 +21,9 @@ public class Constants {
 	 */
 	public final static String QUIT_STRING = "/q";
 	
-	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper().activateDefaultTyping(
+	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper()
+			.activateDefaultTyping(
 			BasicPolymorphicTypeValidator.builder().build()
-	);
-	
+	)
+			;
 }

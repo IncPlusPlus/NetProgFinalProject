@@ -1,9 +1,9 @@
 package io.github.incplusplus.peerprocessing.server;
 
 /**
- * Represents the state of a {@link io.github.incplusplus.peerprocessing.common.Job}.
+ * Represents the state of a {@link io.github.incplusplus.peerprocessing.common.Query}.
  */
-public enum JobState {
+public enum QueryState {
 	/**
 	 * This Job is in the queue waiting
 	 * for an available slave to take it on

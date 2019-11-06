@@ -18,8 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
@@ -108,12 +107,13 @@ public class Slave implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						this.uuid = UUID.fromString(decode(lineFromServer));
+						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer),Introduction.class);
+						this.uuid = introduction.getSenderId();
 					}
-					else if (header.equals(SOLVE)) {
-						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
-						debug("Solving: " + job.getMathJob().getProblemId() + " - " + job.getMathJob().getOriginalExpression());
-						sendSolvedMathQuery(solve(job));
+					else if (header.equals(QUERY)) {
+						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
+						sendEvaluatedQuery(evaluate(query));
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
@@ -152,28 +152,37 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	/**
-	 * Solves and returns a job. If an exception occurs,
-	 * it will be contained in the query enclosed by the specified job.
+	 * Solves and returns a mathQuery. If an exception occurs,
+	 * it will be contained in the query enclosed by the specified mathQuery.
 	 *
-	 * @param job the job to complete
-	 * @return the job containing the
+	 * @param mathQuery the mathQuery to complete
+	 * @return the mathQuery containing the
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
-	private Job solve(Job job) {
-		Expression expression = new Expression(job.getMathJob().getOriginalExpression());
+	private MathQuery solve(MathQuery mathQuery) {
+		Expression expression = new Expression(mathQuery.getQueryString());
 		try {
-			job.getMathJob().setResult(expression.eval());
-			job.getMathJob().setSolved(true);
+			mathQuery.setResult(expression.eval().toString());
+			mathQuery.setCompleted(true);
 		}
 		catch (Exception e) {
 			printStackTrace(e);
-			job.getMathJob().setSolved(false);
-			job.getMathJob().setReasonUnsolved(e);
+			mathQuery.setCompleted(false);
+			mathQuery.setReasonIncomplete(e);
 		}
-		return job;
+		return mathQuery;
 	}
 	
-	private void sendSolvedMathQuery(Job job) throws JsonProcessingException {
-		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(job), SOLUTION));
+	private Query evaluate(Query query) {
+		if (query instanceof MathQuery) {
+			return solve((MathQuery) query);
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	private void sendEvaluatedQuery(Query query) throws JsonProcessingException {
+		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
 	}
 }

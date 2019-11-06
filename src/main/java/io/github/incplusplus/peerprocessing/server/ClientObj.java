@@ -1,9 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.common.Header;
-import io.github.incplusplus.peerprocessing.common.Job;
-import io.github.incplusplus.peerprocessing.common.MathJob;
+import io.github.incplusplus.peerprocessing.common.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,11 +11,9 @@ import java.net.SocketException;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
-import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
+import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
 import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
@@ -44,8 +40,8 @@ public class ClientObj extends ConnectedEntity {
 			try {
 				lineFromClient = getInFromClient().readLine();
 				Header header = getHeader(lineFromClient);
-				if (header.equals(SOLVE)) {
-					offload(decode(lineFromClient));
+				if (header.equals(QUERY)) {
+					solve(SHARED_MAPPER.readValue(decode(lineFromClient), Query.class));
 				}
 				else if (header.equals(IDENTIFY)) {
 					getOutToClient().println(
@@ -71,13 +67,12 @@ public class ClientObj extends ConnectedEntity {
 		}
 	}
 	
-	void acceptCompleted(MathJob mathJob) throws JsonProcessingException {
-		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(mathJob), SOLUTION));
+	void acceptCompleted(Query query) throws JsonProcessingException {
+		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
 	}
 	
-	private void offload(String mathQuery) {
-		Server.submitJob(
-				new Job(new MathJob(mathQuery), getConnectionUUID())
-		);
+	private void solve(Query query) {
+		query.setRequestingClientUUID(getConnectionUUID());
+		Server.submitJob(query);
 	}
 }
