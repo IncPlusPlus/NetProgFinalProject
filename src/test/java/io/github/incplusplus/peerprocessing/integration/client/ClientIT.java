@@ -18,7 +18,7 @@ import java.util.concurrent.FutureTask;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ClientIT {
-	public static boolean VERBOSE_TEST_OUTPUT = true;
+	public static boolean VERBOSE_TEST_OUTPUT = false;
 	
 	@BeforeAll
 	static void setUp() {
