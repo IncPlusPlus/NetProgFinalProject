@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,6 +37,7 @@ public class Client implements ProperClient, Personable {
 	private String name;
 	private UUID uuid;
 	private AtomicBoolean running = new AtomicBoolean();
+	private ConcurrentHashMap<UUID,Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public static void main(String[] args) throws IOException {
 		enable();
