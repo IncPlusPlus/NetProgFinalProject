@@ -17,6 +17,10 @@ public class StupidSimpleLogger {
 				.build();
 	}
 	
+	public static boolean isEnabled() {
+		return enabled;
+	}
+	
 	public static void disable() {
 		enabled = false;
 	}
