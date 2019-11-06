@@ -175,7 +175,7 @@ public class Client implements ProperClient, Personable {
 					}
 					else if (header.equals(IDENTITY)) {
 						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
-						this.uuid = introduction.getSenderId();
+						this.uuid = introduction.getReceiverId();
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");

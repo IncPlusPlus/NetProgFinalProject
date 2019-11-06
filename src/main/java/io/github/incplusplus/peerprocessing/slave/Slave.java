@@ -121,7 +121,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(IDENTITY)) {
 						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
-						this.uuid = introduction.getSenderId();
+						this.uuid = introduction.getReceiverId();
 					}
 					else if (header.equals(QUERY)) {
 						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
