@@ -35,7 +35,6 @@ public class Client implements ProperClient, Personable {
 	private Socket sock;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private Scanner in = new Scanner(System.in);
 	private String name;
 	private UUID uuid;
 	private AtomicBoolean running = new AtomicBoolean();

@@ -29,7 +29,6 @@ public class Slave implements ProperClient, Personable {
 	private AtomicBoolean running = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private Scanner in;
 	private String name;
 	private UUID uuid = UUID.randomUUID();
 	
