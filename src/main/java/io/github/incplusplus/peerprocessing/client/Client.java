@@ -8,20 +8,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
+import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
@@ -38,6 +38,7 @@ public class Client implements ProperClient, Personable {
 	private Scanner in = new Scanner(System.in);
 	private String name;
 	private UUID uuid;
+	private AtomicBoolean running = new AtomicBoolean();
 	
 	public static void main(String[] args) throws IOException {
 		enable();
@@ -64,40 +65,43 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() {
-		info("\nIf you want to enter an expression, type it and hit enter.\n" +
-				"After you have entered your expression, it may take a moment for the server to respond.\n" +
-				"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-				"or you may attempt to enter a second expression while the first processes. \n" +
-				"This is not recommended " +
-				"as you may be interrupted by the first result while you type the second expression.\n" +
-				"To exit, type /q and hit enter.\n");
+		assert running.compareAndSet(false, true);
 		dealWithServer();
-		String consoleLine;
-		MathQuery mathQuery = null;
-		try {
-			//Sleep for 2 secs just to let the server
-			//identification process complete
-			//without making a mess of the console
-			Thread.sleep(2000);
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		while (!sock.isClosed()) {
-			if (usedWithConsole)
-				printEvalLine();
+		if (usedWithConsole) {
+			info("\nIf you want to enter an expression, type it and hit enter.\n" +
+					"After you have entered your expression, it may take a moment for the server to respond.\n" +
+					"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
+					"or you may attempt to enter a second expression while the first processes. \n" +
+					"This is not recommended " +
+					"as you may be interrupted by the first result while you type the second expression.\n" +
+					"To exit, type /q and hit enter.\n");
+			String consoleLine;
+			MathQuery mathQuery = null;
 			try {
-				consoleLine = getConsoleLine();
-				if (consoleLine == null) {
-					break;
-				}
-				mathQuery = new MathQuery();
-				mathQuery.setOriginalExpression(consoleLine);
-				mathQuery.setRequestingClientUUID(uuid);
-				outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
+				//Sleep for 2 secs just to let the server
+				//identification process complete
+				//without making a mess of the console
+				Thread.sleep(2000);
 			}
-			catch (ExecutionException | InterruptedException | JsonProcessingException e) {
+			catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+			while (running.get()) {
+				if (usedWithConsole)
+					printEvalLine();
+				try {
+					consoleLine = getConsoleLine();
+					if (consoleLine == null) {
+						break;
+					}
+					mathQuery = new MathQuery();
+					mathQuery.setOriginalExpression(consoleLine);
+					mathQuery.setRequestingClientUUID(uuid);
+					outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
+				}
+				catch (ExecutionException | InterruptedException | JsonProcessingException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -138,6 +142,7 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
+		assert running.compareAndSet(true, false);
 		outToServer.close();
 		inFromServer.close();
 		sock.close();

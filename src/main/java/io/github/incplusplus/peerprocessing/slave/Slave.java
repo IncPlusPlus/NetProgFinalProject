@@ -26,7 +26,7 @@ public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
-	private AtomicBoolean running;
+	private AtomicBoolean running = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private Scanner in;
@@ -57,6 +57,7 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void begin() throws IOException {
+		assert running.compareAndSet(false, true);
 		dealWithServer();
 	}
 	
@@ -89,6 +90,7 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
+		assert running.compareAndSet(true, false);
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
@@ -107,7 +109,7 @@ public class Slave implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer),Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
 						this.uuid = introduction.getSenderId();
 					}
 					else if (header.equals(QUERY)) {
