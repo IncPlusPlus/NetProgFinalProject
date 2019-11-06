@@ -142,6 +142,11 @@ public class Slave implements ProperClient, Personable {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 				}
+				catch (NullPointerException e) {
+					if (!running.get()) {
+						printStackTrace(e);
+					}
+				}
 				catch (SocketException e) {
 					if (running.get()) {
 						error("The server suddenly disconnected");
