@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class JerkyClientIT {
 	@BeforeEach
-	static void setUp() {
+	void setUp() {
 		Server.start(1234, VERBOSE_TEST_OUTPUT);
 		while (!Server.started()) {}
 	}
 	
 	@AfterEach
-	static void tearDown() throws IOException {
+	void tearDown() throws IOException {
 		Server.stop();
 	}
 	
