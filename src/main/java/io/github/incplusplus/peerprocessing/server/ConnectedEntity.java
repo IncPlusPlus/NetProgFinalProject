@@ -59,8 +59,12 @@ public abstract class ConnectedEntity implements Runnable {
 		return introduction;
 	}
 	
-	public void disconnect() throws IOException {
+	void disconnect() throws IOException {
 		getOutToClient().println(DISCONNECT);
+		kill();
+	}
+	
+	void kill() throws IOException {
 		getOutToClient().close();
 		getInFromClient().close();
 		getSocket().close();

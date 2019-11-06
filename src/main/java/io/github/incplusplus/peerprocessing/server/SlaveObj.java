@@ -20,6 +20,7 @@ import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.server.Server.*;
 
 public class SlaveObj extends ConnectedEntity {
@@ -62,6 +63,11 @@ public class SlaveObj extends ConnectedEntity {
 				else if (header.equals(IDENTIFY)) {
 					getOutToClient().println(
 							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
+				}
+				else if (header.equals(DISCONNECT)) {
+					//the client already is ending their connection.
+					//we don't want to write back
+					kill();
 				}
 			}
 			catch (SocketException e) {

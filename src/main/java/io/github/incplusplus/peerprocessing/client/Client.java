@@ -59,6 +59,11 @@ public class Client implements ProperClient, Personable {
 		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	}
 	
+	public void setVerbose(boolean verbose) {
+		if (verbose)
+			enable();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */
@@ -94,7 +99,7 @@ public class Client implements ProperClient, Personable {
 					if (consoleLine == null) {
 						break;
 					}
-					mathQuery = new MathQuery(consoleLine,uuid);
+					mathQuery = new MathQuery(consoleLine, uuid);
 					outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
 				}
 				catch (ExecutionException | InterruptedException | JsonProcessingException e) {
@@ -142,12 +147,17 @@ public class Client implements ProperClient, Personable {
 	public void close() throws IOException {
 		boolean notAlreadyClosed = running.compareAndSet(true, false);
 		assert notAlreadyClosed;
+		outToServer.println(DISCONNECT);
+		kill();
+	}
+	
+	private void kill() throws IOException {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
 	}
 	
-	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
+	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) throws JsonProcessingException {
 		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
 	}
 	
@@ -172,7 +182,7 @@ public class Client implements ProperClient, Personable {
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
-						close();
+						disconnect();
 						debug("Disconnected.");
 					}
 					else if (header.equals(RESULT)) {
@@ -188,17 +198,19 @@ public class Client implements ProperClient, Personable {
 							futureQuery.setCompleted(result.isCompleted());
 							//The query has been solved and is ready to be grabbed by
 							//whatever FutureTask put it into futureQueries in the first place
+							printResult(futureQuery);
 						}
 					}
 				}
 				catch (SocketException e) {
-					printStackTrace(e);
-					error("The server suddenly disconnected");
-					try {
-						disconnect();
-					}
-					catch (IOException ex) {
-						ex.printStackTrace();
+					if (running.get()) {
+						error("The server suddenly disconnected");
+						try {
+							kill();
+						}
+						catch (IOException ex) {
+							printStackTrace(ex);
+						}
 					}
 				}
 				catch (IOException e) {
@@ -208,7 +220,7 @@ public class Client implements ProperClient, Personable {
 					}
 					catch (IOException ex) {
 						debug("There was an exception during the disconnect which began due to a previous exception!");
-						ex.printStackTrace();
+						printStackTrace(ex);
 					}
 					break;
 				}
@@ -239,7 +251,8 @@ public class Client implements ProperClient, Personable {
 			debug("The reason for this is: " + query.getReasonIncomplete().toString());
 			debug("Stacktrace: \n" + Arrays.toString(query.getReasonIncomplete().getStackTrace()));
 		}
-		printEvalLine();
+		if (usedWithConsole)
+			printEvalLine();
 	}
 	
 	private void printEvalLine() {
@@ -248,21 +261,21 @@ public class Client implements ProperClient, Personable {
 	
 	class ExpressionEvaluator implements Callable<BigDecimal> {
 		private final String expression;
-		private final UUID correspondingQueryId;
 		
-		ExpressionEvaluator(String mathExpression) {
+		ExpressionEvaluator(String mathExpression) throws JsonProcessingException {
 			this.expression = mathExpression;
-			MathQuery query = new MathQuery(mathExpression,uuid);
-			this.correspondingQueryId = query.getQueryId();
-			futureQueries.put(query.getQueryId(),query);
 		}
 		
 		@Override
 		public BigDecimal call() throws Exception {
-			if(futureQueries.get(correspondingQueryId)==null) {
+			MathQuery query = new MathQuery(this.expression, uuid);
+			UUID correspondingQueryId = query.getQueryId();
+			futureQueries.put(query.getQueryId(), query);
+			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
+			if (futureQueries.get(correspondingQueryId) == null) {
 				throw new IllegalStateException("The corresponding query disappeared from the map!");
 			}
-			while(!futureQueries.get(correspondingQueryId).isCompleted()) {
+			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
 				Thread.sleep(500);
 			}
 			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());

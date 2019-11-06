@@ -51,6 +51,11 @@ public class Slave implements ProperClient, Personable {
 		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	}
 	
+	public void setVerbose(boolean verbose) {
+		if (verbose)
+			enable();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */
@@ -92,6 +97,11 @@ public class Slave implements ProperClient, Personable {
 	public void close() throws IOException {
 		boolean notAlreadyClosed = running.compareAndSet(true, false);
 		assert notAlreadyClosed;
+		outToServer.println(DISCONNECT);
+		kill();
+	}
+	
+	private void kill() throws IOException {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
@@ -120,7 +130,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
-						close();
+						disconnect();
 						debug("Disconnected.");
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
@@ -128,13 +138,14 @@ public class Slave implements ProperClient, Personable {
 					}
 				}
 				catch (SocketException e) {
-					printStackTrace(e);
-					error("The server suddenly disconnected");
-					try {
-						disconnect();
-					}
-					catch (IOException ex) {
-						printStackTrace(ex);
+					if (running.get()) {
+						error("The server suddenly disconnected");
+						try {
+							kill();
+						}
+						catch (IOException ex) {
+							printStackTrace(ex);
+						}
 					}
 				}
 				catch (IOException e) {

@@ -29,6 +29,9 @@ public class ConnectionHandler implements Runnable {
 	private volatile ConnectionState connectionState;
 	
 	public ConnectionHandler(Socket incomingConnection) throws IOException {
+		if (incomingConnection == null || incomingConnection.isClosed())
+			throw new IllegalArgumentException("An incoming connection was established" +
+					"but was then immediately dropped.");
 		debug("New connection at " + incomingConnection.getLocalAddress().getHostAddress() + ":" + incomingConnection.getLocalPort());
 		this.connectionUUID = UUID.randomUUID();
 		this.connectionState = CONNECTING;

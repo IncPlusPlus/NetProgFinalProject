@@ -69,6 +69,12 @@ public class Server {
 		debug("Server stopped.");
 	}
 	
+	public static void start(int serverPort, boolean verbose) {
+		if(verbose)
+			StupidSimpleLogger.enable();
+		start(serverPort);
+	}
+	
 	public static void start(int serverPort) {
 		class ServerStartTask implements Runnable {
 			private int port;
@@ -93,6 +99,9 @@ public class Server {
 							handlerThread.setDaemon(true);
 							handlerThread.start();
 						}
+						catch (IllegalArgumentException e) {
+							error(e.getMessage());
+						}
 						catch (SocketException e) {
 							if(started.get())
 								stop();
@@ -110,7 +119,6 @@ public class Server {
 		}
 		Thread t = new Thread(new ServerStartTask(serverPort));
 		t.setName("Server socket acceptance thread");
-		t.setDaemon(true);
 		t.start();
 	}
 	
