@@ -28,10 +28,9 @@ public class StupidSimpleLogger {
 	public static void debug(String message) {
 		if (enabled) {
 			cp.clear();
-			cp.print("[" + cp.getDateFormatted() + "] ", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
-			cp.debugPrintln(message);
+			cp.print("[" + cp.getDateFormatted() + "]", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.debugPrintln(" " + message);
 			cp.clear();
-			
 		}
 	}
 	
@@ -59,8 +58,8 @@ public class StupidSimpleLogger {
 	public static void error(String message) {
 		if (enabled) {
 			cp.clear();
-			cp.print("[" + cp.getDateFormatted() + "] ", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
-			cp.errorPrintln(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.print("[" + cp.getDateFormatted() + "]", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+			cp.errorPrintln(" " + message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 			cp.clear();
 		}
 	}
