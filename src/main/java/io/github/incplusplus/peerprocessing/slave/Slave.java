@@ -27,7 +27,9 @@ public class Slave implements ProperClient, Personable {
 	private final int serverPort;
 	private Socket sock;
 	private AtomicBoolean running = new AtomicBoolean();
-	/** Whether or not this client has introduced itself */
+	/**
+	 * Whether or not this client has introduced itself
+	 */
 	private AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;

@@ -245,11 +245,15 @@ public class Client implements ProperClient, Personable {
 	private void printSolution(MathQuery query) {
 		assert query.isCompleted();
 		if (query.getReasonIncomplete() == null) {
-			System.out.println();
+			//Make way for incoming message if the "Evaluate:" line is there
+			if (usedWithConsole)
+				System.out.println();
 			debug("The solution for the problem \"" + query.getQueryString() + "\" is: \"" + query.getResult() + "\"");
 		}
 		else {
-			System.out.println();
+			//Make way for incoming message if the "Evaluate:" line is there
+			if (usedWithConsole)
+				System.out.println();
 			debug("The solution for the problem \"" + query.getQueryString() + "\" could not be found.");
 			debug("The reason for this is: " + query.getReasonIncomplete().toString());
 			debug("Stacktrace: \n" + Arrays.toString(query.getReasonIncomplete().getStackTrace()));
