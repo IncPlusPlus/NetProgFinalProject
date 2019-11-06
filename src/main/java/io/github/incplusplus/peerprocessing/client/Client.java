@@ -281,4 +281,9 @@ public class Client implements ProperClient, Personable {
 			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "Client" + (uuid != null ? " " + uuid : "");
+	}
 }

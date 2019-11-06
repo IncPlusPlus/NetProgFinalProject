@@ -201,4 +201,9 @@ public class Slave implements ProperClient, Personable {
 	private void sendEvaluatedQuery(Query query) throws JsonProcessingException {
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
 	}
+	
+	@Override
+	public String toString() {
+		return "Slave" + (uuid != null ? " " + uuid : "");
+	}
 }
