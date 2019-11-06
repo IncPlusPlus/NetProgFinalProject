@@ -55,7 +55,7 @@ public class SlaveObj extends ConnectedEntity {
 					storedQuery.setQueryState(QueryState.COMPLETE);
 					storedQuery.setReasonIncomplete(completedQuery.getReasonIncomplete());
 					storedQuery.setResult(completedQuery.getResult());
-					storedQuery.setCompleted(completedQuery.isCompleted());
+					storedQuery.setCompleted(true);
 					relayToAppropriateClient(storedQuery);
 					jobsResponsibleFor.remove(storedQuery.getQueryId());
 				}

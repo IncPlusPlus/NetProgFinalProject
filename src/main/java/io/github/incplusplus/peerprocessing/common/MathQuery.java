@@ -1,6 +1,18 @@
 package io.github.incplusplus.peerprocessing.common;
 
+import java.util.UUID;
+
 public class MathQuery extends Query {
+	
+	public MathQuery() {
+		super();
+	}
+	
+	public MathQuery(String originalExpression, UUID requestingClientUUID) {
+		super();
+		setOriginalExpression(originalExpression);
+		setRequestingClientUUID(requestingClientUUID);
+	}
 	public void setOriginalExpression(String expression) {
 		setQueryString(expression);
 	}

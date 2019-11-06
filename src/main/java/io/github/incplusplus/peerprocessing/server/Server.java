@@ -137,6 +137,10 @@ public class Server {
 		socket.close();
 	}
 	
+	public static boolean started() {
+		return started.get();
+	}
+	
 	//<editor-fold desc="register() methods">
 	
 	/**

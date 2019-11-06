@@ -170,7 +170,9 @@ public class Slave implements ProperClient, Personable {
 		}
 		catch (Exception e) {
 			printStackTrace(e);
-			mathQuery.setCompleted(false);
+			//We've completed it to the best of our ability
+			//client should check the throwable!=null
+			mathQuery.setCompleted(true);
 			mathQuery.setReasonIncomplete(e);
 		}
 		return mathQuery;

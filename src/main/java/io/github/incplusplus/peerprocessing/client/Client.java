@@ -37,7 +37,7 @@ public class Client implements ProperClient, Personable {
 	private String name;
 	private UUID uuid;
 	private AtomicBoolean running = new AtomicBoolean();
-	private ConcurrentHashMap<UUID,Query> futureQueries = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public static void main(String[] args) throws IOException {
 		enable();
@@ -94,9 +94,7 @@ public class Client implements ProperClient, Personable {
 					if (consoleLine == null) {
 						break;
 					}
-					mathQuery = new MathQuery();
-					mathQuery.setOriginalExpression(consoleLine);
-					mathQuery.setRequestingClientUUID(uuid);
+					mathQuery = new MathQuery(consoleLine,uuid);
 					outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
 				}
 				catch (ExecutionException | InterruptedException | JsonProcessingException e) {
@@ -178,8 +176,19 @@ public class Client implements ProperClient, Personable {
 						debug("Disconnected.");
 					}
 					else if (header.equals(RESULT)) {
-						if (usedWithConsole)
-							printSolution(SHARED_MAPPER.readValue(decode(lineFromServer), MathQuery.class));
+						Query result = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						if (usedWithConsole) {
+							printResult(result);
+						}
+						else if (futureQueries.containsKey(result.getQueryId())) {
+							Query futureQuery = futureQueries.get(result.getQueryId());
+							futureQuery.setQueryState(result.getQueryState());
+							futureQuery.setSolvingSlaveUUID(result.getSolvingSlaveUUID());
+							futureQuery.setResult(result.getResult());
+							futureQuery.setCompleted(result.isCompleted());
+							//The query has been solved and is ready to be grabbed by
+							//whatever FutureTask put it into futureQueries in the first place
+						}
 					}
 				}
 				catch (SocketException e) {
@@ -209,8 +218,18 @@ public class Client implements ProperClient, Personable {
 		serverInteractionThread.start();
 	}
 	
+	private void printResult(Query query) {
+		if (query instanceof MathQuery) {
+			printSolution((MathQuery) query);
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
 	private void printSolution(MathQuery query) {
-		if (query.isCompleted()) {
+		assert query.isCompleted();
+		if (query.getReasonIncomplete() == null) {
 			System.out.println();
 			debug("The solution for the problem \"" + query.getQueryString() + "\" is: \"" + query.getResult() + "\"");
 		}
@@ -229,14 +248,24 @@ public class Client implements ProperClient, Personable {
 	
 	class ExpressionEvaluator implements Callable<BigDecimal> {
 		private final String expression;
+		private final UUID correspondingQueryId;
 		
 		ExpressionEvaluator(String mathExpression) {
 			this.expression = mathExpression;
+			MathQuery query = new MathQuery(mathExpression,uuid);
+			this.correspondingQueryId = query.getQueryId();
+			futureQueries.put(query.getQueryId(),query);
 		}
 		
 		@Override
 		public BigDecimal call() throws Exception {
-			return null;
+			if(futureQueries.get(correspondingQueryId)==null) {
+				throw new IllegalStateException("The corresponding query disappeared from the map!");
+			}
+			while(!futureQueries.get(correspondingQueryId).isCompleted()) {
+				Thread.sleep(500);
+			}
+			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());
 		}
 	}
 }

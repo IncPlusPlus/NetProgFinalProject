@@ -10,7 +10,7 @@ import java.util.UUID;
 @JsonSubTypes(@JsonSubTypes.Type(MathQuery.class))
 public abstract class Query {
 	private final UUID queryId = UUID.randomUUID();
-	private boolean completed;
+	private volatile boolean completed;
 	private Throwable reasonIncomplete;
 	private UUID requestingClientUUID;
 	private UUID solvingSlaveUUID;
@@ -48,6 +48,13 @@ public abstract class Query {
 		return queryId;
 	}
 	
+	/**
+	 * Whether or not the request is completed.
+	 * NOTE THAT THIS CAN MEAN THAT IT WAS COMPLETED EXCEPTIONALLY.
+	 * CHECK THAT {@link #getReasonIncomplete()} IS NULL BEFORE
+	 * ASSUMING SUCCESS!
+	 * @return whether or not this request is complete
+	 */
 	public boolean isCompleted() {
 		return completed;
 	}
@@ -56,7 +63,7 @@ public abstract class Query {
 		this.result = result;
 	}
 	
-	public void setCompleted(boolean completed) {
+	public synchronized void setCompleted(boolean completed) {
 		this.completed = completed;
 	}
 	
