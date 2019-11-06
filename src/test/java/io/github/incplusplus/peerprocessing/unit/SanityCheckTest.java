@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing.common;
+package io.github.incplusplus.peerprocessing.unit;
 
 import org.junit.jupiter.api.Test;
 
