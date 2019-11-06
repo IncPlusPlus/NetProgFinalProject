@@ -11,13 +11,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
+import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 
@@ -25,11 +26,15 @@ public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
+	private AtomicBoolean running = new AtomicBoolean();
+	/**
+	 * Whether or not this client has introduced itself
+	 */
+	private AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private Scanner in;
 	private String name;
-	private UUID uuid = UUID.randomUUID();
+	private volatile UUID uuid = UUID.randomUUID();
 	
 	public static void main(String[] args) throws IOException {
 		enable();
@@ -50,13 +55,19 @@ public class Slave implements ProperClient, Personable {
 		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 	}
 	
+	public void setVerbose(boolean verbose) {
+		if (verbose)
+			enable();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */
 	@Override
 	public void begin() throws IOException {
+		boolean firstStart = running.compareAndSet(false, true);
+		assert firstStart;
 		dealWithServer();
-		while (!sock.isClosed()) {}
 	}
 	
 	/**
@@ -66,11 +77,10 @@ public class Slave implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setName(name);
-		introduction.setId(uuid);
-		introduction.setType(ClientType.SLAVE);
+		introduction.setSenderName(name);
+		introduction.setSenderId(uuid);
+		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
-		debug("Connected");
 	}
 	
 	/**
@@ -88,6 +98,13 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
+		boolean notAlreadyClosed = running.compareAndSet(true, false);
+		assert notAlreadyClosed;
+		outToServer.println(DISCONNECT);
+		kill();
+	}
+	
+	private void kill() throws IOException {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
@@ -102,29 +119,43 @@ public class Slave implements ProperClient, Personable {
 					Header header = getHeader(lineFromServer);
 					if (header.equals(IDENTIFY)) {
 						introduce();
+						//demand the server identify and also tell us our UUID
+						outToServer.println(IDENTIFY);
 					}
-					else if (header.equals(SOLVE)) {
-						Job job = SHARED_MAPPER.readValue(decode(lineFromServer), Job.class);
-						debug("Solving: " + job.getMathQuery().getProblemId() + " - " + job.getMathQuery().getOriginalExpression());
-						sendSolvedMathQuery(solve(job));
+					else if (header.equals(IDENTITY)) {
+						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						this.uuid = introduction.getReceiverId();
+						debug(this + " connected");
+						this.polite.compareAndSet(false, true);
 					}
-					else if(header.equals(DISCONNECT)) {
+					else if (header.equals(QUERY)) {
+						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
+						sendEvaluatedQuery(evaluate(query));
+					}
+					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
-						close();
+						disconnect();
 						debug("Disconnected.");
 					}
 					else if (header.equals(PROVIDE_CLIENT_NAME)) {
 						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 				}
-				catch (SocketException e) {
-					printStackTrace(e);
-					error("The server suddenly disconnected");
-					try {
-						disconnect();
+				catch (NullPointerException e) {
+					if (!running.get()) {
+						printStackTrace(e);
 					}
-					catch (IOException ex) {
-						ex.printStackTrace();
+				}
+				catch (SocketException e) {
+					if (running.get()) {
+						error("The server suddenly disconnected");
+						try {
+							kill();
+						}
+						catch (IOException ex) {
+							printStackTrace(ex);
+						}
 					}
 				}
 				catch (IOException e) {
@@ -134,40 +165,55 @@ public class Slave implements ProperClient, Personable {
 					}
 					catch (IOException ex) {
 						debug("There was an exception during the disconnect which began due to a previous exception!");
-						ex.printStackTrace();
+						printStackTrace(ex);
 					}
 					break;
 				}
 			}
 		});
-		serverInteractionThread.setDaemon(true);
+		serverInteractionThread.setName("Slave server interaction");
 		serverInteractionThread.start();
 	}
 	
 	/**
-	 * Solves and returns a job. If an exception occurs,
-	 * it will be contained in the query enclosed by the specified job.
+	 * Solves and returns a mathQuery. If an exception occurs,
+	 * it will be contained in the query enclosed by the specified mathQuery.
 	 *
-	 * @param job the job to complete
-	 * @return the job containing the
+	 * @param mathQuery the mathQuery to complete
+	 * @return the mathQuery containing the
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
-	private Job solve(Job job) {
-		
-		Expression expression = new Expression(job.getMathQuery().getOriginalExpression());
+	private MathQuery solve(MathQuery mathQuery) {
+		Expression expression = new Expression(mathQuery.getQueryString());
 		try {
-			job.getMathQuery().setResult(expression.eval());
-			job.getMathQuery().setSolved(true);
+			mathQuery.setResult(expression.eval().toString());
+			mathQuery.setCompleted(true);
 		}
 		catch (Exception e) {
 			printStackTrace(e);
-			job.getMathQuery().setSolved(false);
-			job.getMathQuery().setReasonUnsolved(e);
+			//We've completed it to the best of our ability
+			//client should check the throwable!=null
+			mathQuery.setCompleted(true);
+			mathQuery.setReasonIncomplete(e);
 		}
-		return job;
+		return mathQuery;
 	}
 	
-	private void sendSolvedMathQuery(Job job) throws JsonProcessingException {
-		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(job), SOLUTION));
+	private Query evaluate(Query query) {
+		if (query instanceof MathQuery) {
+			return solve((MathQuery) query);
+		}
+		else {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	private void sendEvaluatedQuery(Query query) throws JsonProcessingException {
+		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
+	}
+	
+	@Override
+	public String toString() {
+		return "Slave" + (uuid != null ? " " + uuid : "");
 	}
 }

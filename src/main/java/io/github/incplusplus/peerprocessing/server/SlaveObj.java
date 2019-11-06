@@ -3,6 +3,7 @@ package io.github.incplusplus.peerprocessing.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Job;
+import io.github.incplusplus.peerprocessing.common.Query;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,9 +17,10 @@ import java.util.UUID;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.server.Server.*;
 
 public class SlaveObj extends ConnectedEntity {
@@ -45,18 +47,29 @@ public class SlaveObj extends ConnectedEntity {
 			try {
 				lineFromSlave = getInFromClient().readLine();
 				Header header = getHeader(lineFromSlave);
-				if (header.equals(SOLUTION)) {
-					Job completedJob = SHARED_MAPPER.readValue(decode(lineFromSlave), Job.class);
-					Job storedJob = removeJob(completedJob.getJobId());
-					//We keep the originally created job object and only take what we need from the
+				if (header.equals(RESULT)) {
+					Query completedQuery = SHARED_MAPPER.readValue(decode(lineFromSlave), Query.class);
+					Query storedQuery = removeJob(completedQuery.getQueryId());
+					//We keep the originally created query object and only take what we need from the
 					//slave's data. This is to prevent possibly malicious slaves from compromising
 					//our good and pure clients who can do nothing wrong.
-					storedJob.setJobState(JobState.COMPLETE);
-					storedJob.getMathQuery().setReasonUnsolved(completedJob.getMathQuery().getReasonUnsolved());
-					storedJob.getMathQuery().setResult(completedJob.getMathQuery().getResult());
-					storedJob.getMathQuery().setSolved(completedJob.getMathQuery().isSolved());
-					relayToAppropriateClient(storedJob);
-					jobsResponsibleFor.remove(storedJob.getJobId());
+					storedQuery.setQueryState(QueryState.COMPLETE);
+					storedQuery.setReasonIncomplete(completedQuery.getReasonIncomplete());
+					storedQuery.setResult(completedQuery.getResult());
+					storedQuery.setCompleted(true);
+					relayToAppropriateClient(storedQuery);
+					jobsResponsibleFor.remove(storedQuery.getQueryId());
+				}
+				else if (header.equals(IDENTIFY)) {
+					getOutToClient().println(
+							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
+				}
+				else if (header.equals(DISCONNECT)) {
+					deRegister(this);
+					//the client already is ending their connection.
+					//we don't want to write back
+					kill();
+					break;
 				}
 			}
 			catch (SocketException e) {
@@ -76,15 +89,16 @@ public class SlaveObj extends ConnectedEntity {
 	}
 	
 	/**
-	 * Send a job to this slave for processing.
+	 * Send a query to this slave for processing.
 	 *
-	 * @param job the job to send
+	 * @param query the query to send
 	 * @throws JsonProcessingException if something goes horribly wrong
 	 */
-	void accept(Job job) throws JsonProcessingException {
-		job.setJobState(JobState.WAITING_ON_SLAVE);
-		jobsResponsibleFor.add(job.getJobId());
-		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(job), SOLVE));
+	void accept(Query query) throws JsonProcessingException {
+		query.setQueryState(QueryState.WAITING_ON_SLAVE);
+		jobsResponsibleFor.add(query.getQueryId());
+		debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
+		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 	}
 	
 	/**

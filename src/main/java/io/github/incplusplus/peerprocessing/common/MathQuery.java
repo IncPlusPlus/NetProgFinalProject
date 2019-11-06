@@ -1,55 +1,29 @@
 package io.github.incplusplus.peerprocessing.common;
 
-import java.beans.ConstructorProperties;
-import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Serves as the holder of the bulk of information
- * regarding
- */
-public class MathQuery {
-	private final String originalExpression;
-	private final UUID problemId;
-	private boolean solved;
-	private BigDecimal result;
-	private Throwable reasonUnsolved;
+public class MathQuery extends Query {
 	
-	@ConstructorProperties("originalExpression")
-	public MathQuery(String originalExpression) {
-		this.problemId = UUID.randomUUID();
-		this.originalExpression = originalExpression;
+	public MathQuery() {
+		super();
 	}
 	
-	public String getOriginalExpression() {
-		return originalExpression;
+	public MathQuery(String originalExpression, UUID requestingClientUUID) {
+		super();
+		setOriginalExpression(originalExpression);
+		setRequestingClientUUID(requestingClientUUID);
+	}
+	public void setOriginalExpression(String expression) {
+		setQueryString(expression);
 	}
 	
-	public boolean isSolved() {
-		return solved;
-	}
-	
-	public void setSolved(boolean solved) {
-		this.solved = solved;
-	}
-	
-	public BigDecimal getResult() {
-		return result;
-	}
-	
-	public void setResult(BigDecimal result) {
-		this.result = result;
-	}
-	
-	public UUID getProblemId() {
-		return problemId;
-	}
-	
-	public Throwable getReasonUnsolved() {
-		return reasonUnsolved;
-	}
-	
-	public void setReasonUnsolved(Throwable reasonUnsolved) {
-		this.reasonUnsolved = reasonUnsolved;
+	/**
+	 * To reduce the need for external libraries, the actual processing of the math query does
+	 * not occur within this class. Instead, it is expected that it happens outside of the class
+	 * and the result is set using {@link #setResult(String)}.
+	 */
+	@Override
+	public void complete() {
+		throw new IllegalStateException("MathQuery does not have a complete() implementation. See its JavaDoc");
 	}
 }

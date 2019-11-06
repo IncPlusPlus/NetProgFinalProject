@@ -1,6 +1,7 @@
 package io.github.incplusplus.peerprocessing.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 /**
  * A class of constants that the server and/or the client understand
@@ -20,6 +21,9 @@ public class Constants {
 	 */
 	public final static String QUIT_STRING = "/q";
 	
-	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper();
-	
+	public final static ObjectMapper SHARED_MAPPER = new ObjectMapper()
+			.activateDefaultTyping(
+			BasicPolymorphicTypeValidator.builder().build()
+	)
+			;
 }
