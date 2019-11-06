@@ -200,7 +200,7 @@ public class Client implements ProperClient, Personable {
 				}
 			}
 		});
-		serverInteractionThread.setDaemon(true);
+		serverInteractionThread.setName("Client server interaction");
 		serverInteractionThread.start();
 	}
 	
