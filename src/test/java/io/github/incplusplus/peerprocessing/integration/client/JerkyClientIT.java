@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests in this class are "jerky" because they involve the server
  * starting up and shutting down between tests.
  */
-public class JerkyClientIT {
+class JerkyClientIT {
 	@BeforeEach
 	void setUp() {
 		Server.start(1234, VERBOSE_TEST_OUTPUT);
