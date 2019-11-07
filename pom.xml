@@ -149,9 +149,8 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-<!--                            TODO: Make it so that we don't have to suppress errors and warns-->
+<!--                            TODO: Make it so that we don't have to have this set-->
                             <failOnWarnings>false</failOnWarnings>
-                            <quiet>true</quiet>
                             <tags>
                                 <tag>
                                     <name>apiNote</name>
