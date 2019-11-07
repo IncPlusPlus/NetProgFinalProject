@@ -22,6 +22,7 @@ import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_CLIENT;
 import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
 
+//TODO Make this class less static. Allow server instances.
 public class Server {
 	private static ServerSocket socket;
 	/**
@@ -69,24 +70,34 @@ public class Server {
 		debug("Server stopped.");
 	}
 	
-	public static void start(int serverPort, boolean verbose) {
+	/**
+	 * See {@link #start(int)}
+	 */
+	public static int start(int serverPort, boolean verbose) throws IOException {
 		if (verbose)
 			StupidSimpleLogger.enable();
-		start(serverPort);
+		return start(serverPort);
 	}
 	
-	public static void start(int serverPort) {
+	/**
+	 * Start a server.
+	 * @param serverPort the port to start the server on.
+	 *                   If set to 0, the server will listen on
+	 *                   whatever port is available.
+	 * @return the port the server started listening on
+	 */
+	public static int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
-			private int port;
+			private ServerSocket s;
 			
-			ServerStartTask(int p) {
-				port = p;
+			ServerStartTask(ServerSocket socket) {
+				this.s=socket;
 			}
 			
 			public void run() {
 				try {
 					started.compareAndSet(false, true);
-					socket = new ServerSocket(port);
+					
 					startJobIngestionThread();
 					while (started.get()) {
 						try {
@@ -117,9 +128,11 @@ public class Server {
 				}
 			}
 		}
-		Thread t = new Thread(new ServerStartTask(serverPort));
+		socket = new ServerSocket(port);
+		Thread t = new Thread(new ServerStartTask(socket));
 		t.setName("Server socket acceptance thread");
 		t.start();
+		return socket.getLocalPort();
 	}
 	
 	public static void stop() throws IOException {
