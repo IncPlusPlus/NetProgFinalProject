@@ -1,3 +1,9 @@
-flags:
-  unittests:
-  integration:
+coverage:
+  status:
+    project:
+      default: on
+      unittests:
+        flags: unittests
+      integration:
+        target: 50%
+        flags: integration
