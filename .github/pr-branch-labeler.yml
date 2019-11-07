@@ -6,3 +6,5 @@ ignore-develop-sync:
 ignore-master-sync:
   head: "develop"
   base: "master"
+chore:
+  head: ["chore/*", "maintenance/*"]
