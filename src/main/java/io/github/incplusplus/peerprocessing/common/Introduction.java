@@ -10,13 +10,13 @@ import java.util.UUID;
  * the partner who demanded it. Then, the sender turns the table and
  * demands an Introduction back from the original demand-ee.
  * Below is an example of this interaction with two parties, a client and a server.
- * <br></br><br></br>
+ * <br><br>
  * Client: connects to server
  * Server: demands Introduction of client
  * Client: sends Introduction to server
  * Client: demands Introduction of server
  * Server: demands Introduction of server
- * <br></br><br></br>
+ * <br><br>
  * The reason this is done in such a roundabout manner is to allow
  * the server to tell a client what that client's UUID is as opposed
  * to the client specifying one themselves.
