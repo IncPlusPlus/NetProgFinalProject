@@ -19,6 +19,7 @@ class HeaderTest {
 	@MethodSource("provideStringsForValueOf")
 	void valueOf(String enumName, Enum actualEnum) {
 		assertEquals(enumName, actualEnum.name());
+		assertTrue(actualEnum instanceof Header);
 	}
 	
 	private static Stream<Arguments> provideStringsForValueOf() {
