@@ -11,8 +11,8 @@ This is the final project for Network Programming (COMP-2100). The goal is to cr
 - A slave class that can process various commands
 
 ## Features 
-Features in order of priority
 
+Features in order of priority
 - [x] The server can communicate with a client
 - [x] The server can communicate with slave nodes
 - [x] A user can send individual math expressions to be processed.
