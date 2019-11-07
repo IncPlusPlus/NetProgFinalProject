@@ -1,9 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.common.Header;
-import io.github.incplusplus.peerprocessing.common.Job;
-import io.github.incplusplus.peerprocessing.common.MathQuery;
+import io.github.incplusplus.peerprocessing.common.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,11 +11,12 @@ import java.net.SocketException;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.SOLVE;
+import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
-import static io.github.incplusplus.peerprocessing.common.Responses.SOLUTION;
+import static io.github.incplusplus.peerprocessing.common.Responses.*;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.printStackTrace;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.server.Server.deRegister;
 
 public class ClientObj extends ConnectedEntity {
@@ -42,8 +41,19 @@ public class ClientObj extends ConnectedEntity {
 			try {
 				lineFromClient = getInFromClient().readLine();
 				Header header = getHeader(lineFromClient);
-				if (header.equals(SOLVE)) {
-					offload(decode(lineFromClient));
+				if (header.equals(QUERY)) {
+					solve(SHARED_MAPPER.readValue(decode(lineFromClient), Query.class));
+				}
+				else if (header.equals(IDENTIFY)) {
+					getOutToClient().println(
+							msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
+				}
+				else if (header.equals(DISCONNECT)) {
+					deRegister(this);
+					//the client already is ending their connection.
+					//we don't want to write back
+					kill();
+					break;
 				}
 			}
 			catch (SocketException e) {
@@ -65,13 +75,13 @@ public class ClientObj extends ConnectedEntity {
 		}
 	}
 	
-	void acceptCompleted(MathQuery mathQuery) throws JsonProcessingException {
-		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), SOLUTION));
+	void acceptCompleted(Query query) throws JsonProcessingException {
+		getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
 	}
 	
-	private void offload(String mathQuery) {
-		Server.submitJob(
-				new Job(new MathQuery(mathQuery), getConnectionUUID())
-		);
+	private void solve(Query query) {
+		debug("Got query " + query.getQueryId() + " from client " + getConnectionUUID());
+		query.setRequestingClientUUID(getConnectionUUID());
+		Server.submitJob(query);
 	}
 }
