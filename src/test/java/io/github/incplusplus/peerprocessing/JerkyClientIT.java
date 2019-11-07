@@ -1,10 +1,9 @@
-package io.github.incplusplus.peerprocessing.integration.client;
+package io.github.incplusplus.peerprocessing;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.server.Server;
 import io.github.incplusplus.peerprocessing.slave.Slave;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
@@ -15,20 +14,24 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import static io.github.incplusplus.peerprocessing.ClientIT.VERBOSE_TEST_OUTPUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ClientIT {
-	public static boolean VERBOSE_TEST_OUTPUT = false;
-	private static int serverPort;
+/**
+ * Tests in this class are "jerky" because they involve the server
+ * starting up and shutting down between tests.
+ */
+class JerkyClientIT {
+	private int serverPort;
 	
-	@BeforeAll
-	static void setUp() throws IOException {
+	@BeforeEach
+	void setUp() throws IOException {
 		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
 		while (!Server.started()) {}
 	}
 	
-	@AfterAll
-	static void tearDown() throws IOException {
+	@AfterEach
+	void tearDown() throws IOException {
 		Server.stop();
 	}
 	

@@ -1,8 +1,8 @@
-package io.github.incplusplus.peerprocessing.unit;
+package io.github.incplusplus.peerprocessing;
 
 import org.junit.jupiter.api.Test;
 
-import static io.github.incplusplus.peerprocessing.integration.client.ClientIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.ClientIT.VERBOSE_TEST_OUTPUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SanityCheckTest {
