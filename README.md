@@ -24,7 +24,7 @@ Features in order of priority
 ## Team members
 
 * Ryan Cloherty ([@IncPlusPlus](https://github.com/IncPlusPlus)), Team Lead, Developer
-* Joey Demeo([demeoj1](https://github.com/demeoj1)), Developer
+* Joey Demeo([@demeoj1](https://github.com/demeoj1)), Developer
 
 ## Usage
 
