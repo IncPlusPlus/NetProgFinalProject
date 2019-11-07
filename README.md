@@ -54,14 +54,6 @@ If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Ma
 
 The Java library portion of this project is in a very rough state and is merely for demo purposes so please don't use it to calculate rocket trajectories!
 
-To use this as a library in your own project, you will have to clone this project and use Maven to generate your own artifacts. Once you have the artifact as a JAR, you can simply include that JAR as a dependency. Instructions for this, whether or not you're using maven, will not be presented here as it is out of scope for this README. JARs will be available for download after they start being hosted at JitPack.
+To use this as a library in your own project, you may either add it by importing it using your build tool of choice by adding it from [JitPack]() or by downloading the JAR from the releases page and adding it to your classpath.
 
-Currently, the only usable APIs are:
-- The constructor for `Slave`
-- The constructor for `Client`
-- `int Server.start(int port)`
-- `int Server.start(int port, boolean verbose)`
-- The `init()` and `begin()` methods for `Slave` and `Client`
-- `Client`'s `FutureTask<BigDecimal> evaluateExpression(String expression)`
-
-This list will disappear as soon as JavaDoc is hosted somewhere like JitPack.
+There aren't many functions available yet and it's certainly not polished. However, there is a JavaDoc available online at [JitPack](https://jitpack.io/com/github/IncPlusPlus/NetProgFinalProject/latest/javadoc/).
