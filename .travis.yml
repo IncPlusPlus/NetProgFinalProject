@@ -7,7 +7,7 @@ script:
 after_success:
 - mvn jacoco:prepare-agent test jacoco:report -DskipIntegrationTests
 - bash <(curl -s https://codecov.io/bash) -c -F unittests
-- mvn jacoco:prepare-agent test jacoco:report -DskipUnitTests
+- mvn jacoco:prepare-agent integration-test jacoco:report -DskipUnitTests
 - bash <(curl -s https://codecov.io/bash) -c -F integration
 deploy:
   provider: releases
