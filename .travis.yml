@@ -3,7 +3,7 @@ cache:
   directories:
   - "$HOME/.m2/repository"
 script:
-- mvn clean jacoco:prepare-agent verify jacoco:report
+- mvn clean jacoco:prepare-agent install jacoco:report
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 deploy:
