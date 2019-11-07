@@ -11,9 +11,8 @@ deploy:
   api_key:
     secure: hyhC+O5QP7HlbzwEMu+3nG1UugJP95bmvx6cXbHWjIEcZhbjxdz4McwzROZjJu9BhvbCMLugNFxua/ycng1mEZRKWokB19hkvkiZ/A3gQHktizLVCNHJx233wTfa22T8cxzAVl//1Jw7RTb+rp0XCZAX5XY51DDBGIX2LzDrUDX51pbv3ZnwwVL5QcQdXhFdim/l/uXfHOTxnDUTpzSLk/lrOOcIBKLrL1oxeaWTC1mwt5lTMJc0hpxA0bb33ahu4THCwJC5w3PoJ01KT22lJPNR5e32uqbo8pbJzPTyHkUqQivwiBQgfOP53YSuIJlR8aQhmJwSXXe4IY7Z8wLwiCsz4++HRnOAep4oRutV3j26nSHsk5fYA0NYmk6Pb9u5yx3++5Ek8gUIQ2tfdWl76enoBBFRXsea//IMinMLkLCoeFD4wHWj1X7dxpGA+8U1S1rLdwuuLwZcUxiLBeaCNd/jQijunP2D1YqYZfPGUya8CSe8c2lbkmeRvxUCS0OLyQyQVPoQ80rN7Wg5c+H143US3snHXnW8xGrvYb8fQPN1uHmSD8sCdSvvmSGSItd3Anrbea2iUAg6qvx8G+vg2Ad3RBMZ0YIQPY6IcB78M72RfHMTyZkqtBr61FoXwJPlRbQ+YXiI5Tch+8xol95r+mLeRwH6V7ILxS4SBhfLoQo=
   file_glob: true
-  file: peer-processing-*.*.*.jar
+  file: target/peer-processing-*.*.*.jar
   skip_cleanup: true
-  prerelease: true
   on:
     repo: IncPlusPlus/NetProgFinalProject
     branch: master
