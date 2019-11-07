@@ -88,10 +88,10 @@ public class Server {
 	 */
 	public static int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
-			private ServerSocket s;
+			private ServerSocket serverSocket;
 			
 			ServerStartTask(ServerSocket socket) {
-				this.s=socket;
+				this.serverSocket =socket;
 			}
 			
 			public void run() {
@@ -101,7 +101,7 @@ public class Server {
 					startJobIngestionThread();
 					while (started.get()) {
 						try {
-							Socket incomingConnection = socket.accept();
+							Socket incomingConnection = serverSocket.accept();
 							ConnectionHandler ch = new ConnectionHandler(incomingConnection);
 							register(ch);
 							Thread handlerThread = new Thread(ch);
@@ -128,7 +128,7 @@ public class Server {
 				}
 			}
 		}
-		socket = new ServerSocket(port);
+		socket = new ServerSocket(serverPort);
 		Thread t = new Thread(new ServerStartTask(socket));
 		t.setName("Server socket acceptance thread");
 		t.start();

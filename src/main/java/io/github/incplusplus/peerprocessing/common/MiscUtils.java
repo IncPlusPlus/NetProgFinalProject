@@ -35,7 +35,7 @@ public class MiscUtils {
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
 		String host = hostAndPortPair.getValue0();
 		int port = hostAndPortPair.getValue1();
-		return Triplet.with(host, port, new Socket(host,port));
+		return Triplet.with(host, port, new Socket(host, port));
 	}
 	
 	/**
@@ -72,7 +72,6 @@ public class MiscUtils {
 	 *
 	 * @param receivedMessage the message to decode
 	 * @return the decoded message if it exists; else null
-	 * @throws IOException if there is no header
 	 */
 	public static String decode(String receivedMessage) {
 		String[] split = receivedMessage.split(Character.toString(HEADER_SEPARATOR));
