@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing.integration.client;
+package io.github.incplusplus.peerprocessing;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.server.Server;
@@ -17,7 +17,7 @@ import java.util.concurrent.FutureTask;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ClientIT {
+public class SingleSlaveIT {
 	public static boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;
 	

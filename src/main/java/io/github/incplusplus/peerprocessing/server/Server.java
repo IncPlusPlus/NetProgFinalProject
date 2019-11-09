@@ -34,6 +34,7 @@ public class Server {
 	final static UUID serverId = UUID.randomUUID();
 	final static String serverName = "Processing Server";
 	private static volatile AtomicBoolean started = new AtomicBoolean(false);
+	private static volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private static final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -81,6 +82,7 @@ public class Server {
 	
 	/**
 	 * Start a server.
+	 *
 	 * @param serverPort the port to start the server on.
 	 *                   If set to 0, the server will listen on
 	 *                   whatever port is available.
@@ -91,7 +93,7 @@ public class Server {
 			private ServerSocket serverSocket;
 			
 			ServerStartTask(ServerSocket socket) {
-				this.serverSocket =socket;
+				this.serverSocket = socket;
 			}
 			
 			public void run() {
@@ -137,6 +139,7 @@ public class Server {
 	
 	public static void stop() throws IOException {
 		started.compareAndSet(true, false);
+		shutdownInProgress.compareAndSet(false, true);
 		debug("Server shutting down.");
 		debug("Disconnecting clients.");
 		synchronized (clients) {
@@ -156,7 +159,11 @@ public class Server {
 			}
 		}
 		socket.close();
-		socket = null;
+		shutdownInProgress.compareAndSet(true, false);
+	}
+	
+	public static boolean shutdownInProgress() {
+		return shutdownInProgress.get();
 	}
 	
 	public static boolean started() {
@@ -237,6 +244,16 @@ public class Server {
 		}
 	}
 	
+	/**
+	 * Determine whether or not a client or slave with a certain UUID is connected or not.
+	 *
+	 * @param uuid the UUID of the slave/client
+	 * @return whether or not the server is still connected to the slave or client of the specified UUID
+	 */
+	static boolean isConnected(UUID uuid) {
+		return clients.containsKey(uuid) || slaves.containsKey(uuid);
+	}
+	
 	//</editor-fold>
 	
 	/**
@@ -305,7 +322,7 @@ public class Server {
 	
 	private static void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
-			while (!socket.isClosed()) {
+			while (Server.started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
 					sendToLeastBusySlave(currentJob);
