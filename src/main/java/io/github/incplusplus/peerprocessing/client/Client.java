@@ -45,10 +45,17 @@ public class Client implements ProperClient, Personable {
 		this.serverPort = serverPort;
 	}
 	
-	public void init() throws IOException {
-		this.sock = new Socket(serverHostname, serverPort);
-		this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+	public boolean init() {
+		try {
+			this.sock = new Socket(serverHostname, serverPort);
+			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			return true;
+		}
+		catch (IOException e) {
+			printStackTrace(e);
+			return false;
+		}
 	}
 	
 	public void setVerbose(boolean verbose) {

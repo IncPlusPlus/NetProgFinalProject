@@ -6,8 +6,11 @@ import java.io.IOException;
 public interface ProperClient extends Closeable {
 	/**
 	 * Initialize any connections, readers, and writers necessary.
+	 * No exception will be thrown here. It is the user's responsibility
+	 * to ensure the boolean returned by this method call is true.
+	 * @return whether or not initialization was successful.
 	 */
-	void init() throws IOException;
+	boolean init();
 	
 	/**
 	 * Begin reading or writing as expected.
