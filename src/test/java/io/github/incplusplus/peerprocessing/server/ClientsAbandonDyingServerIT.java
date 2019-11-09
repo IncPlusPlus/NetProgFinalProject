@@ -1,8 +1,7 @@
-package io.github.incplusplus.peerprocessing;
+package io.github.incplusplus.peerprocessing.server;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.common.ProperClient;
-import io.github.incplusplus.peerprocessing.server.Server;
 import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
