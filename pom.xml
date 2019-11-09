@@ -6,7 +6,7 @@
 
     <groupId>io.github.incplusplus</groupId>
     <artifactId>peer-processing</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,6 +15,9 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <junit-platform.version>5.3.1</junit-platform.version>
+        <!--        Initialize variables. We expect these variables might be specified by the command line.
+        However, we don't want to set them with a value here. They are initialized here to prevent
+        warnings about unknown properties in the build file.-->
         <skipUnitTests/>
         <skipIntegrationTests/>
     </properties>
@@ -48,6 +51,7 @@
             <version>2.0.3.1</version>
         </dependency>
         <!--</editor-fold>-->
+        <!--<editor-fold desc="JUnit">-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -66,15 +70,19 @@
             <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
+        <!--</editor-fold>-->
     </dependencies>
 
     <build>
         <plugins>
+            <!--<editor-fold desc="Maven Compiler Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Exec Maven Plugin">-->
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
@@ -83,6 +91,8 @@
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>
                 </configuration>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Jacoco Maven Plugin">-->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -103,6 +113,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Maven Failsafe Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -119,6 +131,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Maven Surefire Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -127,6 +141,8 @@
                     <skipTests>${skipUnitTests}</skipTests>
                 </configuration>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Maven Source Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -140,14 +156,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Maven Javadoc Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.1.0</version>
-                <!-- workaround for https://bugs.openjdk.java.net/browse/JDK-8212233 -->
-                <!--                <configuration>-->
-                <!--                    <source>8</source>-->
-                <!--                </configuration>-->
+                <configuration>
+                    <quiet>true</quiet>
+                    <!--                    workaround for https://bugs.openjdk.java.net/browse/JDK-8212233-->
+                    <!--                    <source>8</source>-->
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -191,6 +210,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--</editor-fold>-->
+            <!--<editor-fold desc="Maven Resources Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -218,6 +239,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--</editor-fold>-->
         </plugins>
     </build>
 </project>
