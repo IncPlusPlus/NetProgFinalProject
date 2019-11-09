@@ -5,7 +5,6 @@ coverage:
       unittests:
         flags: unittests
       integration:
-        target: 50%
         flags: integration
 ignore:
   - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
