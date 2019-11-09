@@ -81,6 +81,7 @@ public class Server {
 	
 	/**
 	 * Start a server.
+	 *
 	 * @param serverPort the port to start the server on.
 	 *                   If set to 0, the server will listen on
 	 *                   whatever port is available.
@@ -91,7 +92,7 @@ public class Server {
 			private ServerSocket serverSocket;
 			
 			ServerStartTask(ServerSocket socket) {
-				this.serverSocket =socket;
+				this.serverSocket = socket;
 			}
 			
 			public void run() {
@@ -156,7 +157,6 @@ public class Server {
 			}
 		}
 		socket.close();
-		socket = null;
 	}
 	
 	public static boolean started() {
@@ -235,6 +235,16 @@ public class Server {
 		else {
 			throw new IllegalArgumentException("Argument 'connectedEntity' must be a SlaveObj or ClientObj.");
 		}
+	}
+	
+	/**
+	 * Determine whether or not a client or slave with a certain UUID is connected or not.
+	 *
+	 * @param uuid the UUID of the slave/client
+	 * @return whether or not the server is still connected to the slave or client of the specified UUID
+	 */
+	static boolean isConnected(UUID uuid) {
+		return clients.containsKey(uuid) || slaves.containsKey(uuid);
 	}
 	
 	//</editor-fold>
