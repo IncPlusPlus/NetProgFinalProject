@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
-import org.javatuples.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +28,7 @@ public class Client implements ProperClient, Personable {
 	/**
 	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
 	 */
-	private boolean usedWithConsole;
+	boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
@@ -41,29 +40,39 @@ public class Client implements ProperClient, Personable {
 	private AtomicBoolean polite = new AtomicBoolean();
 	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Client mainClient = new Client(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainClient.usedWithConsole = true;
-		mainClient.init();
-		mainClient.begin();
-	}
-	
 	public Client(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
 	}
 	
-	public void init() throws IOException {
-		this.sock = new Socket(serverHostname, serverPort);
-		this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+	public boolean init() {
+		try {
+			this.sock = new Socket(serverHostname, serverPort);
+			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			return true;
+		}
+		catch (IOException e) {
+			printStackTrace(e);
+			return false;
+		}
 	}
 	
 	public void setVerbose(boolean verbose) {
 		if (verbose)
 			enable();
+	}
+	
+	public UUID getConnectionId() {
+		return uuid;
+	}
+	
+	public boolean isClosed() {
+		return !running.get();
+	}
+	
+	public boolean isPolite() {
+		return polite.get();
 	}
 	
 	/**
