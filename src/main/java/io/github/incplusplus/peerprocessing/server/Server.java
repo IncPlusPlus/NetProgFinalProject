@@ -305,7 +305,7 @@ public class Server {
 	
 	private static void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
-			while (!socket.isClosed()) {
+			while (Server.started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
 					sendToLeastBusySlave(currentJob);
