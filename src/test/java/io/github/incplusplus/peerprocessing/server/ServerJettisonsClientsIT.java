@@ -138,7 +138,6 @@ class ServerJettisonsClientsIT {
 		});
 		//Wait for all clients to have introduced themselves
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
-//		Server.stop();
 		properClientList.forEach(properClient -> {
 			try {
 				properClient.close();
@@ -147,7 +146,7 @@ class ServerJettisonsClientsIT {
 				e.printStackTrace();
 				assert false;
 			}
-			assertFalse(Server.isConnected(properClient.getConnectionId()));
 		});
+		properClientList.forEach(properClient -> assertFalse(Server.isConnected(properClient.getConnectionId())));
 	}
 }

@@ -34,6 +34,7 @@ public class Server {
 	final static UUID serverId = UUID.randomUUID();
 	final static String serverName = "Processing Server";
 	private static volatile AtomicBoolean started = new AtomicBoolean(false);
+	private static volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private static final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -138,6 +139,7 @@ public class Server {
 	
 	public static void stop() throws IOException {
 		started.compareAndSet(true, false);
+		shutdownInProgress.compareAndSet(false, true);
 		debug("Server shutting down.");
 		debug("Disconnecting clients.");
 		synchronized (clients) {
@@ -157,6 +159,11 @@ public class Server {
 			}
 		}
 		socket.close();
+		shutdownInProgress.compareAndSet(true, false);
+	}
+	
+	public static boolean shutdownInProgress() {
+		return shutdownInProgress.get();
 	}
 	
 	public static boolean started() {

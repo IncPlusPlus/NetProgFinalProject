@@ -144,6 +144,8 @@ class ClientsAbandonDyingServerIT {
 		//Wait for all clients to have introduced themselves
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
 		Server.stop();
+		//Wait until we're absolutely sure the server is shut down
+		while (Server.shutdownInProgress()) {}
 		properClientList.forEach(properClient -> assertTrue(properClient.isClosed()));
 		//might as well run this too
 		properClientList.forEach(properClient -> assertFalse(Server.isConnected(properClient.getConnectionId())));
