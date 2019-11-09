@@ -11,7 +11,7 @@ import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.ena
  * This class is purely a driver class for a single {@link Client}.
  * Run the main method here to create an instance of a Client
  * and interact with it through the console.
- * <b>
+ * <br>
  * The goal of this class is to make the {@link Client} class
  * as object-oriented as possible and avoid using its main method.
  * This also will help with making improving coverage easier.
