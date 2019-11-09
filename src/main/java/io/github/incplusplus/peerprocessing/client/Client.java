@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
-import org.javatuples.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
