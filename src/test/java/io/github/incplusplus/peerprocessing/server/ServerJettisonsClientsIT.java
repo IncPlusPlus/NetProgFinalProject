@@ -15,12 +15,7 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * This integration test ensures that when the server
- * sends the disconnect signal, the clients and slaves
- * properly disconnect from it.
- */
-class ClientsAbandonDyingServerIT {
+public class ServerJettisonsClientsIT {
 	private int serverPort;
 	
 	@BeforeEach
@@ -143,9 +138,16 @@ class ClientsAbandonDyingServerIT {
 		});
 		//Wait for all clients to have introduced themselves
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
-		Server.stop();
-		properClientList.forEach(properClient -> assertTrue(properClient.isClosed()));
-		//might as well run this too
-		properClientList.forEach(properClient -> assertFalse(Server.isConnected(properClient.getConnectionId())));
+//		Server.stop();
+		properClientList.forEach(properClient -> {
+			try {
+				properClient.close();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+				assert false;
+			}
+			assertFalse(Server.isConnected(properClient.getConnectionId()));
+		});
 	}
 }
