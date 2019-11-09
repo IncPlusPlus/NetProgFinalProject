@@ -243,7 +243,7 @@ public class Server {
 	 * @param uuid the UUID of the slave/client
 	 * @return whether or not the server is still connected to the slave or client of the specified UUID
 	 */
-	static boolean isConnected(UUID uuid) {
+	public static boolean isConnected(UUID uuid) {
 		return clients.containsKey(uuid) || slaves.containsKey(uuid);
 	}
 	
