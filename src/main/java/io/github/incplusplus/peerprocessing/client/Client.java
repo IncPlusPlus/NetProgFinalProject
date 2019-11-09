@@ -60,6 +60,10 @@ public class Client implements ProperClient, Personable {
 		return !running.get();
 	}
 	
+	public boolean isPolite() {
+		return polite.get();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */

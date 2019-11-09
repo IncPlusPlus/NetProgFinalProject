@@ -12,17 +12,23 @@ public interface ProperClient extends Closeable {
 	/**
 	 * Begin reading or writing as expected.
 	 */
-	void begin() throws IOException;
+	void begin();
 	
 	/**
-	 *
 	 * @return whether or not this client is still connected
 	 * to a server and running.
 	 */
 	boolean isClosed();
 	
 	/**
+	 * @return whether or not this client has introduced itself
+	 * or not.
+	 */
+	boolean isPolite();
+	
+	/**
 	 * Disconnect from the server. Calls {@link ProperClient#close()}
+	 *
 	 * @throws IOException if an I/O error occurs
 	 */
 	default void disconnect() throws IOException {
