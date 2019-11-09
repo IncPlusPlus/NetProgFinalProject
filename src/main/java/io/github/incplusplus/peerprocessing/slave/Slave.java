@@ -102,6 +102,8 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
+		boolean notAlreadyClosed = running.compareAndSet(true, false);
+		assert notAlreadyClosed;
 		outToServer.println(DISCONNECT);
 		kill();
 	}
@@ -110,8 +112,6 @@ public class Slave implements ProperClient, Personable {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
-		boolean notAlreadyClosed = running.compareAndSet(true, false);
-		assert notAlreadyClosed;
 	}
 	
 	private void dealWithServer() {

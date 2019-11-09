@@ -140,6 +140,8 @@ public class Client implements ProperClient, Personable {
 	 */
 	@Override
 	public void close() throws IOException {
+		boolean notAlreadyClosed = running.compareAndSet(true, false);
+		assert notAlreadyClosed;
 		outToServer.println(DISCONNECT);
 		kill();
 	}
@@ -148,8 +150,6 @@ public class Client implements ProperClient, Personable {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
-		boolean notAlreadyClosed = running.compareAndSet(true, false);
-		assert notAlreadyClosed;
 	}
 	
 	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) throws JsonProcessingException {
