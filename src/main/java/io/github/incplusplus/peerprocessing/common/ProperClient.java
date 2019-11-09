@@ -2,12 +2,14 @@ package io.github.incplusplus.peerprocessing.common;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.UUID;
 
 public interface ProperClient extends Closeable {
 	/**
 	 * Initialize any connections, readers, and writers necessary.
 	 * No exception will be thrown here. It is the user's responsibility
 	 * to ensure the boolean returned by this method call is true.
+	 *
 	 * @return whether or not initialization was successful.
 	 */
 	boolean init();
@@ -30,10 +32,14 @@ public interface ProperClient extends Closeable {
 	boolean isPolite();
 	
 	/**
-	 *
 	 * @param verbose whether to enable logging within this client
 	 */
 	void setVerbose(boolean verbose);
+	
+	/**
+	 * @return a UUID representing this clients connection to the server
+	 */
+	UUID getConnectionId();
 	
 	/**
 	 * Disconnect from the server. Calls {@link ProperClient#close()}

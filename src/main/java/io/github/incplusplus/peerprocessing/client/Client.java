@@ -63,6 +63,10 @@ public class Client implements ProperClient, Personable {
 			enable();
 	}
 	
+	public UUID getConnectionId() {
+		return uuid;
+	}
+	
 	public boolean isClosed() {
 		return !running.get();
 	}

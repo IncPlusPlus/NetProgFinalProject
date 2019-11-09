@@ -75,6 +75,10 @@ public class Slave implements ProperClient, Personable {
 		return polite.get();
 	}
 	
+	public UUID getConnectionId() {
+		return uuid;
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */
