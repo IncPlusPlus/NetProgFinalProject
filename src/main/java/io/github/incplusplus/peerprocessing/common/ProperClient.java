@@ -27,6 +27,12 @@ public interface ProperClient extends Closeable {
 	boolean isPolite();
 	
 	/**
+	 *
+	 * @param verbose whether to enable logging within this client
+	 */
+	void setVerbose(boolean verbose);
+	
+	/**
 	 * Disconnect from the server. Calls {@link ProperClient#close()}
 	 *
 	 * @throws IOException if an I/O error occurs
