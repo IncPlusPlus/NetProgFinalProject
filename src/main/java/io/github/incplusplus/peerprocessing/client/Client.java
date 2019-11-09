@@ -29,7 +29,7 @@ public class Client implements ProperClient, Personable {
 	/**
 	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
 	 */
-	private boolean usedWithConsole;
+	boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
@@ -40,15 +40,6 @@ public class Client implements ProperClient, Personable {
 	/** Whether or not this client has introduced itself */
 	private AtomicBoolean polite = new AtomicBoolean();
 	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
-	
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Client mainClient = new Client(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainClient.usedWithConsole = true;
-		mainClient.init();
-		mainClient.begin();
-	}
 	
 	public Client(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
