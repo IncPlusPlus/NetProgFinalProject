@@ -60,6 +60,10 @@ public class Slave implements ProperClient, Personable {
 			enable();
 	}
 	
+	public boolean isClosed() {
+		return !running.get();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */

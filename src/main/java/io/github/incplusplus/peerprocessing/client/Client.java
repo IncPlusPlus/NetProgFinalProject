@@ -56,6 +56,10 @@ public class Client implements ProperClient, Personable {
 			enable();
 	}
 	
+	public boolean isClosed() {
+		return !running.get();
+	}
+	
 	/**
 	 * Begin reading or writing as expected.
 	 */
