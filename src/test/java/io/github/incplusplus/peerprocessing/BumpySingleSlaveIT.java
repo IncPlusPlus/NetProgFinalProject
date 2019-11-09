@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing.integration.client;
+package io.github.incplusplus.peerprocessing;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.server.Server;
@@ -14,14 +14,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import static io.github.incplusplus.peerprocessing.integration.client.ClientIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests in this class are "jerky" because they involve the server
+ * Tests in this class are "bumpy" because they involve the server
  * starting up and shutting down between tests.
  */
-class JerkyClientIT {
+class BumpySingleSlaveIT {
 	private int serverPort;
 	
 	@BeforeEach
