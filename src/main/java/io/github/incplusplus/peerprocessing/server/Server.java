@@ -156,7 +156,6 @@ public class Server {
 			}
 		}
 		socket.close();
-		socket = null;
 	}
 	
 	public static boolean started() {
