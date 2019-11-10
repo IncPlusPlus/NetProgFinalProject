@@ -19,7 +19,6 @@ public class ServerRunner {
 		int port = myServer.start(0,true);
 		if (serverName != null)
 			info("Server name: " + serverName);
-//		start(port);
 		info("Server started on " + getIp() + ":" + port + ".");
 		info("Hit enter to stop the server.");
 		/*

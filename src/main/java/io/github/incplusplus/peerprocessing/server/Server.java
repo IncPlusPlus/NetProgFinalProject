@@ -40,6 +40,7 @@ public class Server {
 	private static long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 	//mostly unused
 	final UUID serverId = UUID.randomUUID();
+	//server naming is a low priority at the moment
 	final static String serverName = "Processing Server";
 	private volatile AtomicBoolean started = new AtomicBoolean(false);
 	private volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
