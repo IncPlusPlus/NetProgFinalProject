@@ -11,4 +11,4 @@ chore:
 bug:
   head: ["bugfix/*", "fix/*", "hotfix/*"]
 🛠 Improvement:
-  head: "improvement"
+  head: "improvement/*"
