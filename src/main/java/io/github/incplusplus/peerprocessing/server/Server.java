@@ -37,7 +37,7 @@ public class Server {
 	/**
 	 * The time to sleep in milliseconds when there are no slaves around to process requests
 	 */
-	private static long NO_SLAVES_SLEEP_TIME = 1000 * 30;
+	private static long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 	//mostly unused
 	final UUID serverId = UUID.randomUUID();
 	final static String serverName = "Processing Server";
@@ -292,7 +292,7 @@ public class Server {
 		while (slaves.size() < 1) {
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
 					"However, no slaves were available. Job queue thread sleeping " +
-					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " seconds...");
+					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " second(s)...");
 			Thread.sleep(NO_SLAVES_SLEEP_TIME);
 		}
 		/*
