@@ -51,7 +51,7 @@ If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Ma
     - sqrt(2209)
 
 ### API Usage
-
+ 
 The Java library portion of this project is in a very rough state and is merely for demo purposes so please don't use it to calculate rocket trajectories!
 
 To use this as a library in your own project, you may either add it by importing it using your build tool of choice by adding it from [JitPack](https://jitpack.io/#IncPlusPlus/NetProgFinalProject) or by downloading the JAR from the releases page and adding it to your classpath.
