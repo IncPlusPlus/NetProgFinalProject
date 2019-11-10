@@ -1,12 +1,18 @@
+# This file represents the default values when a customer has not filled them out
 coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  notify:
+    require_ci_to_pass: yes
+
   status:
-    patch:
-      default:
-        enabled: no
-    project:
-      unittests:
-        flags: unittests
-      integration:
-        flags: integration
-ignore:
-  - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
+    project: yes
+
+    patch: no
+
+    changes: yes
+
+comment:
+  layout: "header, diff, changes"
+  behavior: default
