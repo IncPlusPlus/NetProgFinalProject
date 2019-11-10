@@ -1,5 +1,8 @@
 coverage:
   status:
-    project: false
+    project:
+      default: false
+      client:
+        paths: "src/main/java/io/github/incplusplus/peerprocessing/client/"
 ignore:
   - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
