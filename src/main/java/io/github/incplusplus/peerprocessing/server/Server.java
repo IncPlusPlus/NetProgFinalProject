@@ -329,6 +329,19 @@ public class Server {
 	private static void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
 			debug("Starting job ingestion thread. (Server.started() = "+Server.started()+")");
+			synchronized (jobsAwaitingProcessing) {
+				if(!jobsAwaitingProcessing.isEmpty()) {
+					debug("Job queue was not empty on startup. Popping all elements...");
+					while(!jobsAwaitingProcessing.isEmpty()) {
+						try{
+							debug("Popped " + jobsAwaitingProcessing.pop());
+						}
+						catch (NoSuchElementException e) {
+							debug("Finished popping from the queue.");
+						}
+					}
+				}
+			}
 			while (Server.started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
