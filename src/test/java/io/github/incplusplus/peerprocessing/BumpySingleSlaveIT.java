@@ -23,16 +23,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class BumpySingleSlaveIT {
 	private int serverPort;
+	private Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
-		while (!Server.started()) {}
+		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		while (!server.started()) {}
 	}
 	
 	@AfterEach
 	void tearDown() throws IOException {
-		Server.stop();
+		server.stop();
 	}
 	
 	@ParameterizedTest

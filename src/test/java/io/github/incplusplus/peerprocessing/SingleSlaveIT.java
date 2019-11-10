@@ -20,16 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SingleSlaveIT {
 	public static boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;
+	private static Server server = new Server();
 	
 	@BeforeAll
 	static void setUp() throws IOException {
-		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
-		while (!Server.started()) {}
+		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		while (!server.started()) {}
 	}
 	
 	@AfterAll
 	static void tearDown() throws IOException {
-		Server.stop();
+		server.stop();
 	}
 	
 	@ParameterizedTest

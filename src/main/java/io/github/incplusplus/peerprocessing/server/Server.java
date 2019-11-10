@@ -34,17 +34,16 @@ import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiat
 //TODO Make this class less static. Allow server instances.
 public class Server {
 	private static final String poisonPillString = "Time to wake up, Neo.";
-	private static ServerSocket socket;
+	private ServerSocket socket;
 	/**
 	 * The time to sleep in milliseconds when there are no slaves around to process requests
 	 */
 	private static long NO_SLAVES_SLEEP_TIME = 1000 * 30;
-	private final static int port = 1234;
 	//mostly unused
 	final static UUID serverId = UUID.randomUUID();
 	final static String serverName = "Processing Server";
-	private static volatile AtomicBoolean started = new AtomicBoolean(false);
-	private static volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+	private volatile AtomicBoolean started = new AtomicBoolean(false);
+	private volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -52,8 +51,8 @@ public class Server {
 	 * Elements of this list exist while an incoming connection is established and are removed
 	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
-	private static final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
-	private static final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<UUID, Query>();
+	private final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
+	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<UUID, Query>();
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
 	 */
@@ -150,11 +149,11 @@ public class Server {
 		shutdownInProgress.compareAndSet(true, false);
 	}
 	
-	public static boolean shutdownInProgress() {
+	public boolean shutdownInProgress() {
 		return shutdownInProgress.get();
 	}
 	
-	public static boolean started() {
+	public boolean started() {
 		return started.get();
 	}
 	
@@ -270,7 +269,7 @@ public class Server {
 	 *
 	 * @param queryId the id of the query to remove
 	 */
-	static Query removeJob(UUID queryId) {
+	Query removeJob(UUID queryId) {
 		Query removedJob = queries.remove(queryId);
 		boolean sanity = removedJob.getQueryState().equals(WAITING_ON_SLAVE);
 		assert sanity;
@@ -314,7 +313,7 @@ public class Server {
 	
 	private void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
-			debug("Starting job ingestion thread. (Server.started() = "+Server.started()+")");
+			debug("Starting job ingestion thread. (Server.started() = "+started()+")");
 			synchronized (jobsAwaitingProcessing) {
 				if(!jobsAwaitingProcessing.isEmpty()) {
 					debug("Job queue was not empty on startup. Popping all elements...");
@@ -328,7 +327,7 @@ public class Server {
 					}
 				}
 			}
-			while (Server.started()) {
+			while (started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
 					if (currentJob.getQueryString().equals(
