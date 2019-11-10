@@ -1,3 +1,9 @@
 coverage:
   status:
-    project: false
+    project:
+      unittests:
+        flags: unittests
+      integration:
+        flags: integration
+ignore:
+  - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
