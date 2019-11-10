@@ -2,9 +2,7 @@ coverage:
   status:
     project:
       default: false
-    unittests:
-      flags: unittests
-    integration:
-      flags: integration
+      client:
+        paths: "src/main/java/io/github/incplusplus/peerprocessing/client/"
 ignore:
   - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
