@@ -8,3 +8,5 @@ ignore-master-sync:
   base: "master"
 chore:
   head: ["chore/*", "maintenance/*"]
+🛠 Improvement:
+  head: "improvement"
