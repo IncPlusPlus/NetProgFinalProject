@@ -31,7 +31,6 @@ import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_
 import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
 import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
 
-//TODO Make this class less static. Allow server instances.
 public class Server {
 	private static final String poisonPillString = "Time to wake up, Neo.";
 	private ServerSocket socket;
