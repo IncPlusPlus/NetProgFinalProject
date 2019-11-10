@@ -1,12 +1,12 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.common.MathQuery;
-import io.github.incplusplus.peerprocessing.common.Query;
-import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
-import io.github.incplusplus.peerprocessing.common.MemberType;
+import io.github.incplusplus.peerprocessing.common.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -17,11 +17,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
+import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
+import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.server.ConnectionState.CONNECTING;
+import static io.github.incplusplus.peerprocessing.server.ConnectionState.INVALID;
 import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_CLIENT;
 import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
+import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
 
 //TODO Make this class less static. Allow server instances.
 public class Server {
@@ -37,8 +45,8 @@ public class Server {
 	final static String serverName = "Processing Server";
 	private static volatile AtomicBoolean started = new AtomicBoolean(false);
 	private static volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
-	private static final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
-	private static final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
+	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
+	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
 	 * Should probably be replaced with {@link Executors#newCachedThreadPool()} at some point.
 	 * Elements of this list exist while an incoming connection is established and are removed
@@ -49,34 +57,12 @@ public class Server {
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
 	 */
-	private static final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
-	
-	public static void main(String[] args) throws IOException, InterruptedException {
-		Scanner in = new Scanner(System.in);
-		//Set up my custom logging implementation
-		StupidSimpleLogger.enable();
-		if (serverName != null)
-			info("Server name: " + serverName);
-		start(port);
-		info("Server started on " + getIp() + ":" + port + ".");
-		info("Hit enter to stop the server.");
-		/*
-		 * Wait for newline from user.
-		 * This call will block the main thread
-		 * until the user hits enter in the console.
-		 * This is because the server runs on a daemon thread.
-		 * This feels like a cleaner way than having a while(true){}
-		 * on the main thread.
-		 */
-		in.nextLine();
-		stop();
-		debug("Server stopped.");
-	}
+	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
 	
 	/**
 	 * See {@link #start(int)}
 	 */
-	public static int start(int serverPort, boolean verbose) throws IOException {
+	public int start(int serverPort, boolean verbose) throws IOException {
 		if (verbose)
 			StupidSimpleLogger.enable();
 		return start(serverPort);
@@ -90,7 +76,7 @@ public class Server {
 	 *                   whatever port is available.
 	 * @return the port the server started listening on
 	 */
-	public static int start(int serverPort) throws IOException {
+	public int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
 			private ServerSocket serverSocket;
 			
@@ -138,7 +124,7 @@ public class Server {
 		return socket.getLocalPort();
 	}
 	
-	public static void stop() throws IOException {
+	public void stop() throws IOException {
 		started.compareAndSet(true, false);
 		shutdownInProgress.compareAndSet(false, true);
 		debug("Server shutting down.");
@@ -179,7 +165,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to register.
 	 */
-	static void register(ConnectionHandler connectionHandler) {
+	void register(ConnectionHandler connectionHandler) {
 		connectionHandlers.add(connectionHandler);
 	}
 	
@@ -189,7 +175,7 @@ public class Server {
 	 *
 	 * @param connectedEntity an entity to keep track of
 	 */
-	static void register(ConnectedEntity connectedEntity) {
+	void register(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
 			SlaveObj shouldBeNull = null;
 			//Put this slave in the slaves map
@@ -222,7 +208,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to remove
 	 */
-	static void deRegister(ConnectionHandler connectionHandler) {
+	void deRegister(ConnectionHandler connectionHandler) {
 		connectionHandlers.remove(connectionHandler);
 	}
 	
@@ -233,7 +219,7 @@ public class Server {
 	 *
 	 * @param connectedEntity the entity to remove
 	 */
-	static void deRegister(ConnectedEntity connectedEntity) {
+	void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
 			//TODO add responsibility reassignment if the slave held jobs
 			slaves.remove(connectedEntity.getConnectionUUID());
@@ -252,7 +238,7 @@ public class Server {
 	 * @param uuid the UUID of the slave/client
 	 * @return whether or not the server is still connected to the slave or client of the specified UUID
 	 */
-	static boolean isConnected(UUID uuid) {
+	boolean isConnected(UUID uuid) {
 		return clients.containsKey(uuid) || slaves.containsKey(uuid);
 	}
 	
@@ -266,7 +252,7 @@ public class Server {
 	 *
 	 * @param query the query to be processed
 	 */
-	static void submitJob(Query query) {
+	void submitJob(Query query) {
 		Query shouldBeNull = null;
 		//Put this slave in the slaves map
 		shouldBeNull = queries.put(query.getQueryId(), query);
@@ -292,7 +278,7 @@ public class Server {
 		return removedJob;
 	}
 	
-	static void relayToAppropriateClient(Query query) throws JsonProcessingException {
+	void relayToAppropriateClient(Query query) throws JsonProcessingException {
 		ClientObj requestSource = clients.get(query.getRequestingClientUUID());
 		if (requestSource == null) {
 			error("Tried to tell client " + query.getRequestingClientUUID() + " that " +
@@ -304,7 +290,7 @@ public class Server {
 		}
 	}
 	
-	private static void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
+	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
 					"However, no slaves were available. Job queue thread sleeping " +
@@ -322,11 +308,11 @@ public class Server {
 		designatedSlave.accept(job);
 	}
 	
-	private static void poisonJobIngestionThread() {
+	private void poisonJobIngestionThread() {
 		jobsAwaitingProcessing.add(new MathQuery(poisonPillString, null));
 	}
 	
-	private static void startJobIngestionThread() {
+	private void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
 			debug("Starting job ingestion thread. (Server.started() = "+Server.started()+")");
 			synchronized (jobsAwaitingProcessing) {
@@ -360,5 +346,212 @@ public class Server {
 		ingestionThread.setName("Job Ingestion Thread");
 		ingestionThread.setDaemon(true);
 		ingestionThread.start();
+	}
+	
+	public class ClientObj extends ConnectedEntity {
+		public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+		
+		/**
+		 * When an object implementing interface <code>Runnable</code> is used
+		 * to create a thread, starting the thread causes the object's
+		 * <code>run</code> method to be called in that separately executing
+		 * thread.
+		 * <p>
+		 * The general contract of the method <code>run</code> is that it may
+		 * take any action whatsoever.
+		 *
+		 * @see Thread#run()
+		 */
+		@Override
+		public void run() {
+			String lineFromClient;
+			while (!getSocket().isClosed()) {
+				try {
+					lineFromClient = getInFromClient().readLine();
+					Header header = getHeader(lineFromClient);
+					if (header.equals(QUERY)) {
+						solve(SHARED_MAPPER.readValue(decode(lineFromClient), Query.class));
+					}
+					else if (header.equals(IDENTIFY)) {
+						getOutToClient().println(
+								msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
+					}
+					else if (header.equals(DISCONNECT)) {
+						deRegister(this);
+						//the client already is ending their connection.
+						//we don't want to write back
+						kill();
+						break;
+					}
+				}
+				catch (SocketException e) {
+					debug("Client " + getConnectionUUID() + " disconnected.");
+					deRegister(this);
+					try {
+						getSocket().close();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+				catch (IOException e) {
+					printStackTrace(e);
+				}
+				finally {
+				
+				}
+			}
+		}
+		
+		void acceptCompleted(Query query) throws JsonProcessingException {
+			getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
+		}
+		
+		private void solve(Query query) {
+			debug("Got query " + query.getQueryId() + " from client " + getConnectionUUID());
+			query.setRequestingClientUUID(getConnectionUUID());
+			submitJob(query);
+		}
+	}
+	
+	public class SlaveObj extends ConnectedEntity {
+		private List<UUID> jobsResponsibleFor = new ArrayList<>();
+		
+		public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+		
+		/**
+		 * When an object implementing interface <code>Runnable</code> is used
+		 * to create a thread, starting the thread causes the object's
+		 * <code>run</code> method to be called in that separately executing
+		 * thread.
+		 * <p>
+		 * The general contract of the method <code>run</code> is that it may
+		 * take any action whatsoever.
+		 *
+		 * @see Thread#run()
+		 */
+		@Override
+		public void run() {
+			String lineFromSlave;
+			while (!getSocket().isClosed()) {
+				try {
+					lineFromSlave = getInFromClient().readLine();
+					Header header = getHeader(lineFromSlave);
+					if (header.equals(RESULT)) {
+						Query completedQuery = SHARED_MAPPER.readValue(decode(lineFromSlave), Query.class);
+						Query storedQuery = removeJob(completedQuery.getQueryId());
+						//We keep the originally created query object and only take what we need from the
+						//slave's data. This is to prevent possibly malicious slaves from compromising
+						//our good and pure clients who can do nothing wrong.
+						storedQuery.setQueryState(QueryState.COMPLETE);
+						storedQuery.setReasonIncomplete(completedQuery.getReasonIncomplete());
+						storedQuery.setResult(completedQuery.getResult());
+						storedQuery.setCompleted(true);
+						relayToAppropriateClient(storedQuery);
+						jobsResponsibleFor.remove(storedQuery.getQueryId());
+					}
+					else if (header.equals(IDENTIFY)) {
+						getOutToClient().println(
+								msg(SHARED_MAPPER.writeValueAsString(provideIntroductionFromServer()), IDENTITY));
+					}
+					else if (header.equals(DISCONNECT)) {
+						deRegister(this);
+						//the client already is ending their connection.
+						//we don't want to write back
+						kill();
+						break;
+					}
+				}
+				catch (SocketException e) {
+					debug("Slave " + getConnectionUUID() + " disconnected.");
+					deRegister(this);
+					try {
+						getSocket().close();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+				catch (IOException e) {
+					printStackTrace(e);
+				}
+			}
+		}
+		
+		/**
+		 * Send a query to this slave for processing.
+		 *
+		 * @param query the query to send
+		 * @throws JsonProcessingException if something goes horribly wrong
+		 */
+		void accept(Query query) throws JsonProcessingException {
+			query.setQueryState(WAITING_ON_SLAVE);
+			jobsResponsibleFor.add(query.getQueryId());
+			debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
+			getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
+		}
+		
+		/**
+		 * @return the list of UUIDs representing jobs that this slave is currently
+		 * responsible for. Useful for recovering a job if a slave suddenly disconnects.
+		 */
+		public List<UUID> getJobsResponsibleFor() {
+			return jobsResponsibleFor;
+		}
+	}
+	
+	public class ConnectionHandler implements Runnable {
+		private volatile PrintWriter outToClient;
+		private volatile BufferedReader inFromClient;
+		private Socket socket;
+		private UUID connectionUUID;
+		private volatile ConnectionState connectionState;
+		
+		public ConnectionHandler(Socket incomingConnection) throws IOException {
+			if (incomingConnection == null || incomingConnection.isClosed())
+				throw new IllegalArgumentException("An incoming connection was established" +
+						"but was then immediately dropped.");
+			debug("New connection at " + incomingConnection.getLocalAddress().getHostAddress() + ":" + incomingConnection.getLocalPort());
+			this.connectionUUID = UUID.randomUUID();
+			this.connectionState = CONNECTING;
+			this.socket = incomingConnection;
+			this.inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			this.outToClient = new PrintWriter(socket.getOutputStream(), true);
+		}
+		
+		public void run() {
+			try {
+				Introduction clientIntroduction = SHARED_MAPPER.readValue(
+						negotiate(IDENTIFY, IDENTITY, outToClient, inFromClient), Introduction.class);
+				if (clientIntroduction.getSenderType().equals(MemberType.CLIENT)) {
+					ClientObj client = new ClientObj(outToClient, inFromClient, socket, connectionUUID);
+					Thread clientThread = new Thread(client);
+					clientThread.setDaemon(true);
+					clientThread.setName("Client at " + socket.getLocalAddress().getHostAddress());
+					clientThread.start();
+					debug("Registering new client");
+					register(client);
+				}
+				else if (clientIntroduction.getSenderType().equals(MemberType.SLAVE)) {
+					SlaveObj slave = new SlaveObj(outToClient, inFromClient, socket, connectionUUID);
+					Thread clientThread = new Thread(slave);
+					clientThread.setDaemon(true);
+					clientThread.setName("Slave at " + socket.getLocalAddress().getHostAddress());
+					clientThread.start();
+					debug("Registering new slave");
+					register(slave);
+				}
+				this.connectionState = INVALID;
+			}
+			catch (IOException e) {
+				printStackTrace(e);
+			}
+			finally {
+				//Remove this ConnectionHandler from the connectionHandlers list
+				deRegister(this);
+			}
+		}
 	}
 }
