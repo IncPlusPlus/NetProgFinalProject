@@ -101,7 +101,6 @@ public class Server {
 			public void run() {
 				try {
 					started.compareAndSet(false, true);
-					
 					startJobIngestionThread();
 					while (started.get()) {
 						try {
@@ -329,6 +328,7 @@ public class Server {
 	
 	private static void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
+			debug("Starting job ingestion thread. (Server.started() = "+Server.started()+")");
 			while (Server.started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
