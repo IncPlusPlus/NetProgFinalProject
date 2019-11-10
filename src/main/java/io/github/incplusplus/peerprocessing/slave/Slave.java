@@ -162,7 +162,7 @@ public class Slave implements ProperClient, Personable {
 					}
 				}
 				catch (NullPointerException e) {
-					if (!running.get()) {
+					if (running.get()) {
 						printStackTrace(e);
 					}
 				}
