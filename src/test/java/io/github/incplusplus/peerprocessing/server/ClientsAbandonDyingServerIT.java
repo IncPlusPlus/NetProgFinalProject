@@ -146,7 +146,23 @@ class ClientsAbandonDyingServerIT {
 		Server.stop();
 		//Wait until we're absolutely sure the server is shut down
 		while (Server.shutdownInProgress()) {}
-		properClientList.forEach(properClient -> assertTrue(properClient.isClosed()));
+		properClientList.forEach(properClient -> {
+			//there was previously a much more elegant way but some
+			//clients were still reading the disconnect line from the server
+			//and caused this integration test to fail
+			if (!properClient.isClosed()) {
+				try {
+					System.out.println("Waiting 50ms for " + properClient + " to close.");
+					Thread.sleep(50);
+					if (properClient.isClosed())
+						System.out.println("Success!!");
+				}
+				catch (InterruptedException e) {
+					throw new IllegalStateException("Got interrupted while generously sleeping on a client.", e);
+				}
+			}
+			assertTrue(properClient.isClosed());
+		});
 		//might as well run this too
 		properClientList.forEach(properClient -> assertFalse(Server.isConnected(properClient.getConnectionId())));
 	}
