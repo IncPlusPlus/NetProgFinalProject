@@ -1,3 +1,5 @@
 coverage:
   status:
     project: false
+ignore:
+  - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
