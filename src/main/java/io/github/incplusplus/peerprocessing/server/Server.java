@@ -1,6 +1,7 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.github.incplusplus.peerprocessing.common.MathQuery;
 import io.github.incplusplus.peerprocessing.common.Query;
 import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.common.MemberType;
@@ -24,6 +25,7 @@ import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_
 
 //TODO Make this class less static. Allow server instances.
 public class Server {
+	private static final String poisonPillString = "Time to wake up, Neo.";
 	private static ServerSocket socket;
 	/**
 	 * The time to sleep in milliseconds when there are no slaves around to process requests
@@ -159,6 +161,7 @@ public class Server {
 			}
 		}
 		socket.close();
+		poisonJobIngestionThread();
 		shutdownInProgress.compareAndSet(true, false);
 	}
 	
@@ -320,11 +323,20 @@ public class Server {
 		designatedSlave.accept(job);
 	}
 	
+	private static void poisonJobIngestionThread() {
+		jobsAwaitingProcessing.add(new MathQuery(poisonPillString, null));
+	}
+	
 	private static void startJobIngestionThread() {
 		Thread ingestionThread = new Thread(() -> {
 			while (Server.started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
+					if (currentJob.getQueryString().equals(
+							poisonPillString) && currentJob.getRequestingClientUUID() == null) {
+						debug("Job ingestion thread ate a poison pill and is shutting down.");
+						break;
+					}
 					sendToLeastBusySlave(currentJob);
 				}
 				catch (InterruptedException | JsonProcessingException e) {
