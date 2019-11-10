@@ -351,6 +351,11 @@ public class Server {
 		public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 		                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 		
+		@Override
+		UUID getServerId() {
+			return serverId;
+		}
+		
 		/**
 		 * When an object implementing interface <code>Runnable</code> is used
 		 * to create a thread, starting the thread causes the object's
@@ -419,6 +424,11 @@ public class Server {
 		
 		public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 		                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+		
+		@Override
+		UUID getServerId() {
+			return serverId;
+		}
 		
 		/**
 		 * When an object implementing interface <code>Runnable</code> is used

@@ -52,12 +52,14 @@ public abstract class ConnectedEntity implements Runnable {
 	
 	Introduction provideIntroductionFromServer() {
 		Introduction introduction = new Introduction();
-		introduction.setSenderId(Server.serverId);
+		introduction.setSenderId(this.getServerId());
 		introduction.setReceiverId(getConnectionUUID());
 		introduction.setSenderName(Server.serverName);
 		introduction.setSenderType(MemberType.SERVER);
 		return introduction;
 	}
+	
+	abstract UUID getServerId();
 	
 	void disconnect() throws IOException {
 		getOutToClient().println(DISCONNECT);
