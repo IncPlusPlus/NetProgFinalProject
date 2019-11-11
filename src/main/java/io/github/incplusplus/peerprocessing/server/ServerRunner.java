@@ -1,13 +1,13 @@
 package io.github.incplusplus.peerprocessing.server;
 
-import io.github.incplusplus.peerprocessing.common.StupidSimpleLogger;
+import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
 
 import java.io.IOException;
 import java.util.Scanner;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.info;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
 import static io.github.incplusplus.peerprocessing.server.Server.serverName;
 
 public class ServerRunner {
