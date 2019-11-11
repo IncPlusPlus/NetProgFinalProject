@@ -1,11 +1,18 @@
 coverage:
-  ignore:
-    - "**/StupidSimpleLogger.java"
-    - "**/ClientRunner.java"
-    - "**/ServerRunner.java"
   status:
     project:
       unittests:
         flags: unittests
       integration:
         flags: integration
+flags:
+  unittests:
+    paths:
+      - !*/StupidSimpleLogger.java
+      - !*/ClientRunner.java
+      - !*/ServerRunner.java
+  integration:
+    paths:
+      - !*/StupidSimpleLogger.java
+      - !*/ClientRunner.java
+      - !*/ServerRunner.java
