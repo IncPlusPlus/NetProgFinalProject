@@ -8,11 +8,11 @@ coverage:
 flags:
   unittests:
     paths:
-      - !*/StupidSimpleLogger.java
-      - !*/ClientRunner.java
-      - !*/ServerRunner.java
+      - "!*/StupidSimpleLogger.java"
+      - "!*/ClientRunner.java"
+      - "!*/ServerRunner.java"
   integration:
     paths:
-      - !*/StupidSimpleLogger.java
-      - !*/ClientRunner.java
-      - !*/ServerRunner.java
+      - "!*/StupidSimpleLogger.java"
+      - "!*/ClientRunner.java"
+      - "!*/ServerRunner.java"
