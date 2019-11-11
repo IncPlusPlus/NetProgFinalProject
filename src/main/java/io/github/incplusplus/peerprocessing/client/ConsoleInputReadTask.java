@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
 
 /**
  * Modified version of solution at <a href="https://stackoverflow.com/a/4983156/1687436">Stack Overflow</a>

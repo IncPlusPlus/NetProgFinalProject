@@ -2,6 +2,7 @@ package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.server.ConnectionState.CONNECTING;
 import static io.github.incplusplus.peerprocessing.server.ConnectionState.INVALID;

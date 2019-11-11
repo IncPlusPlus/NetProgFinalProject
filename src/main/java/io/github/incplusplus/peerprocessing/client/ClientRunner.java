@@ -5,7 +5,7 @@ import org.javatuples.Pair;
 import java.io.IOException;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
-import static io.github.incplusplus.peerprocessing.common.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
 
 /**
  * This class is purely a driver class for a single {@link Client}.
