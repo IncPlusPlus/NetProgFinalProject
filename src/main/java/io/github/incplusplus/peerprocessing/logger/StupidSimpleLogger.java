@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing.common;
+package io.github.incplusplus.peerprocessing.logger;
 
 import com.diogonunes.jcdp.color.ColoredPrinter;
 import com.diogonunes.jcdp.color.api.Ansi;
