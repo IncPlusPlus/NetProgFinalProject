@@ -27,10 +27,6 @@ import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNEC
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
-	/**
-	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
-	 */
-	//	boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
