@@ -1,9 +1,2 @@
-coverage:
-  status:
-    project:
-      unittests:
-        flags: unittests
-      integration:
-        flags: integration
 ignore:
   - "**/*StupidSimpleLogger.java"
