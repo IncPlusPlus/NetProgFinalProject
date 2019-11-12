@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
-import static io.github.incplusplus.peerprocessing.client.ConsoleUtils.printSolution;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 
@@ -24,7 +26,6 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
  * This also will help with making improving coverage easier.
  */
 public final class ClientRunner {
-	private static List<FutureTask<BigDecimal>> queries = Collections.synchronizedList(new ArrayList<>());
 	private volatile static Client mainClient;
 	
 	public static void main(String[] args) throws IOException {
@@ -45,18 +46,20 @@ public final class ClientRunner {
 				"To exit, type /q and hit enter.\n");
 		String consoleLine;
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-			printEvalLine();
+		Scanner in = new Scanner(System.in);
+		printEvalLine();
 		while (!mainClient.isClosed()) {
 			try {
-				consoleLine = getConsoleLine(mainClient);
-				if (consoleLine == null) {
+				consoleLine = in.nextLine();
+				if (consoleLine.equalsIgnoreCase("/q")) {
+					mainClient.close();
 					break;
 				}
 				executor.submit(mainClient.evaluateExpression(consoleLine));
 				//Sleep for a hot second in case the answer comes in super fast
 				Thread.sleep(250);
 			}
-			catch (ExecutionException | InterruptedException | JsonProcessingException e) {
+			catch (InterruptedException | JsonProcessingException e) {
 				e.printStackTrace();
 			}
 		}
@@ -65,12 +68,5 @@ public final class ClientRunner {
 	
 	static void printEvalLine() {
 		infoNoLine("Evaluate: ");
-	}
-	
-	private static String getConsoleLine(Client dependentClient) throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		Future<String> future = executorService.submit(new ConsoleInputReadTask(dependentClient));
-		executorService.shutdown();
-		return future.get();
 	}
 }
