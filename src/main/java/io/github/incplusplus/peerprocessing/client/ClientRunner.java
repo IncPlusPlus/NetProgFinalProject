@@ -26,12 +26,11 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
  * This also will help with making improving coverage easier.
  */
 public final class ClientRunner {
-	private volatile static Client mainClient;
-	
 	public static void main(String[] args) throws IOException {
 		enable();
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		mainClient = new Client(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
+		Client mainClient = new Client(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
+		Scanner in = new Scanner(System.in);
 		mainClient.setVerbose(true);
 		info("Connecting...");
 		mainClient.init();
@@ -46,7 +45,6 @@ public final class ClientRunner {
 				"To exit, type /q and hit enter.\n");
 		String consoleLine;
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Scanner in = new Scanner(System.in);
 		printEvalLine();
 		while (!mainClient.isClosed()) {
 			try {
