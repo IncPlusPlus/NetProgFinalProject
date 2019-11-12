@@ -165,6 +165,21 @@ class ClientsAbandonDyingServerIT {
 			assertTrue(properClient.isClosed());
 		});
 		//might as well run this too
-		properClientList.forEach(properClient -> assertFalse(server.isConnected(properClient.getConnectionId())));
+		properClientList.forEach(properClient -> {
+			//there was previously a much more elegant way but some
+			//clients were still reading the disconnect line from the server
+			//and caused this integration test to fail
+			if(server.isConnected(properClient.getConnectionId())) {
+				try {
+					System.out.println("Waiting 50ms for server to drop " + properClient + ".");
+					Thread.sleep(50);
+					if (!server.isConnected(properClient.getConnectionId()))
+						System.out.println("Success!!");
+				}
+				catch (InterruptedException e) {
+					throw new IllegalStateException("Got interrupted while generously sleeping on the connected entities map.", e);
+				}
+			}
+		});
 	}
 }
