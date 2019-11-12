@@ -8,3 +8,4 @@ coverage:
 ignore:
   - "**/*StupidSimpleLogger.java"
   - "**/*Runner.java"
+  - "**/*InputReadTask.java"
