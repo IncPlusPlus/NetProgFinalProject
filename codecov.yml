@@ -5,5 +5,8 @@ coverage:
         flags: unittests
       integration:
         flags: integration
-  ignore:
-    - "src/main/java/io/github/incplusplus/peerprocessing/common/StupidSimpleLogger.java"
+ignore:
+  - "src/main/java/io/github/incplusplus/peerprocessing/logger/StupidSimpleLogger.java"
+  - "src/main/java/io/github/incplusplus/peerprocessing/client/ConsoleInputReadTask.java"
+  - "src/main/java/io/github/incplusplus/peerprocessing/client/ClientRunner.java."
+  - "src/main/java/io/github/incplusplus/peerprocessing/server/ServerRunner.java"

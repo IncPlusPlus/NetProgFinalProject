@@ -10,3 +10,5 @@ chore:
   head: ["chore/*", "maintenance/*"]
 bug:
   head: ["bugfix/*", "fix/*", "hotfix/*"]
+🛠 Improvement:
+  head: "improvement/*"

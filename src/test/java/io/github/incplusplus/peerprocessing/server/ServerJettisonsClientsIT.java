@@ -16,16 +16,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ServerJettisonsClientsIT {
 	private int serverPort;
+	private Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
-		while (!Server.started()) {}
+		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		while (!server.started()) {}
 	}
 	
 	@AfterEach
 	void tearDown() throws IOException {
-		Server.stop();
+		server.stop();
 	}
 	
 	@Test
@@ -150,11 +151,11 @@ class ServerJettisonsClientsIT {
 			//there was previously a much more elegant way but some
 			//clients were still reading the disconnect line from the server
 			//and caused this integration test to fail
-			if(Server.isConnected(properClient.getConnectionId())) {
+			if(server.isConnected(properClient.getConnectionId())) {
 				try {
 					System.out.println("Waiting 50ms for server to drop " + properClient + ".");
 					Thread.sleep(50);
-					if (!Server.isConnected(properClient.getConnectionId()))
+					if (!server.isConnected(properClient.getConnectionId()))
 						System.out.println("Success!!");
 				}
 				catch (InterruptedException e) {
