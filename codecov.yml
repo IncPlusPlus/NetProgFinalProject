@@ -5,3 +5,5 @@ coverage:
         flags: unittests
       integration:
         flags: integration
+ignore:
+  - "**/*Runner.java"
