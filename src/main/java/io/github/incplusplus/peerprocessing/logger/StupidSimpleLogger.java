@@ -39,7 +39,7 @@ public class StupidSimpleLogger {
 		if (enabled) {
 			synchronized (cp) {
 				cp.clear();
-				cp.println(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.GREEN);
+				cp.println(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 				cp.clear();
 			}
 		}
@@ -53,7 +53,7 @@ public class StupidSimpleLogger {
 			synchronized (cp) {
 				cp.clear();
 				//See https://github.com/dialex/JCDP/issues/21
-				cp.print("", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.GREEN);
+				cp.print("", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
 				System.out.print(message);
 				cp.clear();
 			}
