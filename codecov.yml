@@ -7,3 +7,4 @@ coverage:
         flags: integration
 ignore:
   - "**/*StupidSimpleLogger.java"
+  - "**/*Runner.java"
