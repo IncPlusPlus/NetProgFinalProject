@@ -10,7 +10,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	}
 	
 	BigDecimalMatrix() {
-		this.matrix = null;
+		this.matrix = new BigDecimal[0][0];
 	}
 	
 	@Override
