@@ -28,6 +28,7 @@ class BumpySingleSlaveIT {
 	@BeforeEach
 	void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	

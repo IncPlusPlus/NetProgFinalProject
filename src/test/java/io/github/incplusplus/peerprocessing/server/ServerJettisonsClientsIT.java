@@ -21,6 +21,7 @@ class ServerJettisonsClientsIT {
 	@BeforeEach
 	void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	
@@ -137,6 +138,7 @@ class ServerJettisonsClientsIT {
 			properClient.begin();
 		});
 		//Wait for all clients to have introduced themselves
+		//noinspection StatementWithEmptyBody
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
 		properClientList.forEach(properClient -> {
 			try {

@@ -27,6 +27,7 @@ class ClientsAbandonDyingServerIT {
 	@BeforeEach
 	void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	
@@ -143,9 +144,11 @@ class ClientsAbandonDyingServerIT {
 			properClient.begin();
 		});
 		//Wait for all clients to have introduced themselves
+		//noinspection StatementWithEmptyBody
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
 		server.stop();
 		//Wait until we're absolutely sure the server is shut down
+		//noinspection StatementWithEmptyBody
 		while (server.shutdownInProgress()) {}
 		properClientList.forEach(properClient -> {
 			//there was previously a much more elegant way but some

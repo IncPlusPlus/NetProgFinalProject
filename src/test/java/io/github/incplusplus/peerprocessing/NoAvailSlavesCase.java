@@ -33,6 +33,7 @@ public class NoAvailSlavesCase {
 	@BeforeAll
 	static void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody,StatementWithEmptyBody
 		while (!server.started()) {}
 		executor = Executors.newFixedThreadPool(20);
 	}
@@ -51,6 +52,7 @@ public class NoAvailSlavesCase {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.init();
 			myClient.begin();
+			//noinspection StatementWithEmptyBody
 			while (!myClient.isPolite()){}
 			task = myClient.evaluateExpression(input);
 			Future<?> nullFuture = executor.submit(task);
