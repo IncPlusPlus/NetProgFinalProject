@@ -37,14 +37,6 @@ public class Slave implements ProperClient, Personable {
 	private String name;
 	private volatile UUID uuid = UUID.randomUUID();
 	
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainSlave.init();
-		mainSlave.begin();
-	}
-	
 	public Slave(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
