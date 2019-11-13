@@ -71,44 +71,4 @@ public class ServerMethods {
 	                                          String actual) {
 		debug("Expected '" + properResponse + "' for demand '" + serverDemand + "' but got '" + actual + "' instead.");
 	}
-	
-//	/**
-//	 * Provides a new registration key that does not
-//	 * yet exist within the current group of clients.
-//	 *
-//	 * @param handlers the current handlers
-//	 * @return a unique int
-//	 * @throws IllegalStateException if there are too many handlers
-//	 *                               pending registration.
-//	 * @implNote Because this method recurses, it would be unwise to
-//	 * synchronize on the handlers parameter. Therefore YOU MUST
-//	 * RUN THIS METHOD IN A BLOCK SYNCHRONIZED ON handlers.
-//	 */
-//	static int getNewRegKey(List<Server.ConnectionHandler> handlers) {
-//		int possiblyUsableKey = randInt(1, 100);
-//		if (getHandlerForKey(handlers, possiblyUsableKey) == null) {
-//			return possiblyUsableKey;
-//		}
-//		else {
-//			return getNewRegKey(handlers);
-//		}
-//	}
-//
-//	/**
-//	 * Find a {@link io.github.incplusplus.chatroom.server.Server.ConnectionHandler} that
-//	 * contains the provided registration key.
-//	 *
-//	 * @param handlers the list of handlers
-//	 * @param key      a registration key
-//	 * @return a ConnectionHandler that contains the provided registration key; else null
-//	 * @implNote YOU MUST RUN THIS METHOD IN A BLOCK SYNCHRONIZED ON handlers.
-//	 */
-//	static Server.ConnectionHandler getHandlerForKey(List<Server.ConnectionHandler> handlers, int key) {
-//		return handlers.stream()
-//				//this should grab clients that still have a registration key
-//				.filter(clientHandler -> clientHandler.getClientState().equals(REGISTERED))
-//				//this grabs a client that has the same key as what was provided in this function
-//				.filter(clientHandler ->
-//						clientHandler.getClientRegistrationKey() == key).findAny().orElse(null);
-//	}
 }
