@@ -16,10 +16,12 @@ public class StupidSimpleLogger {
 		enabled = true;
 	}
 	
+	@SuppressWarnings("unused")
 	public static boolean isEnabled() {
 		return enabled;
 	}
 	
+	@SuppressWarnings("unused")
 	public static void disable() {
 		enabled = false;
 	}
