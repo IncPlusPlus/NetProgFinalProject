@@ -81,15 +81,6 @@ public class MiscUtils {
 	}
 	
 	/**
-	 * This is the same as {@link #decode(String)} except it
-	 * specifically expects the incoming header to be a {@link VariousEnums#MESSAGE}
-	 */
-	public static String decodeMessage(String receivedMessage) {
-		assert getHeader(receivedMessage).equals(MESSAGE);
-		return decode(receivedMessage);
-	}
-	
-	/**
 	 * Gets the header of a message which contains a header and a payload.
 	 *
 	 * @param fullPayload the message to get the header from
