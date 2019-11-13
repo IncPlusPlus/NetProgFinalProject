@@ -31,14 +31,14 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientOneSlave() throws IOException {
+	void oneClientOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort));
 	}
 	
 	@Test
-	void twoClientsOneSlave() throws IOException {
+	void twoClientsOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -46,7 +46,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientTwoSlaves() throws IOException {
+	void oneClientTwoSlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort),
@@ -54,7 +54,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void manyClientsOneSlave() throws IOException {
+	void manyClientsOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -75,7 +75,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientManySlaves() throws IOException {
+	void oneClientManySlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort),
@@ -96,7 +96,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void manyClientsManySlaves() throws IOException {
+	void manyClientsManySlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -130,7 +130,7 @@ class ServerJettisonsClientsIT {
 				new Slave("localhost", serverPort));
 	}
 	
-	void performActionsAndAssertions(ProperClient... properClients) throws IOException {
+	void performActionsAndAssertions(ProperClient... properClients) {
 		List<ProperClient> properClientList = asList(properClients);
 		properClientList.forEach(properClient -> {
 			properClient.setVerbose(VERBOSE_TEST_OUTPUT);
