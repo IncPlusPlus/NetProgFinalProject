@@ -17,6 +17,7 @@ public class ServerRunner {
 		StupidSimpleLogger.enable();
 		Server myServer = new Server();
 		int port = myServer.start(0,true);
+		//noinspection ConstantConditions because we may eventually use serverName
 		if (serverName != null)
 			info("Server name: " + serverName);
 		info("Server started on " + getIp() + ":" + port + ".");
