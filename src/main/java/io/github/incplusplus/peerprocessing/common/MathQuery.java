@@ -4,10 +4,6 @@ import java.util.UUID;
 
 public class MathQuery extends Query {
 	
-	public MathQuery() {
-		super();
-	}
-	
 	public MathQuery(String originalExpression, UUID requestingClientUUID) {
 		super();
 		setOriginalExpression(originalExpression);

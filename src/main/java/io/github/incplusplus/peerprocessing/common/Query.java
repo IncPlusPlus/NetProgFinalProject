@@ -18,6 +18,10 @@ public abstract class Query {
 	private String result;
 	private String queryString;
 	
+	Query() {
+		this.queryState = QueryState.WAITING_FOR_AVAILABLE_SLAVES;
+	}
+	
 	public QueryState getQueryState() {
 		return queryState;
 	}
@@ -53,6 +57,7 @@ public abstract class Query {
 	 * NOTE THAT THIS CAN MEAN THAT IT WAS COMPLETED EXCEPTIONALLY.
 	 * CHECK THAT {@link #getReasonIncomplete()} IS NULL BEFORE
 	 * ASSUMING SUCCESS!
+	 *
 	 * @return whether or not this request is complete
 	 */
 	public boolean isCompleted() {
