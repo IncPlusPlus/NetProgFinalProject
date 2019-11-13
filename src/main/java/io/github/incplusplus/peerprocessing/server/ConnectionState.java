@@ -33,5 +33,5 @@ public enum ConnectionState {
 	/**
 	 * They're gone!
 	 */
-	DISCONNECTED;
+	DISCONNECTED
 }

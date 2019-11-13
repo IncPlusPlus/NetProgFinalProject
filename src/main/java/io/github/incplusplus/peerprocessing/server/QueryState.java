@@ -25,5 +25,5 @@ public enum QueryState {
 	 * This Job has been completed and
 	 * the result sent back to the client.
 	 */
-	COMPLETE;
+	COMPLETE
 }
