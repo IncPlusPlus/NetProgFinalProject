@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.github.incplusplus.peerprocessing.client.ClientRunner.printEvalLine;
+import static io.github.incplusplus.peerprocessing.client.ConsoleUtils.printSolution;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.*;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
@@ -22,21 +24,21 @@ import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static java.util.Objects.isNull;
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
-	/**
-	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
-	 */
-	boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private String name;
 	private volatile UUID uuid;
+	private boolean printResults = false;
 	private AtomicBoolean running = new AtomicBoolean();
-	/** Whether or not this client has introduced itself */
+	/**
+	 * Whether or not this client has introduced itself
+	 */
 	private AtomicBoolean polite = new AtomicBoolean();
 	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
@@ -59,8 +61,10 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	public void setVerbose(boolean verbose) {
-		if (verbose)
+		if (verbose) {
 			enable();
+			printResults = true;
+		}
 	}
 	
 	public UUID getConnectionId() {
@@ -83,48 +87,6 @@ public class Client implements ProperClient, Personable {
 		boolean firstStart = running.compareAndSet(false, true);
 		assert firstStart;
 		dealWithServer();
-		if (usedWithConsole) {
-			info("\nIf you want to enter an expression, type it and hit enter.\n" +
-					"After you have entered your expression, it may take a moment for the server to respond.\n" +
-					"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-					"or you may attempt to enter a second expression while the first processes. \n" +
-					"This is not recommended " +
-					"as you may be interrupted by the first result while you type the second expression.\n" +
-					"To exit, type /q and hit enter.\n");
-			String consoleLine;
-			MathQuery mathQuery = null;
-			try {
-				//Sleep for 2 secs just to let the server
-				//identification process complete
-				//without making a mess of the console
-				Thread.sleep(2000);
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			while (running.get()) {
-				if (usedWithConsole)
-					printEvalLine();
-				try {
-					consoleLine = getConsoleLine();
-					if (consoleLine == null) {
-						break;
-					}
-					mathQuery = new MathQuery(consoleLine, uuid);
-					outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
-				}
-				catch (ExecutionException | InterruptedException | JsonProcessingException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	private String getConsoleLine() throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		Future<String> future = executorService.submit(new ConsoleInputReadTask(sock));
-		executorService.shutdown();
-		return future.get();
 	}
 	
 	/**
@@ -172,6 +134,9 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	private void dealWithServer() {
+		if (isNull(sock))
+			throw new IllegalStateException("Socket not initialized properly. " +
+					"Did you remember to check the boolean value of Client.begin()?!");
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
 			while (!sock.isClosed()) {
@@ -199,10 +164,7 @@ public class Client implements ProperClient, Personable {
 					}
 					else if (header.equals(RESULT)) {
 						Query result = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
-						if (usedWithConsole) {
-							printResult(result);
-						}
-						else if (futureQueries.containsKey(result.getQueryId())) {
+						if (futureQueries.containsKey(result.getQueryId())) {
 							Query futureQuery = futureQueries.get(result.getQueryId());
 							futureQuery.setQueryState(result.getQueryState());
 							futureQuery.setSolvingSlaveUUID(result.getSolvingSlaveUUID());
@@ -210,7 +172,13 @@ public class Client implements ProperClient, Personable {
 							futureQuery.setCompleted(result.isCompleted());
 							//The query has been solved and is ready to be grabbed by
 							//whatever FutureTask put it into futureQueries in the first place
-							printResult(futureQuery);
+							if (printResults) {
+								printResult(futureQuery);
+								printEvalLine();
+							}
+						}
+						else {
+							error("Client " + getConnectionId() + " got query " + result.getQueryId() + " but wasn't expecting it.");
 						}
 					}
 				}
@@ -254,30 +222,6 @@ public class Client implements ProperClient, Personable {
 		else {
 			throw new UnsupportedOperationException();
 		}
-	}
-	
-	private void printSolution(MathQuery query) {
-		assert query.isCompleted();
-		if (query.getReasonIncomplete() == null) {
-			//Make way for incoming message if the "Evaluate:" line is there
-			if (usedWithConsole)
-				System.out.println();
-			debug("The solution for the problem \"" + query.getQueryString() + "\" is: \"" + query.getResult() + "\"");
-		}
-		else {
-			//Make way for incoming message if the "Evaluate:" line is there
-			if (usedWithConsole)
-				System.out.println();
-			debug("The solution for the problem \"" + query.getQueryString() + "\" could not be found.");
-			debug("The reason for this is: " + query.getReasonIncomplete().toString());
-			debug("Stacktrace: \n" + Arrays.toString(query.getReasonIncomplete().getStackTrace()));
-		}
-		if (usedWithConsole)
-			printEvalLine();
-	}
-	
-	private void printEvalLine() {
-		infoNoLine("Evaluate: ");
 	}
 	
 	class ExpressionEvaluator implements Callable<BigDecimal> {

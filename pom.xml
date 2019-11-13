@@ -6,7 +6,7 @@
 
     <groupId>io.github.incplusplus</groupId>
     <artifactId>peer-processing</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -97,6 +97,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.4</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Logger.*</exclude>
+                        <exclude>**/*Runner.*</exclude>
+                        <exclude>**/*ConsoleUtils.*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>jacoco-initialize</id>

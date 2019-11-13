@@ -21,6 +21,7 @@ import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static java.util.Objects.isNull;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
@@ -35,14 +36,6 @@ public class Slave implements ProperClient, Personable {
 	private BufferedReader inFromServer;
 	private String name;
 	private volatile UUID uuid = UUID.randomUUID();
-	
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainSlave.init();
-		mainSlave.begin();
-	}
 	
 	public Slave(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
@@ -130,6 +123,9 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	private void dealWithServer() {
+		if (isNull(sock))
+			throw new IllegalStateException("Socket not initialized properly. " +
+					"Did you remember to check the boolean value of Slave.begin()?!");
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
 			while (!sock.isClosed()) {
