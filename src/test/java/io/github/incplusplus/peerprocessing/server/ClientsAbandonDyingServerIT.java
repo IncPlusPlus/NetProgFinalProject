@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class ClientsAbandonDyingServerIT {
 	private int serverPort;
-	private Server server = new Server();
+	private final Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {

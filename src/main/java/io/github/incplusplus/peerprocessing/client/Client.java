@@ -37,12 +37,12 @@ public class Client implements ProperClient, Personable {
 	private BufferedReader inFromServer;
 	private volatile UUID uuid;
 	private boolean printResults = false;
-	private AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running = new AtomicBoolean();
 	/**
 	 * Whether or not this client has introduced itself
 	 */
-	private AtomicBoolean polite = new AtomicBoolean();
-	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
+	private final AtomicBoolean polite = new AtomicBoolean();
+	private final ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public Client(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;

@@ -37,8 +37,8 @@ public class Server {
 	final UUID serverId = UUID.randomUUID();
 	//server naming is a low priority at the moment
 	final static String serverName = "Processing Server";
-	private volatile AtomicBoolean started = new AtomicBoolean(false);
-	private volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+	private final AtomicBoolean started = new AtomicBoolean(false);
+	private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -79,7 +79,7 @@ public class Server {
 	 */
 	public int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
-			private ServerSocket serverSocket;
+			private final ServerSocket serverSocket;
 			
 			ServerStartTask(ServerSocket socket) {
 				this.serverSocket = socket;
@@ -421,7 +421,7 @@ public class Server {
 	}
 	
 	public class SlaveObj extends ConnectedEntity {
-		private List<UUID> jobsResponsibleFor = new ArrayList<>();
+		private final List<UUID> jobsResponsibleFor = new ArrayList<>();
 		
 		public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 		                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}

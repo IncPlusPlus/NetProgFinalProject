@@ -18,9 +18,9 @@ import java.util.concurrent.FutureTask;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SingleSlaveIT {
-	public static boolean VERBOSE_TEST_OUTPUT = false;
+	public static final boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;
-	private static Server server = new Server();
+	private static final Server server = new Server();
 	
 	@BeforeAll
 	static void setUp() throws IOException {

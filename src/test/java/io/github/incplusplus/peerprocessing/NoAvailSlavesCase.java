@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 public class NoAvailSlavesCase {
 	private static int serverPort;
-	private static Server server = new Server();
-	private List<Future<?>> futureList = new ArrayList<>();
+	private static final Server server = new Server();
+	private final List<Future<?>> futureList = new ArrayList<>();
 	private static ExecutorService executor;
 	
 	@BeforeAll

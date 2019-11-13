@@ -28,11 +28,11 @@ public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
-	private AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running = new AtomicBoolean();
 	/**
 	 * Whether or not this client has introduced itself
 	 */
-	private AtomicBoolean polite = new AtomicBoolean();
+	private final AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private volatile UUID uuid = UUID.randomUUID();
