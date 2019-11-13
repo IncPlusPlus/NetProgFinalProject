@@ -12,10 +12,13 @@ import static java.util.Arrays.asList;
 public interface Header {
 	List<Class<? extends Enum>> members = asList(Demands.class, MemberType.class, Responses.class, VariousEnums.class);
 	
+	@SuppressWarnings("unchecked")
 	static Header valueOf(String name) {
 		Enum enumValue = null;
 		for (Class<? extends Enum> i : members) {
 			try {
+				/* Whines about unchecked invocation. I've checked. I know exactly what classes
+				 * I'm iterating over. */
 				enumValue = Enum.valueOf(i, name);
 			}
 			catch (IllegalArgumentException ignored) {

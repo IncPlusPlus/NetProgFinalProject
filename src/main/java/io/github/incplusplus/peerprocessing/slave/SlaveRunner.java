@@ -8,7 +8,7 @@ import java.util.Scanner;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
 
-public class SlaveRunner {
+class SlaveRunner {
 	public static void main(String[] args) throws IOException {
 		enable();
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();

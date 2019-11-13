@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class MathQuery extends Query {
 	
+	@SuppressWarnings("unused")
 	public MathQuery() {
 		super();
 	}
@@ -13,7 +14,7 @@ public class MathQuery extends Query {
 		setOriginalExpression(originalExpression);
 		setRequestingClientUUID(requestingClientUUID);
 	}
-	public void setOriginalExpression(String expression) {
+	private void setOriginalExpression(String expression) {
 		setQueryString(expression);
 	}
 	

@@ -3,7 +3,6 @@ package io.github.incplusplus.peerprocessing.slave;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
-import org.javatuples.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,30 +10,31 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.*;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static java.util.Objects.isNull;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
-	private AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running = new AtomicBoolean();
 	/**
 	 * Whether or not this client has introduced itself
 	 */
-	private AtomicBoolean polite = new AtomicBoolean();
+	private final AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private String name;
 	private volatile UUID uuid = UUID.randomUUID();
 	
 	public Slave(String serverHostname, int serverPort) {
@@ -89,7 +89,6 @@ public class Slave implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setSenderName(name);
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
@@ -138,13 +137,14 @@ public class Slave implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
 					}
 					else if (header.equals(QUERY)) {
-						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						Query query = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
 						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
 						sendEvaluatedQuery(evaluate(query));
 					}
@@ -152,9 +152,6 @@ public class Slave implements ProperClient, Personable {
 						debug("Told by server to disconnect. Disconnecting..");
 						disconnect();
 						debug("Disconnected.");
-					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 				}
 				catch (NullPointerException e) {

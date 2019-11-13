@@ -20,7 +20,7 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
  * as object-oriented as possible and avoid using its main method.
  * This also will help with making improving coverage easier.
  */
-public final class ClientRunner {
+final class ClientRunner {
 	public static void main(String[] args) throws IOException {
 		enable();
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
@@ -30,6 +30,7 @@ public final class ClientRunner {
 		info("Connecting...");
 		mainClient.init();
 		mainClient.begin();
+		//noinspection StatementWithEmptyBody
 		while (!mainClient.isPolite()) {}
 		info("\nIf you want to enter an expression, type it and hit enter.\n" +
 				"After you have entered your expression, it may take a moment for the server to respond.\n" +
