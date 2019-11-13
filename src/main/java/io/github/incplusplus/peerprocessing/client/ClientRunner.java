@@ -30,6 +30,7 @@ public final class ClientRunner {
 		info("Connecting...");
 		mainClient.init();
 		mainClient.begin();
+		//noinspection StatementWithEmptyBody
 		while (!mainClient.isPolite()) {}
 		info("\nIf you want to enter an expression, type it and hit enter.\n" +
 				"After you have entered your expression, it may take a moment for the server to respond.\n" +
