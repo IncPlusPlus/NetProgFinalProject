@@ -3,7 +3,6 @@ package io.github.incplusplus.peerprocessing.slave;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
-import org.javatuples.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,12 +15,13 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.*;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static java.util.Objects.isNull;
 
 public class Slave implements ProperClient, Personable {
