@@ -27,7 +27,27 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 */
 	public abstract RealMatrix<T> multiply(RealMatrix<T> other);
 	
+	/**
+	 * @param colIndex the index of the desired column
+	 * @return the column at the specified index
+	 */
 	public abstract T[] getCol(int colIndex);
 	
-	public abstract T[] getRow(int colIndex);
+	/**
+	 * @param rowIndex the index of the desired row
+	 * @return the row at the specified index
+	 */
+	public abstract T[] getRow(int rowIndex);
+	
+	/**
+	 * The fact that this is an instance method and not a static method
+	 * is a byproduct of the desire to keep the generic abstract in place.
+	 * It doesn't matter what RealMatrix instance you use this method on.
+	 * The only things that are relevant to this operation are the two parameters.
+	 *
+	 * @param rowVector    the row vector to dot with the column vector
+	 * @param columnVector the column vector to dot with the row vector
+	 * @return the dot product of the specified vectors
+	 */
+	public abstract T dot(T[] rowVector, T[] columnVector);
 }

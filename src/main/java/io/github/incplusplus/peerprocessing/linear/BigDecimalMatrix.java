@@ -46,6 +46,11 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	}
 	
 	@Override
+	public BigDecimal dot(BigDecimal[] rowVector, BigDecimal[] columnVector) {
+		return null;
+	}
+	
+	@Override
 	public int getNumRows() {
 		return matrix.length;
 	}
