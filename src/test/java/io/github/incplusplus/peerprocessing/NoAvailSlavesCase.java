@@ -33,7 +33,7 @@ public class NoAvailSlavesCase {
 	@BeforeAll
 	static void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
-		//noinspection StatementWithEmptyBody,StatementWithEmptyBody
+		// noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 		executor = Executors.newFixedThreadPool(20);
 	}
