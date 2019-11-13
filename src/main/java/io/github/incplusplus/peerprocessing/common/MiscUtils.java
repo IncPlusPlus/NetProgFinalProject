@@ -8,7 +8,6 @@ import java.net.*;
 import java.util.Scanner;
 import java.util.SplittableRandom;
 
-import static io.github.incplusplus.peerprocessing.common.VariousEnums.MESSAGE;
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
 import static org.javatuples.Pair.with;
 
@@ -36,19 +35,6 @@ public class MiscUtils {
 		String host = hostAndPortPair.getValue0();
 		int port = hostAndPortPair.getValue1();
 		return Triplet.with(host, port, new Socket(host, port));
-	}
-	
-	/**
-	 * Prefixes the provided string such that it begins with
-	 * the message value from the {@link VariousEnums} enum
-	 * and is also separated from the header by {@link Constants#HEADER_SEPARATOR}
-	 *
-	 * @param intendedMessage the message to be prefixed
-	 * @return a prefixed copy of the provided string
-	 * @deprecated As this is leftover code from the chat server
-	 */
-	public static String msg(String intendedMessage) {
-		return msg(intendedMessage, MESSAGE);
 	}
 	
 	/**
