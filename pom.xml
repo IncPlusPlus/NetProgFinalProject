@@ -6,7 +6,7 @@
 
     <groupId>io.github.incplusplus</groupId>
     <artifactId>peer-processing</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,7 +14,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <junit-platform.version>5.3.1</junit-platform.version>
+        <junit-platform.version>5.5.2</junit-platform.version>
         <!--        Initialize variables. We expect these variables might be specified by the command line.
         However, we don't want to set them with a value here. They are initialized here to prevent
         warnings about unknown properties in the build file.-->
@@ -97,6 +97,13 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Logger.*</exclude>
+                        <exclude>**/*Runner.*</exclude>
+                        <exclude>**/*ConsoleUtils.*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>jacoco-initialize</id>
