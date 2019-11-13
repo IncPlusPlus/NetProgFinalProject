@@ -35,7 +35,6 @@ public class Slave implements ProperClient, Personable {
 	private AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private String name;
 	private volatile UUID uuid = UUID.randomUUID();
 	
 	public Slave(String serverHostname, int serverPort) {
@@ -90,7 +89,6 @@ public class Slave implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setSenderName(name);
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
