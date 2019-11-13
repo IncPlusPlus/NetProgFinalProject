@@ -31,6 +31,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 		return null;
 	}
 	
+	@Override
 	public BigDecimal[] getCol(int colIndex) {
 		BigDecimal[] column = new BigDecimal[matrix[0].length]; // Here I assume a rectangular 2D array!
 		for(int i=0; i<column.length; i++){
@@ -39,6 +40,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 		return column;
 	}
 	
+	@Override
 	public BigDecimal[] getRow(int rowIndex) {
 		return matrix[rowIndex];
 	}

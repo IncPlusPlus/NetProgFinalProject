@@ -26,4 +26,8 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 * @return this matrix multiplied by the specified matrix
 	 */
 	public abstract RealMatrix<T> multiply(RealMatrix<T> other);
+	
+	public abstract T[] getCol(int colIndex);
+	
+	public abstract T[] getRow(int colIndex);
 }
