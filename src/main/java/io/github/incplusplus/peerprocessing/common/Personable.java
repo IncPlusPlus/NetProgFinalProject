@@ -9,6 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public interface Personable {
 	/**
 	 * Introduces this {@linkplain Personable} object to a server.
+	 * @throws JsonProcessingException if there was an exception encountered
+	 * while performing the JSON processing required of this method.
 	 */
 	void introduce() throws JsonProcessingException;
 }

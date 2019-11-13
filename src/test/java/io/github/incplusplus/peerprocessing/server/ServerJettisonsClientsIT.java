@@ -16,11 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ServerJettisonsClientsIT {
 	private int serverPort;
-	private Server server = new Server();
+	private final Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	
@@ -30,14 +31,14 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientOneSlave() throws IOException {
+	void oneClientOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort));
 	}
 	
 	@Test
-	void twoClientsOneSlave() throws IOException {
+	void twoClientsOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -45,7 +46,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientTwoSlaves() throws IOException {
+	void oneClientTwoSlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort),
@@ -53,7 +54,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void manyClientsOneSlave() throws IOException {
+	void manyClientsOneSlave() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -74,7 +75,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void oneClientManySlaves() throws IOException {
+	void oneClientManySlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Slave("localhost", serverPort),
@@ -95,7 +96,7 @@ class ServerJettisonsClientsIT {
 	}
 	
 	@Test
-	void manyClientsManySlaves() throws IOException {
+	void manyClientsManySlaves() {
 		performActionsAndAssertions(
 				new Client("localhost", serverPort),
 				new Client("localhost", serverPort),
@@ -129,7 +130,7 @@ class ServerJettisonsClientsIT {
 				new Slave("localhost", serverPort));
 	}
 	
-	void performActionsAndAssertions(ProperClient... properClients) throws IOException {
+	void performActionsAndAssertions(ProperClient... properClients) {
 		List<ProperClient> properClientList = asList(properClients);
 		properClientList.forEach(properClient -> {
 			properClient.setVerbose(VERBOSE_TEST_OUTPUT);
@@ -137,6 +138,7 @@ class ServerJettisonsClientsIT {
 			properClient.begin();
 		});
 		//Wait for all clients to have introduced themselves
+		//noinspection StatementWithEmptyBody
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
 		properClientList.forEach(properClient -> {
 			try {

@@ -10,20 +10,23 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.client.ClientRunner.printEvalLine;
 import static io.github.incplusplus.peerprocessing.client.ConsoleUtils.printSolution;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.*;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static java.util.Objects.isNull;
 
 public class Client implements ProperClient, Personable {
@@ -32,15 +35,14 @@ public class Client implements ProperClient, Personable {
 	private Socket sock;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private String name;
 	private volatile UUID uuid;
 	private boolean printResults = false;
-	private AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running = new AtomicBoolean();
 	/**
 	 * Whether or not this client has introduced itself
 	 */
-	private AtomicBoolean polite = new AtomicBoolean();
-	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
+	private final AtomicBoolean polite = new AtomicBoolean();
+	private final ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public Client(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
@@ -96,7 +98,6 @@ public class Client implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setSenderName(name);
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.CLIENT);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), IDENTITY));
@@ -129,7 +130,7 @@ public class Client implements ProperClient, Personable {
 		sock.close();
 	}
 	
-	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) throws JsonProcessingException {
+	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
 		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
 	}
 	
@@ -149,13 +150,11 @@ public class Client implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
-					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
@@ -163,7 +162,7 @@ public class Client implements ProperClient, Personable {
 						debug("Disconnected.");
 					}
 					else if (header.equals(RESULT)) {
-						Query result = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						Query result = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
 						if (futureQueries.containsKey(result.getQueryId())) {
 							Query futureQuery = futureQueries.get(result.getQueryId());
 							futureQuery.setQueryState(result.getQueryState());
@@ -227,7 +226,7 @@ public class Client implements ProperClient, Personable {
 	class ExpressionEvaluator implements Callable<BigDecimal> {
 		private final String expression;
 		
-		ExpressionEvaluator(String mathExpression) throws JsonProcessingException {
+		ExpressionEvaluator(String mathExpression) {
 			this.expression = mathExpression;
 		}
 		

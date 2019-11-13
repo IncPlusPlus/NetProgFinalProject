@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
 
-public class ConsoleUtils {
+class ConsoleUtils {
 	static void printSolution(MathQuery query) {
 		assert query.isCompleted();
 		if (query.getReasonIncomplete() == null) {
