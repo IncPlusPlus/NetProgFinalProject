@@ -24,6 +24,7 @@ import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static java.util.Objects.isNull;
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
@@ -133,6 +134,9 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	private void dealWithServer() {
+		if (isNull(sock))
+			throw new IllegalStateException("Socket not initialized properly. " +
+					"Did you remember to check the boolean value of Client.begin()?!");
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
 			while (!sock.isClosed()) {
