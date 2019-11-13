@@ -35,10 +35,6 @@ import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiat
 public class Server {
 	private static final String poisonPillString = "Time to wake up, Neo.";
 	private ServerSocket socket;
-	/**
-	 * The time to sleep in milliseconds when there are no slaves around to process requests
-	 */
-	private static long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 	//mostly unused
 	final UUID serverId = UUID.randomUUID();
 	//server naming is a low priority at the moment
@@ -299,6 +295,7 @@ public class Server {
 	
 	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
+			long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
 					"However, no slaves were available. Job queue thread sleeping " +
 					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " second(s)...");
