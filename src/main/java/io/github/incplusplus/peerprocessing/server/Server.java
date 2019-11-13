@@ -180,7 +180,7 @@ public class Server {
 	 */
 	void register(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			SlaveObj shouldBeNull = null;
+			SlaveObj shouldBeNull;
 			//Put this slave in the slaves map
 			shouldBeNull = slaves.put(connectedEntity.getConnectionUUID(), (SlaveObj) connectedEntity);
 			//ConcurrentHashMap does not support null entries. Because of this, the put() method
@@ -189,7 +189,7 @@ public class Server {
 			assert shouldBeNull == null;
 		}
 		else if (connectedEntity instanceof ClientObj) {
-			ClientObj shouldBeNull = null;
+			ClientObj shouldBeNull;
 			//Put this slave in the slaves map
 			shouldBeNull = clients.put(connectedEntity.getConnectionUUID(), (ClientObj) connectedEntity);
 			//ConcurrentHashMap does not support null entries. Because of this, the put() method
@@ -256,7 +256,7 @@ public class Server {
 	 * @param query the query to be processed
 	 */
 	void submitJob(Query query) {
-		Query shouldBeNull = null;
+		Query shouldBeNull;
 		//Put this slave in the slaves map
 		shouldBeNull = queries.put(query.getQueryId(), query);
 		//ConcurrentHashMap does not support null entries. Because of this, the put() method
