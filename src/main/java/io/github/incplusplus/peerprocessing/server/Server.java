@@ -381,7 +381,7 @@ public class Server {
 					lineFromClient = getInFromClient().readLine();
 					Header header = getHeader(lineFromClient);
 					if (header.equals(QUERY)) {
-						solve(SHARED_MAPPER.readValue(decode(lineFromClient), Query.class));
+						solve(SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromClient)), Query.class));
 					}
 					else if (header.equals(IDENTIFY)) {
 						getOutToClient().println(
@@ -455,7 +455,7 @@ public class Server {
 					lineFromSlave = getInFromClient().readLine();
 					Header header = getHeader(lineFromSlave);
 					if (header.equals(RESULT)) {
-						Query completedQuery = SHARED_MAPPER.readValue(decode(lineFromSlave), Query.class);
+						Query completedQuery = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromSlave)), Query.class);
 						Query storedQuery = removeJob(completedQuery.getQueryId());
 						//We keep the originally created query object and only take what we need from the
 						//slave's data. This is to prevent possibly malicious slaves from compromising
