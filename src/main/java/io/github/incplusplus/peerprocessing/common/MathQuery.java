@@ -4,6 +4,11 @@ import java.util.UUID;
 
 public class MathQuery extends Query {
 	
+	@SuppressWarnings("unused")
+	public MathQuery() {
+		super();
+	}
+	
 	public MathQuery(String originalExpression, UUID requestingClientUUID) {
 		super();
 		setOriginalExpression(originalExpression);
