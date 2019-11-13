@@ -101,7 +101,6 @@
                     <excludes>
                         <exclude>**/*Logger.*</exclude>
                         <exclude>**/*Runner.*</exclude>
-                        <exclude>**/*InputReadTask.*</exclude>
                         <exclude>**/*ConsoleUtils.*</exclude>
                     </excludes>
                 </configuration>
