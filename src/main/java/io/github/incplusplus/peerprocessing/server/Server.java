@@ -306,6 +306,7 @@ public class Server {
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
+		//noinspection RedundantCast because if we don't cast, IntelliJ warns about suspicious call to Map.get()
 		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
 		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
 		debug("Sending query " + job.getQueryId() + " to slave " + designatedSlave.getConnectionUUID());
