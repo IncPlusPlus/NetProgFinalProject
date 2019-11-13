@@ -1,18 +1,16 @@
 package io.github.incplusplus.peerprocessing.linear;
 
 import java.math.BigDecimal;
-import java.util.Vector;
-import java.util.stream.Collectors;
 
 public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
-	private Vector<Vector<BigDecimal>> thisMatrix;
+	private BigDecimal[][] matrix;
 	
-	BigDecimalMatrix(Vector<Vector<BigDecimal>> vector) {
-		this.thisMatrix = vector;
+	BigDecimalMatrix(BigDecimal[][] matrix) {
+		this.matrix = matrix;
 	}
 	
 	BigDecimalMatrix() {
-		this.thisMatrix = null;
+		this.matrix = null;
 	}
 	
 	@Override
@@ -22,14 +20,10 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	
 	@Override
 	public RealMatrix<BigDecimal> identity(int n) {
-		Vector<Vector<BigDecimal>> rows = new Vector<>(n);
-		Vector<BigDecimal> allZeroes = allZeroes(n);
-		for (int i = 0; i < n; i++) {
-			Vector<BigDecimal> row = new Vector<>(allZeroes);
-			row.set(i, BigDecimal.ONE);
-			rows.add(row);
-		}
-		return new BigDecimalMatrix(rows);
+		BigDecimal[][] a = new BigDecimal[n][n];
+		for (int i = 0; i < n; i++)
+			a[i][i] = BigDecimal.ONE;
+		return new BigDecimalMatrix(a);
 	}
 	
 	@Override
@@ -37,27 +31,25 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 		return null;
 	}
 	
-	public Vector<BigDecimal> getCol(int colIndex) {
-		return thisMatrix.stream().map(x -> x.get(colIndex)).collect(Collectors.toCollection(Vector::new));
+	public BigDecimal[] getCol(int colIndex) {
+		BigDecimal[] column = new BigDecimal[matrix[0].length]; // Here I assume a rectangular 2D array!
+		for(int i=0; i<column.length; i++){
+			column[i] = matrix[i][colIndex];
+		}
+		return column;
 	}
 	
-	public Vector<BigDecimal> getRow(int rowIndex) {
-		return thisMatrix.get(rowIndex);
+	public BigDecimal[] getRow(int rowIndex) {
+		return matrix[rowIndex];
 	}
 	
 	@Override
 	public int getNumRows() {
-		return thisMatrix.size();
+		return matrix.length;
 	}
 	
 	@Override
 	public int getNumCols() {
-		return thisMatrix.get(0).size();
-	}
-	
-	private static Vector<BigDecimal> allZeroes(int n) {
-		Vector<BigDecimal> allZeroes = new Vector<>(n);
-		for (int i = 0; i < n; i++) {allZeroes.add(BigDecimal.ZERO);}
-		return allZeroes;
+		return matrix[0].length;
 	}
 }
