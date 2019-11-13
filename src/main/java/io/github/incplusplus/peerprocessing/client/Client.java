@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -129,7 +130,7 @@ public class Client implements ProperClient, Personable {
 		sock.close();
 	}
 	
-	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) throws JsonProcessingException {
+	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
 		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
 	}
 	
@@ -149,7 +150,8 @@ public class Client implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
@@ -160,7 +162,7 @@ public class Client implements ProperClient, Personable {
 						debug("Disconnected.");
 					}
 					else if (header.equals(RESULT)) {
-						Query result = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						Query result = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
 						if (futureQueries.containsKey(result.getQueryId())) {
 							Query futureQuery = futureQueries.get(result.getQueryId());
 							futureQuery.setQueryState(result.getQueryState());
@@ -224,7 +226,7 @@ public class Client implements ProperClient, Personable {
 	class ExpressionEvaluator implements Callable<BigDecimal> {
 		private final String expression;
 		
-		ExpressionEvaluator(String mathExpression) throws JsonProcessingException {
+		ExpressionEvaluator(String mathExpression) {
 			this.expression = mathExpression;
 		}
 		

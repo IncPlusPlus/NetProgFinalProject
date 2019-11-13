@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -138,13 +139,14 @@ public class Slave implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
 					}
 					else if (header.equals(QUERY)) {
-						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
+						Query query = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
 						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
 						sendEvaluatedQuery(evaluate(query));
 					}
