@@ -13,7 +13,7 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.deb
 /**
  * A collection of methods that I moved to here to keep {@link Server} concise.
  */
-public class ServerMethods {
+class ServerMethods {
 	/**
 	 * Continuously prompts a client to supply a certain value.
 	 * Specifically, this demands a certain type of payload
