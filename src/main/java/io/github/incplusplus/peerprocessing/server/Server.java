@@ -24,10 +24,8 @@ import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
-import static io.github.incplusplus.peerprocessing.server.ConnectionState.CONNECTING;
-import static io.github.incplusplus.peerprocessing.server.ConnectionState.INVALID;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_CLIENT;
 import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
 import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
@@ -519,7 +517,6 @@ public class Server {
 		private volatile BufferedReader inFromClient;
 		private Socket socket;
 		private UUID connectionUUID;
-		private volatile ConnectionState connectionState;
 		
 		public ConnectionHandler(Socket incomingConnection) throws IOException {
 			if (incomingConnection == null || incomingConnection.isClosed())
@@ -527,7 +524,6 @@ public class Server {
 						"but was then immediately dropped.");
 			debug("New connection at " + incomingConnection.getLocalAddress().getHostAddress() + ":" + incomingConnection.getLocalPort());
 			this.connectionUUID = UUID.randomUUID();
-			this.connectionState = CONNECTING;
 			this.socket = incomingConnection;
 			this.inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.outToClient = new PrintWriter(socket.getOutputStream(), true);
@@ -555,7 +551,6 @@ public class Server {
 					debug("Registering new slave");
 					register(slave);
 				}
-				this.connectionState = INVALID;
 			}
 			catch (IOException e) {
 				printStackTrace(e);

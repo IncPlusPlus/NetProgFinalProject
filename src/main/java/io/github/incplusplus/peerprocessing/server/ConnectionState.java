@@ -11,15 +11,6 @@ public enum ConnectionState {
 	 */
 	CONNECTING,
 	/**
-	 * The client has taken no action yet besides
-	 * initiating a connection.
-	 */
-	CONNECTED,
-	/**
-	 * The client has registered their name.
-	 */
-	REGISTERED,
-	/**
 	 * The client has connected their listener
 	 * and has begun to listen. At this point,
 	 * they're all set up to participate.
