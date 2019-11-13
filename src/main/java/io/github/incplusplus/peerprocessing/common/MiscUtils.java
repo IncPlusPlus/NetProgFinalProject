@@ -96,6 +96,9 @@ public class MiscUtils {
 	
 	/**
 	 * Credit to https://stackoverflow.com/a/38342964 for this elegant solution
+	 * @return the most likely local IP address of this machine
+	 * @throws SocketException if something were to go wrong
+	 * @throws UnknownHostException if something were to go horribly wrong
 	 */
 	public static String getIp() throws SocketException, UnknownHostException {
 		try (final DatagramSocket socket = new DatagramSocket()) {

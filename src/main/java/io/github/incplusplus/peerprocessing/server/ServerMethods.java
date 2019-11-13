@@ -28,9 +28,10 @@ public class ServerMethods {
 	 * @param outToClient    a {@link PrintWriter} to the client
 	 * @param inFromClient   a {@link BufferedReader} from the client
 	 * @return the string content of the reply from the client
+	 * @throws IOException if an IO error occurs during negotiation
 	 */
-	public static String negotiate(Demands serverDemand, Responses properResponse,
-	                               PrintWriter outToClient, BufferedReader inFromClient) throws IOException {
+	static String negotiate(Demands serverDemand, Responses properResponse,
+	                        PrintWriter outToClient, BufferedReader inFromClient) throws IOException {
 		//tell the client what we want
 		outToClient.println(serverDemand);
 		//ingest client response

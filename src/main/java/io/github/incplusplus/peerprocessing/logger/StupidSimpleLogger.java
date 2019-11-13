@@ -47,6 +47,7 @@ public class StupidSimpleLogger {
 	
 	/**
 	 * Same as {@link #info(String)} but without printing linefeed afterwards.
+	 * @param message the message to print.
 	 */
 	public static void infoNoLine(String message) {
 		if (enabled) {

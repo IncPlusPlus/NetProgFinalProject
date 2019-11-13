@@ -60,7 +60,13 @@ public class Server {
 	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
 	
 	/**
-	 * See {@link #start(int)}
+	 * Start a server.
+	 * @param serverPort the port to start the server on.
+	 *                    If set to 0, the server will listen on
+	 *                    whatever port is available.
+	 * @param verbose whether the server should log to the console about every little thing
+	 * @return the port the server started listening on
+	 * @throws IOException if an IO error occurs
 	 */
 	public int start(int serverPort, boolean verbose) throws IOException {
 		if (verbose)
@@ -75,6 +81,7 @@ public class Server {
 	 *                   If set to 0, the server will listen on
 	 *                   whatever port is available.
 	 * @return the port the server started listening on
+	 * @throws IOException if an IO error occurs
 	 */
 	public int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
