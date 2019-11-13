@@ -20,7 +20,6 @@ abstract class ConnectedEntity implements Runnable {
 	private final BufferedReader inFromClient;
 	private final Socket socket;
 	private final UUID connectionUUID;
-	private volatile ConnectionState connectionState;
 	
 	ConnectedEntity(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 	                UUID connectionUUID) {
@@ -44,10 +43,6 @@ abstract class ConnectedEntity implements Runnable {
 	
 	UUID getConnectionUUID() {
 		return connectionUUID;
-	}
-	
-	public ConnectionState getConnectionState() {
-		return connectionState;
 	}
 	
 	Introduction provideIntroductionFromServer() {
