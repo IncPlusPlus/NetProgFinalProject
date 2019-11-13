@@ -13,19 +13,6 @@ public enum Demands implements Header {
 	 */
 	QUERY,
 	/**
-	 * Sent from client to server and from server to slave
-	 * to tell the destination machine to
-	 * solve a particular query.
-	 * @apiNote THIS IS ONLY FOR SENDING things related to
-	 * the {@link MathJob} class. It is for sending a raw query string
-	 * from a client to a server and sending a {@link MathJob} class
-	 * from a server to a slave. The only acceptable response is
-	 * {@link Responses#SOLUTION}.
-	 * @deprecated in favor of {@link #QUERY}
-	 */
-	@Deprecated
-	SOLVE,
-	/**
 	 * Sent from the server. Asks client for their name
 	 */
 	@Deprecated
