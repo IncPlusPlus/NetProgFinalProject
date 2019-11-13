@@ -96,7 +96,7 @@ public abstract class Query {
 		this.solvingSlaveUUID = solvingSlaveUUID;
 	}
 	
-	public void setQueryString(String queryString) {
+	void setQueryString(String queryString) {
 		this.queryString = queryString;
 	}
 }

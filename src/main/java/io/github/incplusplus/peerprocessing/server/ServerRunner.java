@@ -10,7 +10,7 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.deb
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
 import static io.github.incplusplus.peerprocessing.server.Server.serverName;
 
-public class ServerRunner {
+class ServerRunner {
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
 		//Set up my custom logging implementation

@@ -34,7 +34,7 @@ public class Server {
 	private static final String poisonPillString = "Time to wake up, Neo.";
 	private ServerSocket socket;
 	//mostly unused
-	final UUID serverId = UUID.randomUUID();
+	private final UUID serverId = UUID.randomUUID();
 	//server naming is a low priority at the moment
 	final static String serverName = "Processing Server";
 	private final AtomicBoolean started = new AtomicBoolean(false);
@@ -77,11 +77,11 @@ public class Server {
 	 * @return the port the server started listening on
 	 * @throws IOException if an IO error occurs
 	 */
-	public int start(int serverPort) throws IOException {
+	private int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
 			private final ServerSocket serverSocket;
 			
-			ServerStartTask(ServerSocket socket) {
+			private ServerStartTask(ServerSocket socket) {
 				this.serverSocket = socket;
 			}
 			
@@ -166,7 +166,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to register.
 	 */
-	void register(ConnectionHandler connectionHandler) {
+	private void register(ConnectionHandler connectionHandler) {
 		connectionHandlers.add(connectionHandler);
 	}
 	
@@ -176,7 +176,7 @@ public class Server {
 	 *
 	 * @param connectedEntity an entity to keep track of
 	 */
-	void register(ConnectedEntity connectedEntity) {
+	private void register(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
 			SlaveObj shouldBeNull;
 			//Put this slave in the slaves map
@@ -209,7 +209,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to remove
 	 */
-	void deRegister(ConnectionHandler connectionHandler) {
+	private void deRegister(ConnectionHandler connectionHandler) {
 		connectionHandlers.remove(connectionHandler);
 	}
 	
@@ -220,7 +220,7 @@ public class Server {
 	 *
 	 * @param connectedEntity the entity to remove
 	 */
-	void deRegister(ConnectedEntity connectedEntity) {
+	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
 			//TODO add responsibility reassignment if the slave held jobs
 			slaves.remove(connectedEntity.getConnectionUUID());
@@ -253,7 +253,7 @@ public class Server {
 	 *
 	 * @param query the query to be processed
 	 */
-	void submitJob(Query query) {
+	private void submitJob(Query query) {
 		Query shouldBeNull;
 		//Put this slave in the slaves map
 		shouldBeNull = queries.put(query.getQueryId(), query);
@@ -271,7 +271,7 @@ public class Server {
 	 *
 	 * @param queryId the id of the query to remove
 	 */
-	Query removeJob(UUID queryId) {
+	private Query removeJob(UUID queryId) {
 		Query removedJob = queries.remove(queryId);
 		boolean sanity = removedJob.getQueryState().equals(WAITING_ON_SLAVE);
 		assert sanity;
@@ -279,7 +279,7 @@ public class Server {
 		return removedJob;
 	}
 	
-	void relayToAppropriateClient(Query query) throws JsonProcessingException {
+	private void relayToAppropriateClient(Query query) throws JsonProcessingException {
 		ClientObj requestSource = clients.get(query.getRequestingClientUUID());
 		if (requestSource == null) {
 			error("Tried to tell client " + query.getRequestingClientUUID() + " that " +
@@ -351,9 +351,9 @@ public class Server {
 		ingestionThread.start();
 	}
 	
-	public class ClientObj extends ConnectedEntity {
-		public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
-		                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+	class ClientObj extends ConnectedEntity {
+		ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		          UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 		
 		@Override
 		UUID getServerId() {
@@ -420,11 +420,11 @@ public class Server {
 		}
 	}
 	
-	public class SlaveObj extends ConnectedEntity {
+	class SlaveObj extends ConnectedEntity {
 		private final List<UUID> jobsResponsibleFor = new ArrayList<>();
 		
-		public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
-		                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+		SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		         UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 		
 		@Override
 		UUID getServerId() {
@@ -507,18 +507,18 @@ public class Server {
 		 * @return the list of UUIDs representing jobs that this slave is currently
 		 * responsible for. Useful for recovering a job if a slave suddenly disconnects.
 		 */
-		public List<UUID> getJobsResponsibleFor() {
+		List<UUID> getJobsResponsibleFor() {
 			return jobsResponsibleFor;
 		}
 	}
 	
-	public class ConnectionHandler implements Runnable {
+	class ConnectionHandler implements Runnable {
 		private volatile PrintWriter outToClient;
 		private volatile BufferedReader inFromClient;
 		private Socket socket;
 		private UUID connectionUUID;
 		
-		public ConnectionHandler(Socket incomingConnection) throws IOException {
+		ConnectionHandler(Socket incomingConnection) throws IOException {
 			if (incomingConnection == null || incomingConnection.isClosed())
 				throw new IllegalArgumentException("An incoming connection was established" +
 						"but was then immediately dropped.");

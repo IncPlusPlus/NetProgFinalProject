@@ -20,7 +20,7 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
  * as object-oriented as possible and avoid using its main method.
  * This also will help with making improving coverage easier.
  */
-public final class ClientRunner {
+final class ClientRunner {
 	public static void main(String[] args) throws IOException {
 		enable();
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();

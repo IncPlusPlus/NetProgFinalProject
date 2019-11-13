@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * Make sure the server doesn't try to do anything
  * funny if there are no slaves available to process a request.
  */
-public class NoAvailSlavesCase {
+class NoAvailSlavesCase {
 	private static int serverPort;
 	private static final Server server = new Server();
 	private final List<Future<?>> futureList = new ArrayList<>();

@@ -15,34 +15,34 @@ import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNEC
  * Represents a type of object that can
  * connect to a server.
  */
-public abstract class ConnectedEntity implements Runnable {
+abstract class ConnectedEntity implements Runnable {
 	private final PrintWriter outToClient;
 	private final BufferedReader inFromClient;
 	private final Socket socket;
 	private final UUID connectionUUID;
 	private volatile ConnectionState connectionState;
 	
-	public ConnectedEntity(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
-	                       UUID connectionUUID) {
+	ConnectedEntity(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+	                UUID connectionUUID) {
 		this.outToClient = outToClient;
 		this.inFromClient = inFromClient;
 		this.socket = socket;
 		this.connectionUUID = connectionUUID;
 	}
 	
-	public PrintWriter getOutToClient() {
+	PrintWriter getOutToClient() {
 		return outToClient;
 	}
 	
-	public BufferedReader getInFromClient() {
+	BufferedReader getInFromClient() {
 		return inFromClient;
 	}
 	
-	public Socket getSocket() {
+	Socket getSocket() {
 		return socket;
 	}
 	
-	public UUID getConnectionUUID() {
+	UUID getConnectionUUID() {
 		return connectionUUID;
 	}
 	

@@ -9,7 +9,7 @@ public class MathQuery extends Query {
 		setOriginalExpression(originalExpression);
 		setRequestingClientUUID(requestingClientUUID);
 	}
-	public void setOriginalExpression(String expression) {
+	private void setOriginalExpression(String expression) {
 		setQueryString(expression);
 	}
 	
