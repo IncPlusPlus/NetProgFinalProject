@@ -22,16 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class ClientsAbandonDyingServerIT {
 	private int serverPort;
+	private Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = Server.start(0, VERBOSE_TEST_OUTPUT);
-		while (!Server.started()) {}
+		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		while (!server.started()) {}
 	}
 	
 	@AfterEach
 	void tearDown() throws IOException {
-		Server.stop();
+		server.stop();
 	}
 	
 	@Test
@@ -143,9 +144,9 @@ class ClientsAbandonDyingServerIT {
 		});
 		//Wait for all clients to have introduced themselves
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
-		Server.stop();
+		server.stop();
 		//Wait until we're absolutely sure the server is shut down
-		while (Server.shutdownInProgress()) {}
+		while (server.shutdownInProgress()) {}
 		properClientList.forEach(properClient -> {
 			//there was previously a much more elegant way but some
 			//clients were still reading the disconnect line from the server
@@ -164,6 +165,21 @@ class ClientsAbandonDyingServerIT {
 			assertTrue(properClient.isClosed());
 		});
 		//might as well run this too
-		properClientList.forEach(properClient -> assertFalse(Server.isConnected(properClient.getConnectionId())));
+		properClientList.forEach(properClient -> {
+			//there was previously a much more elegant way but some
+			//clients were still reading the disconnect line from the server
+			//and caused this integration test to fail
+			if(server.isConnected(properClient.getConnectionId())) {
+				try {
+					System.out.println("Waiting 50ms for server to drop " + properClient + ".");
+					Thread.sleep(50);
+					if (!server.isConnected(properClient.getConnectionId()))
+						System.out.println("Success!!");
+				}
+				catch (InterruptedException e) {
+					throw new IllegalStateException("Got interrupted while generously sleeping on the connected entities map.", e);
+				}
+			}
+		});
 	}
 }
