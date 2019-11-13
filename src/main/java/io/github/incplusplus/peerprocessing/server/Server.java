@@ -49,11 +49,11 @@ public class Server {
 	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
 	private final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
-	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<UUID, Query>();
+	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<>();
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
 	 */
-	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
+	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<>();
 	
 	/**
 	 * Start a server.
