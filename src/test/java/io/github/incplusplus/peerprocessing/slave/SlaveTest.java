@@ -16,6 +16,6 @@ class SlaveTest {
 				assertThrows(IllegalStateException.class,
 						mySlave::begin);
 		assertEquals(thrown.getMessage(), "Socket not initialized properly. " +
-				"Did you remember to check the boolean value of Client.begin()?!");
+				"Did you remember to check the boolean value of Slave.begin()?!");
 	}
 }
