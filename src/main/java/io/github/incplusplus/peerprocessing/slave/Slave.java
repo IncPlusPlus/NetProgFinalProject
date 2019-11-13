@@ -153,9 +153,6 @@ public class Slave implements ProperClient, Personable {
 						disconnect();
 						debug("Disconnected.");
 					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
-					}
 				}
 				catch (NullPointerException e) {
 					if (running.get()) {

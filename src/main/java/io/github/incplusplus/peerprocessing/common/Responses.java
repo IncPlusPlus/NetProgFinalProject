@@ -9,11 +9,5 @@ public enum Responses implements Header {
 	/**
 	 * The result of a {@link Demands#QUERY}
 	 */
-	RESULT,
-	/**
-	 * Sent from the client. Specifies client name.
-	 * Response to {@link Demands#PROVIDE_CLIENT_NAME}
-	 */
-	@Deprecated
-	CLIENT_NAME
+	RESULT
 }

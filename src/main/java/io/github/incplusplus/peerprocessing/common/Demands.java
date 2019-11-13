@@ -11,10 +11,5 @@ public enum Demands implements Header {
 	 * Submit a query either from a client to the server
 	 * or from the server to a slave.
 	 */
-	QUERY,
-	/**
-	 * Sent from the server. Asks client for their name
-	 */
-	@Deprecated
-	PROVIDE_CLIENT_NAME
+	QUERY
 }

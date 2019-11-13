@@ -154,9 +154,6 @@ public class Client implements ProperClient, Personable {
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
 					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
-					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
 						disconnect();
