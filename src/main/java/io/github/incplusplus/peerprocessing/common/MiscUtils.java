@@ -4,7 +4,10 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.*;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.SplittableRandom;
 
@@ -91,5 +94,18 @@ public class MiscUtils {
 			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
 			return socket.getLocalAddress().getHostAddress();
 		}
+	}
+	
+	/**
+	 * Generates an integer uniformly at random between 0 (inclusive) and
+	 * the specified ceiling (exclusive) and creates a BigDecimal
+	 * with that value divided by 100.
+	 * <br>
+	 * Credit to <a href="https://stackoverflow.com/a/21863676/1687436">this SO answer</a>.
+	 * @param ceiling the ceiling of the initial value
+	 * @return PLEASE SEE METHOD DESCRIPTION
+	 */
+	public static BigDecimal randBigDec(int ceiling) {
+		return new BigDecimal(BigInteger.valueOf(new Random().nextInt(ceiling)), 2);
 	}
 }

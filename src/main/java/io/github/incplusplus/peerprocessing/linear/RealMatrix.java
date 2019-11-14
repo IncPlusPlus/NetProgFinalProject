@@ -1,5 +1,8 @@
 package io.github.incplusplus.peerprocessing.linear;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+
 /**
  * An immutable matrix containing entries that extend T.
  * Implementing classes define their own implementation of this class.
@@ -27,6 +30,8 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 */
 	public abstract RealMatrix<T> multiply(RealMatrix<T> other);
 	
+	public abstract T[] multiply(T[] vector);
+	
 	/**
 	 * @param colIndex the index of the desired column
 	 * @return the column at the specified index
@@ -50,4 +55,8 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 * @return the dot product of the specified vectors
 	 */
 	public abstract T dot(T[] rowVector, T[] columnVector);
+	
+	protected abstract T getEntry(int rowNum, int colNum);
+	
+	public abstract T[][] getContents();
 }
