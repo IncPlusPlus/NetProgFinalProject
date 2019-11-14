@@ -32,6 +32,25 @@ class BigDecimalMatrixTest {
 			{ZERO, ZERO, ZERO}
 	});
 	
+	private final BigDecimalMatrix A = new BigDecimalMatrix(new BigDecimal[][]{
+			{w("-4"), w("5"), w("2"), w("3")},
+			{w("4"), w("0"), w("-3"), w("1")},
+			{w("6"), w("7"), w("-2"), w("8")}
+	});
+	
+	private final BigDecimalMatrix B = new BigDecimalMatrix(new BigDecimal[][]{
+			{w("9"), w("5"), w("10")},
+			{w("11"), w("4"), w("2")},
+			{w("6"), w("7"), w("12")},
+			{w("-2"), w("-4"), w("0")}
+	});
+	
+	private final BigDecimalMatrix AB = new BigDecimalMatrix(new BigDecimal[][]{
+			{w("25"), w("2"), w("-6")},
+			{w("16"), w("-5"), w("4")},
+			{w("103"), w("12"), w("50")}
+	});
+	
 	@Test
 	void isSquare() {
 		assertTrue(identity2x2.isSquare());
@@ -45,8 +64,8 @@ class BigDecimalMatrixTest {
 	
 	@Test
 	void identity() {
-		iterateAndAssertEquals(new BigDecimalMatrix().identity(2).getContents(), identity2x2.getContents());
-		iterateAndAssertEquals(new BigDecimalMatrix().identity(3).getContents(), identity3x3.getContents());
+		iterateAndAssertEquals(new BigDecimalMatrix().identity(2), identity2x2);
+		iterateAndAssertEquals(new BigDecimalMatrix().identity(3), identity3x3);
 	}
 	
 	@Test
@@ -55,17 +74,18 @@ class BigDecimalMatrixTest {
 		iterateAndAssertEquals(identity2x2.multiply(new BigDecimalMatrix(new BigDecimal[][]{
 				{ONE, ZERO},
 				{ZERO, ONE}
-		})).getContents(),identity2x2.getContents());
+		})), identity2x2);
 		
 		//(2-by-2 identity) * (2-by-2 zero matrix) = (2-by-2 zero matrix)
 		iterateAndAssertEquals(identity2x2.multiply(new BigDecimalMatrix(new BigDecimal[][]{
 				{ZERO, ZERO},
 				{ZERO, ZERO}
-		})).getContents(),zero2x2.getContents());
+		})), zero2x2);
 	}
 	
 	@Test
 	void testMultiply() {
+		iterateAndAssertEquals(A.multiply(B), AB);
 	}
 	
 	@Test
@@ -93,12 +113,14 @@ class BigDecimalMatrixTest {
 	}
 	
 	
-	private static void iterateAndAssertEquals(BigDecimal[][] firstMatrix, BigDecimal[][] secondMatrix) {
-		iterateAndDoSomething(firstMatrix, secondMatrix, true);
+	private static void iterateAndAssertEquals(RealMatrix<BigDecimal> firstMatrix,
+	                                           RealMatrix<BigDecimal> secondMatrix) {
+		iterateAndDoSomething(firstMatrix.getContents(), secondMatrix.getContents(), true);
 	}
 	
-	private static void iterateAndAssertCompareToZero(BigDecimal[][] firstMatrix, BigDecimal[][] secondMatrix) {
-		iterateAndDoSomething(firstMatrix, secondMatrix, false);
+	private static void iterateAndAssertCompareToZero(RealMatrix<BigDecimal> firstMatrix,
+	                                                  RealMatrix<BigDecimal> secondMatrix) {
+		iterateAndDoSomething(firstMatrix.getContents(), secondMatrix.getContents(), false);
 	}
 	
 	/**
@@ -125,5 +147,16 @@ class BigDecimalMatrixTest {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * A test helper method with a short name to make matrices
+	 * visually easier to read.
+	 *
+	 * @param number the number to create a {@link BigDecimal} with
+	 * @return a new BigDecimal from the parsed string
+	 */
+	private static BigDecimal w(String number) {
+		return new BigDecimal(number);
 	}
 }
