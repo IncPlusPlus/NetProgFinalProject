@@ -40,7 +40,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 		if (this.getNumCols() != other.getNumRows())
 			throw new IllegalArgumentException("Multiplication is not defined for the specified matrices");
 		BigDecimal[][] result = initZero(new BigDecimal[this.getNumRows()][other.getNumCols()]);
-		for (int i = 0; i < this.getNumCols(); i++) {
+		for (int i = 0; i < this.getNumRows(); i++) {
 			for (int j = 0; j < other.getNumCols(); j++) {
 				for (int k = 0; k < this.getNumCols(); k++) {
 					result[i][j] = result[i][j].add(matrix[i][k].multiply(other.getEntry(k, j)));
