@@ -77,8 +77,8 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
   @Override
   public BigDecimal[] getCol(int colIndex) {
     // adapted from https://stackoverflow.com/a/30426991/1687436
-    BigDecimal[] column = new BigDecimal[matrix[0].length];
-    for (int i = 0; i < column.length; i++) {
+    BigDecimal[] column = new BigDecimal[matrix.length];
+    for (int i = 0; i < matrix.length; i++) {
       column[i] = matrix[i][colIndex];
     }
     return column;
