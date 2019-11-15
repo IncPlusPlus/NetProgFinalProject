@@ -101,7 +101,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 
   @Override
   public RealMatrix<BigDecimal> add(RealMatrix<BigDecimal> addend) {
-    if (!(getNumRows() != addend.getNumRows() && getNumCols() != addend.getNumCols())) {
+    if (getNumRows() != addend.getNumRows() && getNumCols() != addend.getNumCols()) {
       throw new IllegalArgumentException(
           "A+B is not defined where A is "
               + getNumRows()
