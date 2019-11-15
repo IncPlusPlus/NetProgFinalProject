@@ -96,6 +96,27 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	}
 	
 	@Override
+	public RealMatrix<BigDecimal> add(RealMatrix<BigDecimal> addend) {
+		if (!(getNumRows()!=addend.getNumRows()&&getNumCols()!=addend.getNumCols())) {
+			throw new IllegalArgumentException("A+B is not defined where A is "
+					+ getNumRows()
+					+ "x"
+					+ getNumCols()
+					+ " and B is "
+					+ addend.getNumRows()
+					+ "x"
+					+ addend.getNumCols());
+		}
+		BigDecimal[][] newMatrix = new BigDecimal[getNumRows()][getNumCols()];
+		for(int i = 0; i < getNumRows(); i++) {
+			for (int j = 0;j<getNumCols();j++){
+				newMatrix[i][j]=getEntry(i,j).add(addend.getEntry(i,j));
+			}
+		}
+		return new BigDecimalMatrix(newMatrix);
+	}
+	
+	@Override
 	public int getNumRows() {
 		return matrix.length;
 	}

@@ -56,6 +56,13 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 */
 	public abstract T dot(T[] rowVector, T[] columnVector);
 	
+	/**
+	 * Add this matrix and the other specified matrix.
+	 * @param addend the matrix to sum with this matrix
+	 * @return the sum of this matrix and the specified addend
+	 */
+	public abstract RealMatrix<T> add(RealMatrix<T> addend);
+	
 	protected abstract T getEntry(int rowNum, int colNum);
 	
 	public abstract T[][] getContents();
