@@ -143,10 +143,18 @@ class BigDecimalMatrixTest {
   }
 
   @Test
-  void getCol() {}
+  void getCol() {
+    assertArrayEquals(identity3x3.getCol(0), new BigDecimal[] {w("1"), w("0"), w("0")});
+    assertArrayEquals(identity3x3.getCol(1), new BigDecimal[] {w("0"), w("1"), w("0")});
+    assertArrayEquals(identity3x3.getCol(2), new BigDecimal[] {w("0"), w("0"), w("1")});
+  }
 
   @Test
-  void getRow() {}
+  void getRow() {
+    assertArrayEquals(identity3x3.getRow(0), new BigDecimal[] {w("1"), w("0"), w("0")});
+    assertArrayEquals(identity3x3.getRow(1), new BigDecimal[] {w("0"), w("1"), w("0")});
+    assertArrayEquals(identity3x3.getRow(2), new BigDecimal[] {w("0"), w("0"), w("1")});
+  }
 
   @Test
   void getEntry() {
