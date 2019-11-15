@@ -282,9 +282,8 @@ public class Server {
 	private void relayToAppropriateClient(Query query) throws JsonProcessingException {
 		ClientObj requestSource = clients.get(query.getRequestingClientUUID());
 		if (requestSource == null) {
-			error("Tried to tell client " + query.getRequestingClientUUID() + " that " +
-					query.getQueryString() + " = " +
-					query.getResult() + " but the client disappeared!");
+			error("Tried to tell client " + query.getRequestingClientUUID() + " the answer to " +
+					query.getQueryId() + " but the client disappeared!");
 		}
 		else {
 			requestSource.acceptCompleted(query);
