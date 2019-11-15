@@ -5,6 +5,7 @@ import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
+import io.github.incplusplus.peerprocessing.query.VectorQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -216,6 +217,10 @@ public class Slave implements ProperClient, Personable {
 	private Query evaluate(Query query) {
 		if (query instanceof AlgebraicQuery) {
 			return solve((AlgebraicQuery) query);
+		}
+		else if(query instanceof VectorQuery) {
+			query.complete();
+			return query;
 		}
 		else {
 			throw new UnsupportedOperationException();
