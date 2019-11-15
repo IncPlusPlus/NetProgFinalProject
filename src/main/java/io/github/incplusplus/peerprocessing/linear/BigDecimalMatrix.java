@@ -2,6 +2,9 @@ package io.github.incplusplus.peerprocessing.linear;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randBigDec;
 import static java.math.BigDecimal.ZERO;
@@ -50,11 +53,9 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
               + "x"
               + other.getNumCols());
     BigDecimal[][] result = initZero(new BigDecimal[this.getNumRows()][other.getNumCols()]);
-    for (int i = 0; i < this.getNumRows(); i++) {
+    for (int i = 0; i < getNumRows(); i++) {
       for (int j = 0; j < other.getNumCols(); j++) {
-        for (int k = 0; k < this.getNumCols(); k++) {
-          result[i][j] = result[i][j].add(matrix[i][k].multiply(other.getEntry(k, j)));
-        }
+        result[i][j] = dot(getRow(i), other.getCol(j));
       }
     }
     return new BigDecimalMatrix(result);
@@ -96,7 +97,9 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 
   @Override
   public BigDecimal dot(BigDecimal[] rowVector, BigDecimal[] columnVector) {
-    return null;
+    return zipped(rowVector, columnVector, BigDecimal::multiply)
+        .reduce(BigDecimal::add)
+        .orElseThrow(RuntimeException::new);
   }
 
   @Override
@@ -141,5 +144,11 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
       Arrays.fill(bigDecimals, ZERO);
     }
     return nullArray;
+  }
+
+  // a private zipping method. https://stackoverflow.com/a/42787326/1687436
+  private <A, B, C> Stream<C> zipped(A[] lista, B[] listb, BiFunction<A, B, C> zipper) {
+    int shortestLength = Math.min(lista.length, listb.length);
+    return IntStream.range(0, shortestLength).mapToObj(i -> zipper.apply(lista[i], listb[i]));
   }
 }
