@@ -215,8 +215,8 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	private void printResult(Query query) {
-		if (query instanceof MathQuery) {
-			printSolution((MathQuery) query);
+		if (query instanceof AlgebraicQuery) {
+			printSolution((AlgebraicQuery) query);
 		}
 		else {
 			throw new UnsupportedOperationException();
@@ -237,7 +237,7 @@ public class Client implements ProperClient, Personable {
 			while (!polite.get()) {
 				Thread.sleep(50);
 			}
-			MathQuery query = new MathQuery(this.expression, uuid);
+			AlgebraicQuery query = new AlgebraicQuery(this.expression, uuid);
 			UUID correspondingQueryId = query.getQueryId();
 			futureQueries.put(query.getQueryId(), query);
 			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));

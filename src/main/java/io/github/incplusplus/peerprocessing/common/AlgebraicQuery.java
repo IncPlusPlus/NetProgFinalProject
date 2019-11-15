@@ -2,14 +2,14 @@ package io.github.incplusplus.peerprocessing.common;
 
 import java.util.UUID;
 
-public class MathQuery extends Query {
+public class AlgebraicQuery extends Query {
 	
 	@SuppressWarnings("unused")
-	public MathQuery() {
+	public AlgebraicQuery() {
 		super();
 	}
 	
-	public MathQuery(String originalExpression, UUID requestingClientUUID) {
+	public AlgebraicQuery(String originalExpression, UUID requestingClientUUID) {
 		super();
 		setOriginalExpression(originalExpression);
 		setRequestingClientUUID(requestingClientUUID);
@@ -25,6 +25,6 @@ public class MathQuery extends Query {
 	 */
 	@Override
 	public void complete() {
-		throw new IllegalStateException("MathQuery does not have a complete() implementation. See its JavaDoc");
+		throw new IllegalStateException("AlgebraicQuery does not have a complete() implementation. See its JavaDoc");
 	}
 }

@@ -7,7 +7,7 @@ import io.github.incplusplus.peerprocessing.server.QueryState;
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-@JsonSubTypes(@JsonSubTypes.Type(MathQuery.class))
+@JsonSubTypes(@JsonSubTypes.Type(AlgebraicQuery.class))
 public abstract class Query {
 	private final UUID queryId = UUID.randomUUID();
 	private volatile boolean completed;

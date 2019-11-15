@@ -312,7 +312,7 @@ public class Server {
 	}
 	
 	private void poisonJobIngestionThread() {
-		jobsAwaitingProcessing.add(new MathQuery(poisonPillString, null));
+		jobsAwaitingProcessing.add(new AlgebraicQuery(poisonPillString, null));
 	}
 	
 	private void startJobIngestionThread() {
