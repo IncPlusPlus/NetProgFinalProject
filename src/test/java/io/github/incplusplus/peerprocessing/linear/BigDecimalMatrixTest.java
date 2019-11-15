@@ -108,19 +108,33 @@ class BigDecimalMatrixTest {
 
   @RepeatedTest(10)
   void randomMultiplicationTest() {
+    int aRows = randInt(100, 1000);
     int aColsAndBRows = randInt(100, 1000);
+    int bCols = randInt(100, 1000);
+    System.out.println(
+        "Multiplying A("
+            + aRows
+            + "x"
+            + aColsAndBRows
+            + ") and B("
+            + aColsAndBRows
+            + "x"
+            + bCols
+            + ").");
     new BigDecimalMatrix()
-        .random(randInt(100, 1000), aColsAndBRows)
-        .multiply(new BigDecimalMatrix().random(aColsAndBRows, randInt(100, 1000)));
+        .random(aRows, aColsAndBRows)
+        .multiply(new BigDecimalMatrix().random(aColsAndBRows, bCols));
   }
-  
-  @RepeatedTest(10)
+
+  @RepeatedTest(5)
   void randomAdditionTest() {
-  	int numRows = randInt(100,1000);
-  	int numCols = randInt(100,1000);
-	  new BigDecimalMatrix()
-			  .random(numRows, numCols)
-			  .add(new BigDecimalMatrix().random(numRows, numCols));
+    int numRows = randInt(50, 100);
+    int numCols = randInt(50, 100);
+    System.out.println(
+        "Adding A(" + numRows + "x" + numCols + ") and B(" + numRows + "x" + numCols + ").");
+    new BigDecimalMatrix()
+        .random(numRows, numCols)
+        .add(new BigDecimalMatrix().random(numRows, numCols));
   }
 
   @Test
