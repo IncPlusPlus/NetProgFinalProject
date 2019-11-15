@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.PoisonPill;
 import io.github.incplusplus.peerprocessing.query.Query;
 
 import java.io.BufferedReader;
@@ -33,7 +34,6 @@ import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_
 import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
 
 public class Server {
-	private static final String poisonPillString = "Time to wake up, Neo.";
 	private ServerSocket socket;
 	//mostly unused
 	private final UUID serverId = UUID.randomUUID();
@@ -49,6 +49,7 @@ public class Server {
 	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
 	private final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
+	/** A HashMap that holds all queries that are being processed or relayed. */
 	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<>();
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
@@ -313,7 +314,7 @@ public class Server {
 	}
 	
 	private void poisonJobIngestionThread() {
-		jobsAwaitingProcessing.add(new AlgebraicQuery(poisonPillString, null));
+		jobsAwaitingProcessing.add(new PoisonPill());
 	}
 	
 	private void startJobIngestionThread() {
@@ -335,15 +336,13 @@ public class Server {
 			while (started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
-					if(currentJob instanceof AlgebraicQuery) {
-						AlgebraicQuery possiblyPoisonous = (AlgebraicQuery) currentJob;
-						if (possiblyPoisonous.getQueryString().equals(
-								poisonPillString) && currentJob.getRequestingClientUUID() == null) {
-							debug("Job ingestion thread ate a poison pill and is shutting down.");
-							break;
-						}
+					if (currentJob instanceof PoisonPill) {
+						debug("Job ingestion thread ate a poison pill and is shutting down.");
+						break;
 					}
-					sendToLeastBusySlave(currentJob);
+					if(currentJob instanceof AlgebraicQuery) {
+						sendToLeastBusySlave(currentJob);
+					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {
 					printStackTrace(e);
