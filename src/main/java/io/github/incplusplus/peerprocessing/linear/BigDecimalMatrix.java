@@ -37,8 +37,16 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	
 	@Override
 	public RealMatrix<BigDecimal> multiply(RealMatrix<BigDecimal> other) {
-		if (this.getNumCols() != other.getNumRows())
-			throw new IllegalArgumentException("Multiplication is not defined for the specified matrices");
+    if (this.getNumCols() != other.getNumRows())
+      throw new IllegalArgumentException(
+          "AB is not defined where A is "
+              + getNumRows()
+              + "x"
+              + getNumCols()
+              + " and B is "
+              + other.getNumRows()
+              + "x"
+              + other.getNumCols());
 		BigDecimal[][] result = initZero(new BigDecimal[this.getNumRows()][other.getNumCols()]);
 		for (int i = 0; i < this.getNumRows(); i++) {
 			for (int j = 0; j < other.getNumCols(); j++) {
