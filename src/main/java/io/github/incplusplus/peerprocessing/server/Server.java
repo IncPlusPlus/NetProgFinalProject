@@ -3,6 +3,8 @@ package io.github.incplusplus.peerprocessing.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.Query;
 
 import java.io.BufferedReader;
 import java.io.IOException;

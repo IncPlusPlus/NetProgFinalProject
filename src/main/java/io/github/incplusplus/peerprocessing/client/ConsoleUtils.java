@@ -1,6 +1,6 @@
 package io.github.incplusplus.peerprocessing.client;
 
-import io.github.incplusplus.peerprocessing.common.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
 
 import java.util.Arrays;
 

@@ -1,7 +1,9 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import io.github.incplusplus.peerprocessing.query.Query;
+
 /**
- * Represents the state of a {@link io.github.incplusplus.peerprocessing.common.Query}.
+ * Represents the state of a {@link Query}.
  */
 public enum QueryState {
 	/**

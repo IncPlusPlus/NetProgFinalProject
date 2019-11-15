@@ -1,9 +1,8 @@
-package io.github.incplusplus.peerprocessing.common;
+package io.github.incplusplus.peerprocessing.query;
 
 import java.util.UUID;
 
 public class AlgebraicQuery extends Query {
-	
 	private String queryString;
 	
 	@SuppressWarnings("unused")
