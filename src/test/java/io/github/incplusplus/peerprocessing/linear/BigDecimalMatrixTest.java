@@ -149,7 +149,12 @@ class BigDecimalMatrixTest {
   void getRow() {}
 
   @Test
-  void getEntry() {}
+  void getEntry() {
+    assertEquals(identity2x2.getEntry(0, 0), ONE);
+    assertEquals(identity2x2.getEntry(0, 1), ZERO);
+    assertEquals(identity2x2.getEntry(1, 0), ZERO);
+    assertEquals(identity2x2.getEntry(1, 1), ONE);
+  }
 
   @Test
   void dot() {}
