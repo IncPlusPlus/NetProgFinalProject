@@ -1,7 +1,9 @@
 package io.github.incplusplus.peerprocessing.linear;
 
+import org.javatuples.Pair;
+
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * An immutable matrix containing entries that extend T.
@@ -29,6 +31,8 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 * @return this matrix multiplied by the specified matrix
 	 */
 	public abstract RealMatrix<T> multiply(RealMatrix<T> other);
+	
+	public abstract List<Pair<BigDecimal[], BigDecimal[]>> getVectorsForMultiplyingWith(RealMatrix<T> other);
 	
 	public abstract T[] multiply(T[] vector);
 	
