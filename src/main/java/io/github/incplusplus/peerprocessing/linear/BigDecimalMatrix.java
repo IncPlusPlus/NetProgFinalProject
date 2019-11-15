@@ -20,8 +20,8 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 	@Override
 	public RealMatrix<BigDecimal> random(int m, int n) {
 		BigDecimal[][] out = new BigDecimal[n][m];
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
 				out[i][j] = randBigDec(100000);
 			}
 		}
