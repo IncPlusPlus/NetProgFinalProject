@@ -1,9 +1,11 @@
 package io.github.incplusplus.peerprocessing.linear;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,8 +106,22 @@ class BigDecimalMatrixTest {
     assertFalse(dumb4x3.isSquare());
   }
 
-  @Test
-  void random() {}
+  @RepeatedTest(10)
+  void randomMultiplicationTest() {
+    int aColsAndBRows = randInt(100, 1000);
+    new BigDecimalMatrix()
+        .random(randInt(100, 1000), aColsAndBRows)
+        .multiply(new BigDecimalMatrix().random(aColsAndBRows, randInt(100, 1000)));
+  }
+  
+  @RepeatedTest(10)
+  void randomAdditionTest() {
+  	int numRows = randInt(100,1000);
+  	int numCols = randInt(100,1000);
+	  new BigDecimalMatrix()
+			  .random(numRows, numCols)
+			  .add(new BigDecimalMatrix().random(numRows, numCols));
+  }
 
   @Test
   void identity() {
