@@ -4,6 +4,8 @@ import java.util.UUID;
 
 public class AlgebraicQuery extends Query {
 	
+	private String queryString;
+	
 	@SuppressWarnings("unused")
 	public AlgebraicQuery() {
 		super();
@@ -11,11 +13,8 @@ public class AlgebraicQuery extends Query {
 	
 	public AlgebraicQuery(String originalExpression, UUID requestingClientUUID) {
 		super();
-		setOriginalExpression(originalExpression);
+		this.queryString = originalExpression;
 		setRequestingClientUUID(requestingClientUUID);
-	}
-	private void setOriginalExpression(String expression) {
-		setQueryString(expression);
 	}
 	
 	/**
@@ -26,5 +25,13 @@ public class AlgebraicQuery extends Query {
 	@Override
 	public void complete() {
 		throw new IllegalStateException("AlgebraicQuery does not have a complete() implementation. See its JavaDoc");
+	}
+	
+	/**
+	 * @return the string that can be acted upon to
+	 * complete this query.
+	 */
+	public String getQueryString() {
+		return this.queryString;
 	}
 }

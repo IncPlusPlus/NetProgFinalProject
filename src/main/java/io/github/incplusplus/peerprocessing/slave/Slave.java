@@ -145,7 +145,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(QUERY)) {
 						Query query = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
-						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
+						debug("Solving: " + query.getQueryId());
 						sendEvaluatedQuery(evaluate(query));
 					}
 					else if (header.equals(DISCONNECT)) {

@@ -333,10 +333,13 @@ public class Server {
 			while (started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
-					if (currentJob.getQueryString().equals(
-							poisonPillString) && currentJob.getRequestingClientUUID() == null) {
-						debug("Job ingestion thread ate a poison pill and is shutting down.");
-						break;
+					if(currentJob instanceof AlgebraicQuery) {
+						AlgebraicQuery possiblyPoisonous = (AlgebraicQuery) currentJob;
+						if (possiblyPoisonous.getQueryString().equals(
+								poisonPillString) && currentJob.getRequestingClientUUID() == null) {
+							debug("Job ingestion thread ate a poison pill and is shutting down.");
+							break;
+						}
 					}
 					sendToLeastBusySlave(currentJob);
 				}
