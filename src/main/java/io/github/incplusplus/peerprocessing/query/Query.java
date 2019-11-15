@@ -2,12 +2,13 @@ package io.github.incplusplus.peerprocessing.query;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
 
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-@JsonSubTypes(@JsonSubTypes.Type(AlgebraicQuery.class))
+@JsonSubTypes({@JsonSubTypes.Type(AlgebraicQuery.class),@JsonSubTypes.Type(MatrixQuery.class)})
 public abstract class Query {
 	private final UUID queryId = UUID.randomUUID();
 	private volatile boolean completed;
@@ -17,7 +18,7 @@ public abstract class Query {
 	private QueryState queryState;
 	private String result;
 	
-	Query() {
+	protected Query() {
 		this.queryState = QueryState.WAITING_FOR_AVAILABLE_SLAVES;
 	}
 	
