@@ -228,7 +228,7 @@ public class Client implements ProperClient, Personable {
 		if (query instanceof AlgebraicQuery) {
 			printSolution((AlgebraicQuery) query);
 		}
-		if(query instanceof MatrixQuery) {
+		else if(query instanceof MatrixQuery) {
 		  info("No printable answer for type " + MatrixQuery.class);
         }
 		else {
