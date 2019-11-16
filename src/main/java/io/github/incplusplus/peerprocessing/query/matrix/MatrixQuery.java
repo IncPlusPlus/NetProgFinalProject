@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.query.matrix;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.query.BatchQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
@@ -77,6 +78,7 @@ public class MatrixQuery extends BatchQuery {
   }
 
   @Override
+  @JsonIgnore
   public Query[] getQueries() {
     if (getOperation().equals(MULTIPLY)) {
       if (vectorQueries==null){
@@ -84,7 +86,7 @@ public class MatrixQuery extends BatchQuery {
                 .map(VectorQuery::from).collect(Collectors.toList());
       }
       //return all vectorQueries that have not yet been solved
-      return (Query[]) vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).toArray();
+      return vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).collect(Collectors.toList()).toArray(Query[]::new);
     }
     else {
       // if this is not something that supports splitting into multiple queries
