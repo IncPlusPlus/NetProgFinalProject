@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * A class can implement BatchQuery in several situations. 1. The operation the class represents is
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @JsonSubTypes({@JsonSubTypes.Type(MatrixQuery.class)})
 public abstract class BatchQuery extends Query {
   /** @return all the queries that need to be executed from this batch */
-  public abstract Query[] getQueries();
+  public abstract List<Query> getQueries();
 
   /**
    * Offer this BatchQuery a Query instance. If this BatchQuery is responsible for this Query, this

@@ -65,6 +65,7 @@ public class VectorQuery extends Query {
   public void complete() {
     setCompleted(true);
     this.product = new BigDecimalMatrix().dot(firstVector, secondVector);
+    setResult(this.product);
   }
 
   public Integer getRowIndex() {

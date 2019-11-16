@@ -25,7 +25,7 @@ import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.iterateAndAssertEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//@Timeout(value = 2,unit = TimeUnit.MINUTES)
+//@Timeout(value = 5,unit = TimeUnit.MINUTES)
 public class SingleSlaveIT {
 	public static final boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;

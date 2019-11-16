@@ -16,6 +16,7 @@ public abstract class Query {
 	private Throwable reasonIncomplete;
 	private UUID requestingClientUUID;
 	private UUID solvingSlaveUUID;
+	private UUID parentBatchId;
 	private QueryState queryState;
 	@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 	@JsonSubTypes({@JsonSubTypes.Type(BigDecimalMatrix.class),@JsonSubTypes.Type(MatrixQuery.class),@JsonSubTypes.Type(VectorQuery.class),@JsonSubTypes.Type(BatchQuery.class)})
@@ -89,5 +90,13 @@ public abstract class Query {
 	
 	public void setSolvingSlaveUUID(UUID solvingSlaveUUID) {
 		this.solvingSlaveUUID = solvingSlaveUUID;
+	}
+
+	public UUID getParentBatchId() {
+		return parentBatchId;
+	}
+
+	public void setParentBatchId(UUID parentBatchId) {
+		this.parentBatchId = parentBatchId;
 	}
 }

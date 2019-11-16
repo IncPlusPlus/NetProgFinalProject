@@ -307,20 +307,19 @@ public class Server {
 	 * @param query the query that has been completed by a slave
 	 */
 	private void submitCompletedJob(Query query) throws JsonProcessingException {
-		BatchQuery responsibleBatchQuery = null;
-		for(Map.Entry<UUID, BatchQuery> i : batchQueries.entrySet()){
-			if(i.getValue().offer(query)){
-				responsibleBatchQuery = i.getValue();
-				break;
-			}
-		}
-		if(nonNull(responsibleBatchQuery)){
-			debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
-			if(responsibleBatchQuery.isCompleted()) {
-				debug("Completed batch " + responsibleBatchQuery.getQueryId());
-				removeJob(responsibleBatchQuery.getQueryId());
-				responsibleBatchQuery.setCompleted(true);
-				relayToAppropriateClient(responsibleBatchQuery);
+		UUID batchQueryId = query.getParentBatchId();
+		if (nonNull(batchQueryId)) {
+			BatchQuery responsibleBatchQuery = batchQueries.get(batchQueryId);
+			if(nonNull(responsibleBatchQuery)){
+				boolean sanityCheck = responsibleBatchQuery.offer(query);
+				assert sanityCheck;
+				debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
+				if(responsibleBatchQuery.isCompleted()) {
+					debug("Completed batch " + responsibleBatchQuery.getQueryId());
+					removeJob(responsibleBatchQuery.getQueryId());
+					responsibleBatchQuery.setCompleted(true);
+					relayToAppropriateClient(responsibleBatchQuery);
+				}
 			}
 		}
 		else {
@@ -390,11 +389,11 @@ public class Server {
 						sendToLeastBusySlave(currentJob);
 					}
 					if(currentJob instanceof BatchQuery) {
+						currentJob.setQueryState(WAITING_ON_SLAVE);
 						for(Query individualJob : ((BatchQuery) currentJob).getQueries()) {
 							queries.put(individualJob.getQueryId(),individualJob);
 							sendToLeastBusySlave(individualJob);
 						}
-						currentJob.setQueryState(WAITING_ON_SLAVE);
 					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {

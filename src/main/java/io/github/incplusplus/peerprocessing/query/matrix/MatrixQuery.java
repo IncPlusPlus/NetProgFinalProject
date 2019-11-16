@@ -1,6 +1,7 @@
 package io.github.incplusplus.peerprocessing.query.matrix;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Maps;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.query.BatchQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
@@ -8,9 +9,8 @@ import io.github.incplusplus.peerprocessing.query.VectorQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +22,7 @@ public class MatrixQuery extends BatchQuery {
   private BigDecimalMatrix matrix1;
   private BigDecimalMatrix matrix2;
   /** Used only in the case that VectorQueries are required (i.e. a batch dot product operation) */
-  private List<VectorQuery> vectorQueries;
+  private Map<UUID, VectorQuery> vectorQueries;
   private BigDecimalMatrix resultMatrix;
 
   @SuppressWarnings("unused")
@@ -64,7 +64,7 @@ public class MatrixQuery extends BatchQuery {
     if(operation.equals(MULTIPLY)){
       if(isNull(resultMatrix)) {
         BigDecimal[][] productMatrix = new BigDecimal[matrix1.getNumRows()][matrix2.getNumCols()];
-        vectorQueries.forEach(vectorQuery ->
+        vectorQueries.values().forEach(vectorQuery ->
             productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] = (BigDecimal) vectorQuery.getResult());
         resultMatrix = new BigDecimalMatrix(productMatrix);
       }
@@ -96,30 +96,30 @@ public class MatrixQuery extends BatchQuery {
 
   @Override
   @JsonIgnore
-  public Query[] getQueries() {
+  public List<Query> getQueries() {
     if (getOperation().equals(MULTIPLY)) {
       if (vectorQueries==null){
-        vectorQueries = matrix1.getVectorsForMultiplyingWith(matrix2).parallelStream()
-                .map(VectorQuery::from).collect(Collectors.toList());
-        vectorQueries.forEach(vectorQuery -> vectorQuery.setRequestingClientUUID(this.getRequestingClientUUID()));
+        vectorQueries =
+            Maps.uniqueIndex(matrix1.getVectorsForMultiplyingWith(matrix2)
+                .parallelStream()
+                .map(VectorQuery::from)
+                .collect(Collectors.toList()), Query::getQueryId);
+        vectorQueries.values().parallelStream().forEach(vectorQuery -> {vectorQuery.setRequestingClientUUID(this.getRequestingClientUUID());vectorQuery.setParentBatchId(getQueryId());});
       }
       //return all vectorQueries that have not yet been solved
-      return vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).toArray(Query[]::new);
+      return vectorQueries.values().parallelStream().filter(vectorQuery -> !vectorQuery.isCompleted()).collect(Collectors.toList());
     }
     else {
       // if this is not something that supports splitting into multiple queries
       // return a single element array containing this single query.
-      return new MatrixQuery[] {this};
+      return Collections.singletonList(this);
     }
   }
 
   @Override
   public boolean offer(Query query) {
     Query internallyStoredCorrespondingQuery =
-        vectorQueries.stream()
-            .filter(query1 -> query1.getQueryId().equals(query.getQueryId()))
-            .findFirst()
-            .orElse(null);
+        vectorQueries.get(query.getQueryId());
 
     if (isNull(internallyStoredCorrespondingQuery)) {
       return false;
@@ -128,7 +128,7 @@ public class MatrixQuery extends BatchQuery {
       internallyStoredCorrespondingQuery.setQueryState(QueryState.COMPLETE);
       internallyStoredCorrespondingQuery.setResult(query.getResult());
       internallyStoredCorrespondingQuery.setReasonIncomplete(query.getReasonIncomplete());
-      super.setCompleted(Stream.of(getQueries()).allMatch(Query::isCompleted));
+      super.setCompleted(vectorQueries.values().parallelStream().allMatch(Query::isCompleted));
       return true;
     }
   }
