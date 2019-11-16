@@ -15,6 +15,7 @@ public abstract class Matrix<T> {
   @JsonIgnore
   public abstract int getNumCols();
 
+  @JsonIgnore
   public boolean isSquare() {
     return this.getNumRows() == this.getNumCols();
   }
