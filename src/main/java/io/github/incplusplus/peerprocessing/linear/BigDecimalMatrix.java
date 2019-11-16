@@ -151,6 +151,8 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 
   @Override
   public int getNumCols() {
+    if (matrix.length == 0)
+      return 0;
     return matrix[0].length;
   }
 
