@@ -320,8 +320,6 @@ public class Server {
 				debug("Completed batch " + responsibleBatchQuery.getQueryId());
 				removeJob(responsibleBatchQuery.getQueryId());
 				responsibleBatchQuery.setCompleted(true);
-//				responsibleBatchQuery.performCompletionAction();
-//				responsibleBatchQuery.setResult();
 				relayToAppropriateClient(responsibleBatchQuery);
 			}
 		}
