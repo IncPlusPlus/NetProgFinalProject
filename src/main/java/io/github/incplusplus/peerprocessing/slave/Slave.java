@@ -3,6 +3,9 @@ package io.github.incplusplus.peerprocessing.slave;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.Query;
+import io.github.incplusplus.peerprocessing.query.VectorQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -145,7 +148,7 @@ public class Slave implements ProperClient, Personable {
 					}
 					else if (header.equals(QUERY)) {
 						Query query = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
-						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
+						debug("Solving: " + query.getQueryId());
 						sendEvaluatedQuery(evaluate(query));
 					}
 					else if (header.equals(DISCONNECT)) {
@@ -188,32 +191,36 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	/**
-	 * Solves and returns a mathQuery. If an exception occurs,
-	 * it will be contained in the query enclosed by the specified mathQuery.
+	 * Solves and returns a algebraicQuery. If an exception occurs,
+	 * it will be contained in the query enclosed by the specified algebraicQuery.
 	 *
-	 * @param mathQuery the mathQuery to complete
-	 * @return the mathQuery containing the
+	 * @param algebraicQuery the algebraicQuery to complete
+	 * @return the algebraicQuery containing the
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
-	private MathQuery solve(MathQuery mathQuery) {
-		Expression expression = new Expression(mathQuery.getQueryString());
+	private AlgebraicQuery solve(AlgebraicQuery algebraicQuery) {
+		Expression expression = new Expression(algebraicQuery.getQueryString());
 		try {
-			mathQuery.setResult(expression.eval().toString());
-			mathQuery.setCompleted(true);
+			algebraicQuery.setResult(expression.eval().toString());
+			algebraicQuery.setCompleted(true);
 		}
 		catch (Exception e) {
 			printStackTrace(e);
 			//We've completed it to the best of our ability
 			//client should check the throwable!=null
-			mathQuery.setCompleted(true);
-			mathQuery.setReasonIncomplete(e);
+			algebraicQuery.setCompleted(true);
+			algebraicQuery.setReasonIncomplete(e);
 		}
-		return mathQuery;
+		return algebraicQuery;
 	}
 	
 	private Query evaluate(Query query) {
-		if (query instanceof MathQuery) {
-			return solve((MathQuery) query);
+		if (query instanceof AlgebraicQuery) {
+			return solve((AlgebraicQuery) query);
+		}
+		else if(query instanceof VectorQuery) {
+			query.complete();
+			return query;
 		}
 		else {
 			throw new UnsupportedOperationException();

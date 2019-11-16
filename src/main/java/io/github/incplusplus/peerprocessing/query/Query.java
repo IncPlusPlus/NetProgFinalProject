@@ -1,24 +1,28 @@
-package io.github.incplusplus.peerprocessing.common;
+package io.github.incplusplus.peerprocessing.query;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
+import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
 
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-@JsonSubTypes(@JsonSubTypes.Type(MathQuery.class))
+@JsonSubTypes({@JsonSubTypes.Type(AlgebraicQuery.class),@JsonSubTypes.Type(MatrixQuery.class),@JsonSubTypes.Type(VectorQuery.class),@JsonSubTypes.Type(BatchQuery.class)})
 public abstract class Query {
 	private final UUID queryId = UUID.randomUUID();
 	private volatile boolean completed;
 	private Throwable reasonIncomplete;
 	private UUID requestingClientUUID;
 	private UUID solvingSlaveUUID;
+	private UUID parentBatchId;
 	private QueryState queryState;
-	private String result;
-	private String queryString;
+	@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+	@JsonSubTypes({@JsonSubTypes.Type(BigDecimalMatrix.class),@JsonSubTypes.Type(MatrixQuery.class),@JsonSubTypes.Type(VectorQuery.class),@JsonSubTypes.Type(BatchQuery.class)})
+	private Object result;
 	
-	Query() {
+	protected Query() {
 		this.queryState = QueryState.WAITING_FOR_AVAILABLE_SLAVES;
 	}
 	
@@ -30,16 +34,8 @@ public abstract class Query {
 		this.queryState = queryState;
 	}
 	
-	public String getResult() {
+	public Object getResult() {
 		return this.result;
-	}
-	
-	/**
-	 * @return the string that can be acted upon to
-	 * complete this query.
-	 */
-	public String getQueryString() {
-		return this.queryString;
 	}
 	
 	/**
@@ -64,7 +60,7 @@ public abstract class Query {
 		return completed;
 	}
 	
-	public void setResult(String result) {
+	public void setResult(Object result) {
 		this.result = result;
 	}
 	
@@ -95,8 +91,12 @@ public abstract class Query {
 	public void setSolvingSlaveUUID(UUID solvingSlaveUUID) {
 		this.solvingSlaveUUID = solvingSlaveUUID;
 	}
-	
-	void setQueryString(String queryString) {
-		this.queryString = queryString;
+
+	public UUID getParentBatchId() {
+		return parentBatchId;
+	}
+
+	public void setParentBatchId(UUID parentBatchId) {
+		this.parentBatchId = parentBatchId;
 	}
 }
