@@ -323,6 +323,9 @@ public class Server {
 				relayToAppropriateClient(responsibleBatchQuery);
 			}
 		}
+		else {
+			relayToAppropriateClient(query);
+		}
 	}
 	
 	private void relayToAppropriateClient(Query query) throws JsonProcessingException {
