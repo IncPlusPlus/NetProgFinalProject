@@ -19,7 +19,7 @@ public class AlgebraicQuery extends Query {
 	/**
 	 * To reduce the need for external libraries, the actual processing of the math query does
 	 * not occur within this class. Instead, it is expected that it happens outside of the class
-	 * and the result is set using {@link #setResult(String)}.
+	 * and the result is set using {@link Query#setResult(Object)}.
 	 */
 	@Override
 	public void complete() {

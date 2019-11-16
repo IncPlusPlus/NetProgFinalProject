@@ -249,7 +249,7 @@ public class Client implements ProperClient, Personable {
 			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
 				Thread.sleep(50);
 			}
-			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());
+			return new BigDecimal((String) futureQueries.get(correspondingQueryId).getResult());
 		}
 	}
 	

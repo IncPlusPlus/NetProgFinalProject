@@ -16,7 +16,7 @@ public abstract class Query {
 	private UUID requestingClientUUID;
 	private UUID solvingSlaveUUID;
 	private QueryState queryState;
-	private String result;
+	private Object result;
 	
 	protected Query() {
 		this.queryState = QueryState.WAITING_FOR_AVAILABLE_SLAVES;
@@ -30,7 +30,7 @@ public abstract class Query {
 		this.queryState = queryState;
 	}
 	
-	public String getResult() {
+	public Object getResult() {
 		return this.result;
 	}
 	
@@ -56,7 +56,7 @@ public abstract class Query {
 		return completed;
 	}
 	
-	public void setResult(String result) {
+	public void setResult(Object result) {
 		this.result = result;
 	}
 	
