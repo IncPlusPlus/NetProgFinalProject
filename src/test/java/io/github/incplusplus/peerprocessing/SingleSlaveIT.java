@@ -6,6 +6,7 @@ import io.github.incplusplus.peerprocessing.server.Server;
 import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -15,17 +16,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.iterateAndAssertEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//@Timeout(value = 5,unit = TimeUnit.MINUTES)
+@Timeout(value = 5,unit = TimeUnit.MINUTES)
 public class SingleSlaveIT {
 	public static final boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;
