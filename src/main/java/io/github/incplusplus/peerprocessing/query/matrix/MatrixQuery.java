@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.github.incplusplus.peerprocessing.query.matrix.Operation.MULTIPLY;
 
@@ -86,7 +87,7 @@ public class MatrixQuery extends BatchQuery {
                 .map(VectorQuery::from).collect(Collectors.toList());
       }
       //return all vectorQueries that have not yet been solved
-      return vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).collect(Collectors.toList()).toArray(Query[]::new);
+      return vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).toArray(Query[]::new);
     }
     else {
       // if this is not something that supports splitting into multiple queries
@@ -112,6 +113,7 @@ public class MatrixQuery extends BatchQuery {
       internallyStoredCorrespondingQuery.setQueryState(QueryState.COMPLETE);
       internallyStoredCorrespondingQuery.setResult(query.getResult());
       internallyStoredCorrespondingQuery.setReasonIncomplete(query.getReasonIncomplete());
+      super.everythingCompleted = Stream.of(getQueries()).allMatch(Query::isCompleted);
       return true;
     }
   }

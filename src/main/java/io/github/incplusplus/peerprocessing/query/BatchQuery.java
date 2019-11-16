@@ -21,6 +21,7 @@ public abstract class BatchQuery extends Query {
   private boolean isCompletedReturnedTrueAlready = false;
   /** @return all the queries that need to be executed from this batch */
   public abstract Query[] getQueries();
+  protected boolean everythingCompleted = false;
 
   /**
    * Offer this BatchQuery a Query instance. If this BatchQuery is responsible for this Query, this
@@ -34,7 +35,6 @@ public abstract class BatchQuery extends Query {
   /** @return whether or not all of the queries managed by this class have been answered yet. */
   @Override
   public boolean isCompleted() {
-    boolean everythingCompleted = Stream.of(getQueries()).allMatch(Query::isCompleted);
     if (everythingCompleted)
       if (!isCompletedReturnedTrueAlready) {
         performCompletionAction();
