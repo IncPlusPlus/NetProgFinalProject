@@ -1,5 +1,7 @@
 package io.github.incplusplus.peerprocessing.linear;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.javatuples.Quartet;
 
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.util.List;
  *
  * @param <T> the data type of all entries
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+@JsonSubTypes({@JsonSubTypes.Type(BigDecimalMatrix.class)})
 public abstract class RealMatrix<T> extends Matrix<T> {
 	
 	/**

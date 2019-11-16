@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.linear;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.javatuples.Quartet;
 
 import java.math.BigDecimal;
@@ -153,6 +154,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
     return matrix[0].length;
   }
 
+  @JsonIgnore
   @Override
   public BigDecimal[][] getContents() {
     return Arrays.copyOf(matrix, matrix.length);
