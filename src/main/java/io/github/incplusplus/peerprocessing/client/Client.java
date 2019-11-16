@@ -2,8 +2,11 @@ package io.github.incplusplus.peerprocessing.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
+import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
+import io.github.incplusplus.peerprocessing.query.matrix.Operation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -135,6 +138,10 @@ public class Client implements ProperClient, Personable {
 	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
 		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
 	}
+
+	public FutureTask<BigDecimalMatrix> multiply(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) {
+		return new FutureTask<>(new MatrixMultiplicationEvaluator(matrix1,matrix2));
+	}
 	
 	private void dealWithServer() {
 		if (isNull(sock))
@@ -222,6 +229,38 @@ public class Client implements ProperClient, Personable {
 		}
 		else {
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	private class MatrixMultiplicationEvaluator implements Callable<BigDecimalMatrix> {
+		private final BigDecimalMatrix matrix1;
+		private final BigDecimalMatrix matrix2;
+
+		public MatrixMultiplicationEvaluator(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) {
+			this.matrix1 = matrix1;
+			this.matrix2 = matrix2;
+		}
+
+		@Override
+		public BigDecimalMatrix call() throws Exception {
+			//If the client hasn't introduced itself yet,
+			//don't throw a wrench into the mix.
+			while (!polite.get()) {
+				Thread.sleep(50);
+			}
+			MatrixQuery query = new MatrixQuery(Operation.MULTIPLY,matrix1,matrix2);
+			UUID correspondingQueryId = query.getQueryId();
+			futureQueries.put(query.getQueryId(), query);
+			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
+			if (futureQueries.get(correspondingQueryId) == null) {
+				throw new IllegalStateException("The corresponding query disappeared from the map!");
+			}
+			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
+				Thread.sleep(50);
+			}
+			Query resultQuery = futureQueries.get(correspondingQueryId);
+			MatrixQuery resultMatrixQuery = (MatrixQuery) resultQuery;
+			return (BigDecimalMatrix) resultMatrixQuery.getResult();
 		}
 	}
 	
