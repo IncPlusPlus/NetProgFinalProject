@@ -10,6 +10,7 @@ public class VectorQuery extends Query {
   private BigDecimal[] secondVector;
   private final Integer rowIndex;
   private final Integer columnIndex;
+  private BigDecimal product;
 
   public VectorQuery(
       BigDecimal[] firstVector, BigDecimal[] secondVector, Integer rowIndex, Integer columnIndex) {
@@ -26,7 +27,7 @@ public class VectorQuery extends Query {
   @Override
   public void complete() {
     setCompleted(true);
-    new BigDecimalMatrix().dot(firstVector, secondVector);
+    this.product = new BigDecimalMatrix().dot(firstVector, secondVector);
   }
 
   public Integer getRowIndex() {
@@ -35,5 +36,10 @@ public class VectorQuery extends Query {
 
   public Integer getColumnIndex() {
     return columnIndex;
+  }
+
+  @Override
+  public Object getResult() {
+    return this.product;
   }
 }

@@ -17,7 +17,7 @@ import static org.javatuples.Quartet.with;
 public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
   private BigDecimal[][] matrix;
 
-  BigDecimalMatrix(BigDecimal[][] matrix) {
+  public BigDecimalMatrix(BigDecimal[][] matrix) {
     this.matrix = matrix;
   }
 

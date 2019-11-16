@@ -6,6 +6,7 @@ import io.github.incplusplus.peerprocessing.query.Query;
 import io.github.incplusplus.peerprocessing.query.VectorQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,7 @@ public class MatrixQuery extends BatchQuery {
   private BigDecimalMatrix matrix2;
   /** Used only in the case that VectorQueries are required (i.e. a batch dot product operation) */
   private List<VectorQuery> vectorQueries;
+  private BigDecimalMatrix resultMatrix;
 
   public MatrixQuery(Operation operation, BigDecimalMatrix bigDecimalMatrix) {}
 
@@ -51,6 +53,21 @@ public class MatrixQuery extends BatchQuery {
 
   public void setMatrix2(BigDecimalMatrix matrix2) {
     this.matrix2 = matrix2;
+  }
+
+  @Override
+  public void performCompletionAction() {
+    if(operation.equals(MULTIPLY)){
+      BigDecimal[][] productMatrix = new BigDecimal[matrix1.getNumRows()][matrix2.getNumCols()];
+      Arrays.stream((VectorQuery[])getQueries()).forEach(vectorQuery ->
+          productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] = (BigDecimal) vectorQuery.getResult());
+      resultMatrix = new BigDecimalMatrix(productMatrix);
+    }
+  }
+
+  @Override
+  public Object getResult() {
+    return resultMatrix;
   }
 
   @Override
