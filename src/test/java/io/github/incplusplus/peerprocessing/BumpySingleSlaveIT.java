@@ -9,10 +9,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,13 +18,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests in this class are "bumpy" because they involve the server
  * starting up and shutting down between tests.
  */
+@Timeout(value = 2,unit = TimeUnit.MINUTES)
 class BumpySingleSlaveIT {
 	private int serverPort;
-	private Server server = new Server();
+	private final Server server = new Server();
 	
 	@BeforeEach
 	void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	

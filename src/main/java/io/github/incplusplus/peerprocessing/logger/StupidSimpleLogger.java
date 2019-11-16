@@ -16,10 +16,12 @@ public class StupidSimpleLogger {
 		enabled = true;
 	}
 	
+	@SuppressWarnings("unused")
 	public static boolean isEnabled() {
 		return enabled;
 	}
 	
+	@SuppressWarnings("unused")
 	public static void disable() {
 		enabled = false;
 	}
@@ -39,7 +41,7 @@ public class StupidSimpleLogger {
 		if (enabled) {
 			synchronized (cp) {
 				cp.clear();
-				cp.println(message, Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+				cp.println(message, Ansi.Attribute.NONE, Ansi.FColor.GREEN, Ansi.BColor.BLACK);
 				cp.clear();
 			}
 		}
@@ -47,13 +49,14 @@ public class StupidSimpleLogger {
 	
 	/**
 	 * Same as {@link #info(String)} but without printing linefeed afterwards.
+	 * @param message the message to print.
 	 */
 	public static void infoNoLine(String message) {
 		if (enabled) {
 			synchronized (cp) {
 				cp.clear();
 				//See https://github.com/dialex/JCDP/issues/21
-				cp.print("", Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+				cp.print("", Ansi.Attribute.NONE, Ansi.FColor.GREEN, Ansi.BColor.BLACK);
 				System.out.print(message);
 				cp.clear();
 			}

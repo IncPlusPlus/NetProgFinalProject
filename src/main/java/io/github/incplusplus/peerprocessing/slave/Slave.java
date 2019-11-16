@@ -3,7 +3,9 @@ package io.github.incplusplus.peerprocessing.slave;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.*;
-import org.javatuples.Pair;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.Query;
+import io.github.incplusplus.peerprocessing.query.VectorQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,38 +13,32 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.*;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
+import static java.util.Objects.isNull;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
 	private final int serverPort;
 	private Socket sock;
-	private AtomicBoolean running = new AtomicBoolean();
+	private final AtomicBoolean running = new AtomicBoolean();
 	/**
 	 * Whether or not this client has introduced itself
 	 */
-	private AtomicBoolean polite = new AtomicBoolean();
+	private final AtomicBoolean polite = new AtomicBoolean();
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private String name;
 	private volatile UUID uuid = UUID.randomUUID();
-	
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainSlave.init();
-		mainSlave.begin();
-	}
 	
 	public Slave(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
@@ -96,7 +92,6 @@ public class Slave implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setSenderName(name);
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
@@ -130,6 +125,9 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	private void dealWithServer() {
+		if (isNull(sock))
+			throw new IllegalStateException("Socket not initialized properly. " +
+					"Did you remember to check the boolean value of Slave.begin()?!");
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
 			while (!sock.isClosed()) {
@@ -142,23 +140,21 @@ public class Slave implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
 					}
 					else if (header.equals(QUERY)) {
-						Query query = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
-						debug("Solving: " + query.getQueryId() + " - " + query.getQueryString());
+						Query query = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
+						debug("Solving: " + query.getQueryId());
 						sendEvaluatedQuery(evaluate(query));
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
 						disconnect();
 						debug("Disconnected.");
-					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 				}
 				catch (NullPointerException e) {
@@ -195,32 +191,36 @@ public class Slave implements ProperClient, Personable {
 	}
 	
 	/**
-	 * Solves and returns a mathQuery. If an exception occurs,
-	 * it will be contained in the query enclosed by the specified mathQuery.
+	 * Solves and returns a algebraicQuery. If an exception occurs,
+	 * it will be contained in the query enclosed by the specified algebraicQuery.
 	 *
-	 * @param mathQuery the mathQuery to complete
-	 * @return the mathQuery containing the
+	 * @param algebraicQuery the algebraicQuery to complete
+	 * @return the algebraicQuery containing the
 	 * completed query or a query containing a stacktrace if incomplete
 	 */
-	private MathQuery solve(MathQuery mathQuery) {
-		Expression expression = new Expression(mathQuery.getQueryString());
+	private AlgebraicQuery solve(AlgebraicQuery algebraicQuery) {
+		Expression expression = new Expression(algebraicQuery.getQueryString());
 		try {
-			mathQuery.setResult(expression.eval().toString());
-			mathQuery.setCompleted(true);
+			algebraicQuery.setResult(expression.eval().toString());
+			algebraicQuery.setCompleted(true);
 		}
 		catch (Exception e) {
 			printStackTrace(e);
 			//We've completed it to the best of our ability
 			//client should check the throwable!=null
-			mathQuery.setCompleted(true);
-			mathQuery.setReasonIncomplete(e);
+			algebraicQuery.setCompleted(true);
+			algebraicQuery.setReasonIncomplete(e);
 		}
-		return mathQuery;
+		return algebraicQuery;
 	}
 	
 	private Query evaluate(Query query) {
-		if (query instanceof MathQuery) {
-			return solve((MathQuery) query);
+		if (query instanceof AlgebraicQuery) {
+			return solve((AlgebraicQuery) query);
+		}
+		else if(query instanceof VectorQuery) {
+			query.complete();
+			return query;
 		}
 		else {
 			throw new UnsupportedOperationException();

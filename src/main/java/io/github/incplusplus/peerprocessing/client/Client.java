@@ -2,6 +2,11 @@ package io.github.incplusplus.peerprocessing.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.Query;
+import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
+import io.github.incplusplus.peerprocessing.query.matrix.Operation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,35 +15,39 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.github.incplusplus.peerprocessing.client.ClientRunner.printEvalLine;
+import static io.github.incplusplus.peerprocessing.client.ConsoleUtils.printSolution;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
-import static io.github.incplusplus.peerprocessing.common.Demands.*;
+import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
+import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
+import static java.util.Objects.isNull;
 
 public class Client implements ProperClient, Personable {
 	private final String serverHostname;
-	/**
-	 * If true, this is being used by a human with the console. If false, it is being used as an API passthrough
-	 */
-	boolean usedWithConsole;
 	private final int serverPort;
 	private Socket sock;
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
-	private String name;
 	private volatile UUID uuid;
-	private AtomicBoolean running = new AtomicBoolean();
-	/** Whether or not this client has introduced itself */
-	private AtomicBoolean polite = new AtomicBoolean();
-	private ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
+	private boolean printResults = false;
+	private final AtomicBoolean running = new AtomicBoolean();
+	/**
+	 * Whether or not this client has introduced itself
+	 */
+	private final AtomicBoolean polite = new AtomicBoolean();
+	private final ConcurrentHashMap<UUID, Query> futureQueries = new ConcurrentHashMap<>();
 	
 	public Client(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
@@ -59,8 +68,10 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	public void setVerbose(boolean verbose) {
-		if (verbose)
+		if (verbose) {
 			enable();
+			printResults = true;
+		}
 	}
 	
 	public UUID getConnectionId() {
@@ -83,48 +94,6 @@ public class Client implements ProperClient, Personable {
 		boolean firstStart = running.compareAndSet(false, true);
 		assert firstStart;
 		dealWithServer();
-		if (usedWithConsole) {
-			info("\nIf you want to enter an expression, type it and hit enter.\n" +
-					"After you have entered your expression, it may take a moment for the server to respond.\n" +
-					"You'll see 'Evaluate: ' again after submitting. You may choose to wait (recommended) " +
-					"or you may attempt to enter a second expression while the first processes. \n" +
-					"This is not recommended " +
-					"as you may be interrupted by the first result while you type the second expression.\n" +
-					"To exit, type /q and hit enter.\n");
-			String consoleLine;
-			MathQuery mathQuery = null;
-			try {
-				//Sleep for 2 secs just to let the server
-				//identification process complete
-				//without making a mess of the console
-				Thread.sleep(2000);
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			while (running.get()) {
-				if (usedWithConsole)
-					printEvalLine();
-				try {
-					consoleLine = getConsoleLine();
-					if (consoleLine == null) {
-						break;
-					}
-					mathQuery = new MathQuery(consoleLine, uuid);
-					outToServer.println(msg(SHARED_MAPPER.writeValueAsString(mathQuery), QUERY));
-				}
-				catch (ExecutionException | InterruptedException | JsonProcessingException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	private String getConsoleLine() throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
-		Future<String> future = executorService.submit(new ConsoleInputReadTask(sock));
-		executorService.shutdown();
-		return future.get();
 	}
 	
 	/**
@@ -134,7 +103,6 @@ public class Client implements ProperClient, Personable {
 	public void introduce() throws JsonProcessingException {
 		debug("Introducing self to server. Connecting...");
 		Introduction introduction = new Introduction();
-		introduction.setSenderName(name);
 		introduction.setSenderId(uuid);
 		introduction.setSenderType(MemberType.CLIENT);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), IDENTITY));
@@ -167,11 +135,18 @@ public class Client implements ProperClient, Personable {
 		sock.close();
 	}
 	
-	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) throws JsonProcessingException {
+	public FutureTask<BigDecimal> evaluateExpression(String mathExpression) {
 		return new FutureTask<>(new ExpressionEvaluator(mathExpression));
+	}
+
+	public FutureTask<BigDecimalMatrix> multiply(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) {
+		return new FutureTask<>(new MatrixMultiplicationEvaluator(matrix1,matrix2));
 	}
 	
 	private void dealWithServer() {
+		if (isNull(sock))
+			throw new IllegalStateException("Socket not initialized properly. " +
+					"Did you remember to check the boolean value of Client.begin()?!");
 		Thread serverInteractionThread = new Thread(() -> {
 			String lineFromServer;
 			while (!sock.isClosed()) {
@@ -184,13 +159,11 @@ public class Client implements ProperClient, Personable {
 						outToServer.println(IDENTIFY);
 					}
 					else if (header.equals(IDENTITY)) {
-						Introduction introduction = SHARED_MAPPER.readValue(decode(lineFromServer), Introduction.class);
+						Introduction introduction = SHARED_MAPPER.readValue(
+								Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
 						this.uuid = introduction.getReceiverId();
 						debug(this + " connected");
 						this.polite.compareAndSet(false, true);
-					}
-					else if (header.equals(PROVIDE_CLIENT_NAME)) {
-						throw new IllegalStateException("RUN! EVERYBODY RUN!");
 					}
 					else if (header.equals(DISCONNECT)) {
 						debug("Told by server to disconnect. Disconnecting..");
@@ -198,11 +171,8 @@ public class Client implements ProperClient, Personable {
 						debug("Disconnected.");
 					}
 					else if (header.equals(RESULT)) {
-						Query result = SHARED_MAPPER.readValue(decode(lineFromServer), Query.class);
-						if (usedWithConsole) {
-							printResult(result);
-						}
-						else if (futureQueries.containsKey(result.getQueryId())) {
+						Query result = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromServer)), Query.class);
+						if (futureQueries.containsKey(result.getQueryId())) {
 							Query futureQuery = futureQueries.get(result.getQueryId());
 							futureQuery.setQueryState(result.getQueryState());
 							futureQuery.setSolvingSlaveUUID(result.getSolvingSlaveUUID());
@@ -210,7 +180,14 @@ public class Client implements ProperClient, Personable {
 							futureQuery.setCompleted(result.isCompleted());
 							//The query has been solved and is ready to be grabbed by
 							//whatever FutureTask put it into futureQueries in the first place
-							printResult(futureQuery);
+							if (printResults) {
+								printResult(futureQuery);
+								//todo make printing conditional on whether this was started from ClientRunner
+								printEvalLine();
+							}
+						}
+						else {
+							error("Client " + getConnectionId() + " got query " + result.getQueryId() + " but wasn't expecting it.");
 						}
 					}
 				}
@@ -248,42 +225,54 @@ public class Client implements ProperClient, Personable {
 	}
 	
 	private void printResult(Query query) {
-		if (query instanceof MathQuery) {
-			printSolution((MathQuery) query);
+		if (query instanceof AlgebraicQuery) {
+			printSolution((AlgebraicQuery) query);
 		}
+		else if(query instanceof MatrixQuery) {
+		  info("No printable answer for type " + MatrixQuery.class);
+        }
 		else {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
-	private void printSolution(MathQuery query) {
-		assert query.isCompleted();
-		if (query.getReasonIncomplete() == null) {
-			//Make way for incoming message if the "Evaluate:" line is there
-			if (usedWithConsole)
-				System.out.println();
-			debug("The solution for the problem \"" + query.getQueryString() + "\" is: \"" + query.getResult() + "\"");
+
+	private class MatrixMultiplicationEvaluator implements Callable<BigDecimalMatrix> {
+		private final BigDecimalMatrix matrix1;
+		private final BigDecimalMatrix matrix2;
+
+		public MatrixMultiplicationEvaluator(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) {
+			this.matrix1 = matrix1;
+			this.matrix2 = matrix2;
 		}
-		else {
-			//Make way for incoming message if the "Evaluate:" line is there
-			if (usedWithConsole)
-				System.out.println();
-			debug("The solution for the problem \"" + query.getQueryString() + "\" could not be found.");
-			debug("The reason for this is: " + query.getReasonIncomplete().toString());
-			debug("Stacktrace: \n" + Arrays.toString(query.getReasonIncomplete().getStackTrace()));
+
+		@Override
+		public BigDecimalMatrix call() throws Exception {
+			//If the client hasn't introduced itself yet,
+			//don't throw a wrench into the mix.
+			while (!polite.get()) {
+				Thread.sleep(50);
+			}
+			MatrixQuery query = new MatrixQuery(Operation.MULTIPLY,matrix1,matrix2);
+			UUID correspondingQueryId = query.getQueryId();
+			query.setRequestingClientUUID(uuid);
+			futureQueries.put(query.getQueryId(), query);
+			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
+			if (futureQueries.get(correspondingQueryId) == null) {
+				throw new IllegalStateException("The corresponding query disappeared from the map!");
+			}
+			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
+				Thread.sleep(50);
+			}
+			Query resultQuery = futureQueries.get(correspondingQueryId);
+			MatrixQuery resultMatrixQuery = (MatrixQuery) resultQuery;
+			return (BigDecimalMatrix) resultMatrixQuery.getResult();
 		}
-		if (usedWithConsole)
-			printEvalLine();
-	}
-	
-	private void printEvalLine() {
-		infoNoLine("Evaluate: ");
 	}
 	
 	class ExpressionEvaluator implements Callable<BigDecimal> {
 		private final String expression;
 		
-		ExpressionEvaluator(String mathExpression) throws JsonProcessingException {
+		ExpressionEvaluator(String mathExpression) {
 			this.expression = mathExpression;
 		}
 		
@@ -294,8 +283,9 @@ public class Client implements ProperClient, Personable {
 			while (!polite.get()) {
 				Thread.sleep(50);
 			}
-			MathQuery query = new MathQuery(this.expression, uuid);
+			AlgebraicQuery query = new AlgebraicQuery(this.expression, uuid);
 			UUID correspondingQueryId = query.getQueryId();
+			query.setRequestingClientUUID(uuid);
 			futureQueries.put(query.getQueryId(), query);
 			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 			if (futureQueries.get(correspondingQueryId) == null) {
@@ -304,7 +294,7 @@ public class Client implements ProperClient, Personable {
 			while (!futureQueries.get(correspondingQueryId).isCompleted()) {
 				Thread.sleep(50);
 			}
-			return new BigDecimal(futureQueries.get(correspondingQueryId).getResult());
+			return new BigDecimal((String) futureQueries.get(correspondingQueryId).getResult());
 		}
 	}
 	

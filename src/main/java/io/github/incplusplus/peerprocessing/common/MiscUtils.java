@@ -4,11 +4,13 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.*;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.SplittableRandom;
 
-import static io.github.incplusplus.peerprocessing.common.VariousEnums.MESSAGE;
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
 import static org.javatuples.Pair.with;
 
@@ -36,19 +38,6 @@ public class MiscUtils {
 		String host = hostAndPortPair.getValue0();
 		int port = hostAndPortPair.getValue1();
 		return Triplet.with(host, port, new Socket(host, port));
-	}
-	
-	/**
-	 * Prefixes the provided string such that it begins with
-	 * the message value from the {@link VariousEnums} enum
-	 * and is also separated from the header by {@link Constants#HEADER_SEPARATOR}
-	 *
-	 * @param intendedMessage the message to be prefixed
-	 * @return a prefixed copy of the provided string
-	 * @deprecated As this is leftover code from the chat server
-	 */
-	public static String msg(String intendedMessage) {
-		return msg(intendedMessage, MESSAGE);
 	}
 	
 	/**
@@ -81,15 +70,6 @@ public class MiscUtils {
 	}
 	
 	/**
-	 * This is the same as {@link #decode(String)} except it
-	 * specifically expects the incoming header to be a {@link VariousEnums#MESSAGE}
-	 */
-	public static String decodeMessage(String receivedMessage) {
-		assert getHeader(receivedMessage).equals(MESSAGE);
-		return decode(receivedMessage);
-	}
-	
-	/**
 	 * Gets the header of a message which contains a header and a payload.
 	 *
 	 * @param fullPayload the message to get the header from
@@ -105,11 +85,27 @@ public class MiscUtils {
 	
 	/**
 	 * Credit to https://stackoverflow.com/a/38342964 for this elegant solution
+	 * @return the most likely local IP address of this machine
+	 * @throws SocketException if something were to go wrong
+	 * @throws UnknownHostException if something were to go horribly wrong
 	 */
 	public static String getIp() throws SocketException, UnknownHostException {
 		try (final DatagramSocket socket = new DatagramSocket()) {
 			socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
 			return socket.getLocalAddress().getHostAddress();
 		}
+	}
+	
+	/**
+	 * Generates an integer uniformly at random between 0 (inclusive) and
+	 * the specified ceiling (exclusive) and creates a BigDecimal
+	 * with that value divided by 100.
+	 * <br>
+	 * Credit to <a href="https://stackoverflow.com/a/21863676/1687436">this SO answer</a>.
+	 * @param ceiling the ceiling of the initial value
+	 * @return PLEASE SEE METHOD DESCRIPTION
+	 */
+	public static BigDecimal randBigDec(int ceiling) {
+		return new BigDecimal(BigInteger.valueOf(new Random().nextInt(ceiling)), 2);
 	}
 }

@@ -1,7 +1,9 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import io.github.incplusplus.peerprocessing.query.Query;
+
 /**
- * Represents the state of a {@link io.github.incplusplus.peerprocessing.common.Query}.
+ * Represents the state of a {@link Query}.
  */
 public enum QueryState {
 	/**
@@ -25,5 +27,5 @@ public enum QueryState {
 	 * This Job has been completed and
 	 * the result sent back to the client.
 	 */
-	COMPLETE;
+	COMPLETE
 }

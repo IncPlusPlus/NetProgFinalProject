@@ -2,10 +2,11 @@
 [![Build Status](https://travis-ci.com/IncPlusPlus/NetProgFinalProject.svg?branch=master)](https://travis-ci.com/IncPlusPlus/NetProgFinalProject)
 [![codecov](https://codecov.io/gh/IncPlusPlus/NetProgFinalProject/branch/master/graph/badge.svg)](https://codecov.io/gh/IncPlusPlus/NetProgFinalProject)
 [![Release](https://jitpack.io/v/IncPlusPlus/NetProgFinalProject.svg)](https://jitpack.io/#IncPlusPlus/NetProgFinalProject)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=IncPlusPlus/NetProgFinalProject)](https://dependabot.com)
 
 ## Description
 
-This is the final project for Network Programming (COMP-2100). The goal is to create a prorotype distributed processing system. A main server will receive math requests which it will offload onto a pool of slaves. They will then process this request and send the results back to the client via the server.
+This is the final project for Network Programming (COMP-2100). The goal is to create a prototype distributed processing system. A main server will receive math requests which it will offload onto a pool of slaves. They will then process this request and send the results back to the client via the server.
 
 ## Deliverables
 

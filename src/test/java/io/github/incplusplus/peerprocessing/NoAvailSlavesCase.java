@@ -24,15 +24,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * Make sure the server doesn't try to do anything
  * funny if there are no slaves available to process a request.
  */
-public class NoAvailSlavesCase {
+class NoAvailSlavesCase {
 	private static int serverPort;
-	private static Server server = new Server();
-	private List<Future<?>> futureList = new ArrayList<>();
+	private static final Server server = new Server();
+	private final List<Future<?>> futureList = new ArrayList<>();
 	private static ExecutorService executor;
 	
 	@BeforeAll
 	static void setUp() throws IOException {
 		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		// noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 		executor = Executors.newFixedThreadPool(20);
 	}
@@ -51,6 +52,7 @@ public class NoAvailSlavesCase {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.init();
 			myClient.begin();
+			//noinspection StatementWithEmptyBody
 			while (!myClient.isPolite()){}
 			task = myClient.evaluateExpression(input);
 			Future<?> nullFuture = executor.submit(task);

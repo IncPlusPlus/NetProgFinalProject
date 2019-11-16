@@ -3,6 +3,10 @@ package io.github.incplusplus.peerprocessing.server;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
+import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
+import io.github.incplusplus.peerprocessing.query.BatchQuery;
+import io.github.incplusplus.peerprocessing.query.PoisonPill;
+import io.github.incplusplus.peerprocessing.query.Query;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,27 +28,22 @@ import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
-import static io.github.incplusplus.peerprocessing.server.ConnectionState.CONNECTING;
-import static io.github.incplusplus.peerprocessing.server.ConnectionState.INVALID;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.server.QueryState.SENDING_TO_CLIENT;
 import static io.github.incplusplus.peerprocessing.server.QueryState.WAITING_ON_SLAVE;
 import static io.github.incplusplus.peerprocessing.server.ServerMethods.negotiate;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class Server {
-	private static final String poisonPillString = "Time to wake up, Neo.";
 	private ServerSocket socket;
-	/**
-	 * The time to sleep in milliseconds when there are no slaves around to process requests
-	 */
-	private static long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 	//mostly unused
-	final UUID serverId = UUID.randomUUID();
+	private final UUID serverId = UUID.randomUUID();
 	//server naming is a low priority at the moment
 	final static String serverName = "Processing Server";
-	private volatile AtomicBoolean started = new AtomicBoolean(false);
-	private volatile AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+	private final AtomicBoolean started = new AtomicBoolean(false);
+	private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
 	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
@@ -53,14 +52,27 @@ public class Server {
 	 * after it has been established what {@linkplain MemberType} the incoming connection is.
 	 */
 	private final List<ConnectionHandler> connectionHandlers = Collections.synchronizedList(new ArrayList<>());
-	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<UUID, Query>();
+	/** A HashMap that holds all queries that are being processed or relayed. */
+	private final ConcurrentHashMap<UUID, Query> queries = new ConcurrentHashMap<>();
+	/**
+	 *  A HashMap that contains jobs that are to be processed in batches.
+	 *  ClientObj and SlaveObj should not interact with this Map. Only the server
+	 *  coordinates when an action is taken with the items in this Map.
+	 */
+	private final ConcurrentHashMap<UUID, BatchQuery> batchQueries = new ConcurrentHashMap<>();
 	/**
 	 * A queue that holds the jobs that are waiting to be assigned and sent to a slave.
 	 */
-	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<Query>();
+	private final BlockingDeque<Query> jobsAwaitingProcessing = new LinkedBlockingDeque<>();
 	
 	/**
-	 * See {@link #start(int)}
+	 * Start a server.
+	 * @param serverPort the port to start the server on.
+	 *                    If set to 0, the server will listen on
+	 *                    whatever port is available.
+	 * @param verbose whether the server should log to the console about every little thing
+	 * @return the port the server started listening on
+	 * @throws IOException if an IO error occurs
 	 */
 	public int start(int serverPort, boolean verbose) throws IOException {
 		if (verbose)
@@ -75,12 +87,13 @@ public class Server {
 	 *                   If set to 0, the server will listen on
 	 *                   whatever port is available.
 	 * @return the port the server started listening on
+	 * @throws IOException if an IO error occurs
 	 */
-	public int start(int serverPort) throws IOException {
+	private int start(int serverPort) throws IOException {
 		class ServerStartTask implements Runnable {
-			private ServerSocket serverSocket;
+			private final ServerSocket serverSocket;
 			
-			ServerStartTask(ServerSocket socket) {
+			private ServerStartTask(ServerSocket socket) {
 				this.serverSocket = socket;
 			}
 			
@@ -165,7 +178,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to register.
 	 */
-	void register(ConnectionHandler connectionHandler) {
+	private void register(ConnectionHandler connectionHandler) {
 		connectionHandlers.add(connectionHandler);
 	}
 	
@@ -175,9 +188,9 @@ public class Server {
 	 *
 	 * @param connectedEntity an entity to keep track of
 	 */
-	void register(ConnectedEntity connectedEntity) {
+	private void register(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			SlaveObj shouldBeNull = null;
+			SlaveObj shouldBeNull;
 			//Put this slave in the slaves map
 			shouldBeNull = slaves.put(connectedEntity.getConnectionUUID(), (SlaveObj) connectedEntity);
 			//ConcurrentHashMap does not support null entries. Because of this, the put() method
@@ -186,7 +199,7 @@ public class Server {
 			assert shouldBeNull == null;
 		}
 		else if (connectedEntity instanceof ClientObj) {
-			ClientObj shouldBeNull = null;
+			ClientObj shouldBeNull;
 			//Put this slave in the slaves map
 			shouldBeNull = clients.put(connectedEntity.getConnectionUUID(), (ClientObj) connectedEntity);
 			//ConcurrentHashMap does not support null entries. Because of this, the put() method
@@ -208,7 +221,7 @@ public class Server {
 	 *
 	 * @param connectionHandler the ConnectionHandler to remove
 	 */
-	void deRegister(ConnectionHandler connectionHandler) {
+	private void deRegister(ConnectionHandler connectionHandler) {
 		connectionHandlers.remove(connectionHandler);
 	}
 	
@@ -219,7 +232,7 @@ public class Server {
 	 *
 	 * @param connectedEntity the entity to remove
 	 */
-	void deRegister(ConnectedEntity connectedEntity) {
+	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
 			//TODO add responsibility reassignment if the slave held jobs
 			slaves.remove(connectedEntity.getConnectionUUID());
@@ -252,10 +265,14 @@ public class Server {
 	 *
 	 * @param query the query to be processed
 	 */
-	void submitJob(Query query) {
-		Query shouldBeNull = null;
-		//Put this slave in the slaves map
-		shouldBeNull = queries.put(query.getQueryId(), query);
+	private void submitJob(Query query) {
+		Query shouldBeNull;
+		if(query instanceof BatchQuery){
+			shouldBeNull = batchQueries.put(query.getQueryId(), (BatchQuery) query);
+		}
+		else{
+			shouldBeNull = queries.put(query.getQueryId(), query);
+		}
 		//ConcurrentHashMap does not support null entries. Because of this, the put() method
 		//only returns null if there was no previous mapping. We want to assure there was no
 		//duplicate mapping before this put() operation.
@@ -270,20 +287,51 @@ public class Server {
 	 *
 	 * @param queryId the id of the query to remove
 	 */
-	Query removeJob(UUID queryId) {
+	private Query removeJob(UUID queryId) {
 		Query removedJob = queries.remove(queryId);
+		if(isNull(removedJob)){
+			removedJob=batchQueries.remove(queryId);
+			if(isNull(removedJob))
+				throw new IllegalArgumentException("Tried to remove a job that existed in neither 'queries' nor 'batchQueries'.");
+		}
 		boolean sanity = removedJob.getQueryState().equals(WAITING_ON_SLAVE);
 		assert sanity;
 		removedJob.setQueryState(SENDING_TO_CLIENT);
 		return removedJob;
 	}
 	
-	void relayToAppropriateClient(Query query) throws JsonProcessingException {
+	/**
+	 * Tell the server a certain job has been completed. The server checks
+	 * whether this Query is a member of any active {@linkplain BatchQuery}
+	 * instance.
+	 * @param query the query that has been completed by a slave
+	 */
+	private void submitCompletedJob(Query query) throws JsonProcessingException {
+		UUID batchQueryId = query.getParentBatchId();
+		if (nonNull(batchQueryId)) {
+			BatchQuery responsibleBatchQuery = batchQueries.get(batchQueryId);
+			if(nonNull(responsibleBatchQuery)){
+				boolean sanityCheck = responsibleBatchQuery.offer(query);
+				assert sanityCheck;
+				debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
+				if(responsibleBatchQuery.isCompleted()) {
+					debug("Completed batch " + responsibleBatchQuery.getQueryId());
+					removeJob(responsibleBatchQuery.getQueryId());
+					responsibleBatchQuery.setCompleted(true);
+					relayToAppropriateClient(responsibleBatchQuery);
+				}
+			}
+		}
+		else {
+			relayToAppropriateClient(query);
+		}
+	}
+	
+	private void relayToAppropriateClient(Query query) throws JsonProcessingException {
 		ClientObj requestSource = clients.get(query.getRequestingClientUUID());
 		if (requestSource == null) {
-			error("Tried to tell client " + query.getRequestingClientUUID() + " that " +
-					query.getQueryString() + " = " +
-					query.getResult() + " but the client disappeared!");
+			error("Tried to tell client " + query.getRequestingClientUUID() + " the answer to " +
+					query.getQueryId() + " but the client disappeared!");
 		}
 		else {
 			requestSource.acceptCompleted(query);
@@ -292,6 +340,7 @@ public class Server {
 	
 	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
 		while (slaves.size() < 1) {
+			long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
 					"However, no slaves were available. Job queue thread sleeping " +
 					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " second(s)...");
@@ -302,6 +351,7 @@ public class Server {
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
+		//noinspection RedundantCast because if we don't cast, IntelliJ warns about suspicious call to Map.get()
 		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
 		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
 		debug("Sending query " + job.getQueryId() + " to slave " + designatedSlave.getConnectionUUID());
@@ -309,7 +359,7 @@ public class Server {
 	}
 	
 	private void poisonJobIngestionThread() {
-		jobsAwaitingProcessing.add(new MathQuery(poisonPillString, null));
+		jobsAwaitingProcessing.add(new PoisonPill());
 	}
 	
 	private void startJobIngestionThread() {
@@ -331,12 +381,20 @@ public class Server {
 			while (started()) {
 				try {
 					Query currentJob = jobsAwaitingProcessing.take();
-					if (currentJob.getQueryString().equals(
-							poisonPillString) && currentJob.getRequestingClientUUID() == null) {
+					if (currentJob instanceof PoisonPill) {
 						debug("Job ingestion thread ate a poison pill and is shutting down.");
 						break;
 					}
-					sendToLeastBusySlave(currentJob);
+					if(currentJob instanceof AlgebraicQuery) {
+						sendToLeastBusySlave(currentJob);
+					}
+					if(currentJob instanceof BatchQuery) {
+						currentJob.setQueryState(WAITING_ON_SLAVE);
+						for(Query individualJob : ((BatchQuery) currentJob).getQueries()) {
+							queries.put(individualJob.getQueryId(),individualJob);
+							sendToLeastBusySlave(individualJob);
+						}
+					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {
 					printStackTrace(e);
@@ -348,9 +406,9 @@ public class Server {
 		ingestionThread.start();
 	}
 	
-	public class ClientObj extends ConnectedEntity {
-		public ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
-		                 UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+	class ClientObj extends ConnectedEntity {
+		ClientObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		          UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 		
 		@Override
 		UUID getServerId() {
@@ -376,7 +434,7 @@ public class Server {
 					lineFromClient = getInFromClient().readLine();
 					Header header = getHeader(lineFromClient);
 					if (header.equals(QUERY)) {
-						solve(SHARED_MAPPER.readValue(decode(lineFromClient), Query.class));
+						solve(SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromClient)), Query.class));
 					}
 					else if (header.equals(IDENTIFY)) {
 						getOutToClient().println(
@@ -403,9 +461,6 @@ public class Server {
 				catch (IOException e) {
 					printStackTrace(e);
 				}
-				finally {
-				
-				}
 			}
 		}
 		
@@ -420,11 +475,11 @@ public class Server {
 		}
 	}
 	
-	public class SlaveObj extends ConnectedEntity {
-		private List<UUID> jobsResponsibleFor = new ArrayList<>();
+	class SlaveObj extends ConnectedEntity {
+		private final List<UUID> jobsResponsibleFor = new ArrayList<>();
 		
-		public SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
-		                UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
+		SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
+		         UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
 		
 		@Override
 		UUID getServerId() {
@@ -450,7 +505,7 @@ public class Server {
 					lineFromSlave = getInFromClient().readLine();
 					Header header = getHeader(lineFromSlave);
 					if (header.equals(RESULT)) {
-						Query completedQuery = SHARED_MAPPER.readValue(decode(lineFromSlave), Query.class);
+						Query completedQuery = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromSlave)), Query.class);
 						Query storedQuery = removeJob(completedQuery.getQueryId());
 						//We keep the originally created query object and only take what we need from the
 						//slave's data. This is to prevent possibly malicious slaves from compromising
@@ -459,7 +514,7 @@ public class Server {
 						storedQuery.setReasonIncomplete(completedQuery.getReasonIncomplete());
 						storedQuery.setResult(completedQuery.getResult());
 						storedQuery.setCompleted(true);
-						relayToAppropriateClient(storedQuery);
+						submitCompletedJob(storedQuery);
 						jobsResponsibleFor.remove(storedQuery.getQueryId());
 					}
 					else if (header.equals(IDENTIFY)) {
@@ -507,25 +562,23 @@ public class Server {
 		 * @return the list of UUIDs representing jobs that this slave is currently
 		 * responsible for. Useful for recovering a job if a slave suddenly disconnects.
 		 */
-		public List<UUID> getJobsResponsibleFor() {
+		List<UUID> getJobsResponsibleFor() {
 			return jobsResponsibleFor;
 		}
 	}
 	
-	public class ConnectionHandler implements Runnable {
+	class ConnectionHandler implements Runnable {
 		private volatile PrintWriter outToClient;
 		private volatile BufferedReader inFromClient;
 		private Socket socket;
 		private UUID connectionUUID;
-		private volatile ConnectionState connectionState;
 		
-		public ConnectionHandler(Socket incomingConnection) throws IOException {
+		ConnectionHandler(Socket incomingConnection) throws IOException {
 			if (incomingConnection == null || incomingConnection.isClosed())
 				throw new IllegalArgumentException("An incoming connection was established" +
 						"but was then immediately dropped.");
 			debug("New connection at " + incomingConnection.getLocalAddress().getHostAddress() + ":" + incomingConnection.getLocalPort());
 			this.connectionUUID = UUID.randomUUID();
-			this.connectionState = CONNECTING;
 			this.socket = incomingConnection;
 			this.inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.outToClient = new PrintWriter(socket.getOutputStream(), true);
@@ -553,7 +606,6 @@ public class Server {
 					debug("Registering new slave");
 					register(slave);
 				}
-				this.connectionState = INVALID;
 			}
 			catch (IOException e) {
 				printStackTrace(e);

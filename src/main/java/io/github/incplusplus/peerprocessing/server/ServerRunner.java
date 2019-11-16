@@ -10,13 +10,14 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.deb
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
 import static io.github.incplusplus.peerprocessing.server.Server.serverName;
 
-public class ServerRunner {
+class ServerRunner {
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
 		//Set up my custom logging implementation
 		StupidSimpleLogger.enable();
 		Server myServer = new Server();
 		int port = myServer.start(0,true);
+		//noinspection ConstantConditions because we may eventually use serverName
 		if (serverName != null)
 			info("Server name: " + serverName);
 		info("Server started on " + getIp() + ":" + port + ".");
