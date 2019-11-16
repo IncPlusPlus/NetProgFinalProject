@@ -82,5 +82,5 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	
 	protected abstract T getEntry(int rowNum, int colNum);
 	
-	public abstract T[][] getContents();
+	public abstract T[][] getMatrix();
 }

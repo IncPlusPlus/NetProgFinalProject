@@ -2,6 +2,7 @@ package io.github.incplusplus.peerprocessing.query;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
 
@@ -16,6 +17,8 @@ public abstract class Query {
 	private UUID requestingClientUUID;
 	private UUID solvingSlaveUUID;
 	private QueryState queryState;
+	@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+	@JsonSubTypes({@JsonSubTypes.Type(BigDecimalMatrix.class),@JsonSubTypes.Type(MatrixQuery.class),@JsonSubTypes.Type(VectorQuery.class),@JsonSubTypes.Type(BatchQuery.class)})
 	private Object result;
 	
 	protected Query() {

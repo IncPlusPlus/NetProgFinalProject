@@ -319,10 +319,11 @@ public class Server {
 			if(responsibleBatchQuery.isCompleted()) {
 				debug("Completed batch " + responsibleBatchQuery.getQueryId());
 				removeJob(responsibleBatchQuery.getQueryId());
+				responsibleBatchQuery.setCompleted(true);
+//				responsibleBatchQuery.performCompletionAction();
+//				responsibleBatchQuery.setResult();
+				relayToAppropriateClient(responsibleBatchQuery);
 			}
-		}
-		else{
-			relayToAppropriateClient(query);
 		}
 	}
 	
@@ -392,6 +393,7 @@ public class Server {
 							queries.put(individualJob.getQueryId(),individualJob);
 							sendToLeastBusySlave(individualJob);
 						}
+						currentJob.setQueryState(WAITING_ON_SLAVE);
 					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {

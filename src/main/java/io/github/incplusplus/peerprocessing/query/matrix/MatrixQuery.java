@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.github.incplusplus.peerprocessing.query.matrix.Operation.MULTIPLY;
+import static java.util.Objects.isNull;
 
 public class MatrixQuery extends BatchQuery {
   private Operation operation;
@@ -61,11 +62,26 @@ public class MatrixQuery extends BatchQuery {
   @Override
   public void performCompletionAction() {
     if(operation.equals(MULTIPLY)){
-      BigDecimal[][] productMatrix = new BigDecimal[matrix1.getNumRows()][matrix2.getNumCols()];
-      Arrays.stream((VectorQuery[])getQueries()).forEach(vectorQuery ->
-          productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] = (BigDecimal) vectorQuery.getResult());
-      resultMatrix = new BigDecimalMatrix(productMatrix);
+      if(isNull(resultMatrix)) {
+        BigDecimal[][] productMatrix = new BigDecimal[matrix1.getNumRows()][matrix2.getNumCols()];
+        vectorQueries.forEach(vectorQuery ->
+            productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] = (BigDecimal) vectorQuery.getResult());
+        resultMatrix = new BigDecimalMatrix(productMatrix);
+      }
     }
+  }
+
+  @Override
+  public void setResult(Object result) {
+    this.resultMatrix = (BigDecimalMatrix) result;
+  }
+
+  public BigDecimalMatrix getResultMatrix() {
+    return resultMatrix;
+  }
+
+  public void setResultMatrix(BigDecimalMatrix resultMatrix) {
+    this.resultMatrix = resultMatrix;
   }
 
   @Override
@@ -85,6 +101,7 @@ public class MatrixQuery extends BatchQuery {
       if (vectorQueries==null){
         vectorQueries = matrix1.getVectorsForMultiplyingWith(matrix2).parallelStream()
                 .map(VectorQuery::from).collect(Collectors.toList());
+        vectorQueries.forEach(vectorQuery -> vectorQuery.setRequestingClientUUID(this.getRequestingClientUUID()));
       }
       //return all vectorQueries that have not yet been solved
       return vectorQueries.stream().filter(vectorQuery -> !vectorQuery.isCompleted()).toArray(Query[]::new);
@@ -99,21 +116,19 @@ public class MatrixQuery extends BatchQuery {
   @Override
   public boolean offer(Query query) {
     Query internallyStoredCorrespondingQuery =
-        Arrays.stream(getQueries())
+        vectorQueries.stream()
             .filter(query1 -> query1.getQueryId().equals(query.getQueryId()))
             .findFirst()
             .orElse(null);
 
-    if (Objects.isNull(internallyStoredCorrespondingQuery)) {
+    if (isNull(internallyStoredCorrespondingQuery)) {
       return false;
     } else {
-      if (internallyStoredCorrespondingQuery.isCompleted())
-        throw new IllegalStateException("MatrixQuery was offered a duplicate Query.");
       internallyStoredCorrespondingQuery.setCompleted(true);
       internallyStoredCorrespondingQuery.setQueryState(QueryState.COMPLETE);
       internallyStoredCorrespondingQuery.setResult(query.getResult());
       internallyStoredCorrespondingQuery.setReasonIncomplete(query.getReasonIncomplete());
-      super.everythingCompleted = Stream.of(getQueries()).allMatch(Query::isCompleted);
+      super.setCompleted(Stream.of(getQueries()).allMatch(Query::isCompleted));
       return true;
     }
   }

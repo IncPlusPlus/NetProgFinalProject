@@ -10,7 +10,7 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BigDecimalMatrixTest {
+public class BigDecimalMatrixTest {
   // <editor-fold desc="Various matrices">
   private final BigDecimalMatrix zero2x2 =
       new BigDecimalMatrix(
@@ -203,14 +203,14 @@ class BigDecimalMatrixTest {
   @Test
   void getNumCols() {}
 
-  private static void iterateAndAssertEquals(
+  public static void iterateAndAssertEquals(
       RealMatrix<BigDecimal> firstMatrix, RealMatrix<BigDecimal> secondMatrix) {
-    iterateAndDoSomething(firstMatrix.getContents(), secondMatrix.getContents(), true);
+    iterateAndDoSomething(firstMatrix.getMatrix(), secondMatrix.getMatrix(), true);
   }
 
   private static void iterateAndAssertCompareToZero(
       RealMatrix<BigDecimal> firstMatrix, RealMatrix<BigDecimal> secondMatrix) {
-    iterateAndDoSomething(firstMatrix.getContents(), secondMatrix.getContents(), false);
+    iterateAndDoSomething(firstMatrix.getMatrix(), secondMatrix.getMatrix(), false);
   }
 
   /**

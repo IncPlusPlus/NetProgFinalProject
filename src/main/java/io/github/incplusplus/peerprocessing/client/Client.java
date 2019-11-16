@@ -182,6 +182,7 @@ public class Client implements ProperClient, Personable {
 							//whatever FutureTask put it into futureQueries in the first place
 							if (printResults) {
 								printResult(futureQuery);
+								//todo make printing conditional on whether this was started from ClientRunner
 								printEvalLine();
 							}
 						}
@@ -227,6 +228,9 @@ public class Client implements ProperClient, Personable {
 		if (query instanceof AlgebraicQuery) {
 			printSolution((AlgebraicQuery) query);
 		}
+		if(query instanceof MatrixQuery) {
+		  info("No printable answer for type " + MatrixQuery.class);
+        }
 		else {
 			throw new UnsupportedOperationException();
 		}
@@ -250,6 +254,7 @@ public class Client implements ProperClient, Personable {
 			}
 			MatrixQuery query = new MatrixQuery(Operation.MULTIPLY,matrix1,matrix2);
 			UUID correspondingQueryId = query.getQueryId();
+			query.setRequestingClientUUID(uuid);
 			futureQueries.put(query.getQueryId(), query);
 			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 			if (futureQueries.get(correspondingQueryId) == null) {
@@ -280,6 +285,7 @@ public class Client implements ProperClient, Personable {
 			}
 			AlgebraicQuery query = new AlgebraicQuery(this.expression, uuid);
 			UUID correspondingQueryId = query.getQueryId();
+			query.setRequestingClientUUID(uuid);
 			futureQueries.put(query.getQueryId(), query);
 			outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 			if (futureQueries.get(correspondingQueryId) == null) {

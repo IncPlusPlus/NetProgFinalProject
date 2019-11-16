@@ -31,7 +31,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
     BigDecimal[][] out = new BigDecimal[m][n];
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
-        out[i][j] = randBigDec(100000);
+        out[i][j] = randBigDec(10000);
       }
     }
     return new BigDecimalMatrix(out);
@@ -156,9 +156,8 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
     return matrix[0].length;
   }
 
-  @JsonIgnore
   @Override
-  public BigDecimal[][] getContents() {
+  public BigDecimal[][] getMatrix() {
     return Arrays.copyOf(matrix, matrix.length);
   }
 

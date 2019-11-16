@@ -18,10 +18,8 @@ import java.util.stream.Stream;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 @JsonSubTypes({@JsonSubTypes.Type(MatrixQuery.class)})
 public abstract class BatchQuery extends Query {
-  private boolean isCompletedReturnedTrueAlready = false;
   /** @return all the queries that need to be executed from this batch */
   public abstract Query[] getQueries();
-  protected boolean everythingCompleted = false;
 
   /**
    * Offer this BatchQuery a Query instance. If this BatchQuery is responsible for this Query, this
@@ -35,20 +33,17 @@ public abstract class BatchQuery extends Query {
   /** @return whether or not all of the queries managed by this class have been answered yet. */
   @Override
   public boolean isCompleted() {
-    if (everythingCompleted)
-      if (!isCompletedReturnedTrueAlready) {
-        performCompletionAction();
-        isCompletedReturnedTrueAlready = true;
-      }
-    return everythingCompleted;
+    if (super.isCompleted())
+      performCompletionAction();
+    return super.isCompleted();
   }
 
   /**
    * Subclasses can optionally override this method to be notified when their batch is complete.
    * That way, they can compile the information themselves when it's all available. This will be
    * triggered when {@link #isCompleted()} is called UNDER THE CONDITION THAT THE METHOD CALL
-   * RETURNED TRUE. Additionally, the call to performCompletionAction() will only happen once.
-   * Subsequent calls to {@link #isCompleted()} will not trigger this.
+   * RETURNED TRUE. Additionally, the call to performCompletionAction() will happen every time isCompleted()
+   * is called. To avoid wasting resources, keep track of whether you have already run this method before.
    */
   public void performCompletionAction() {
     // do nothing
