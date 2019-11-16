@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 public class VectorQuery extends Query {
   private BigDecimal[] firstVector;
   private BigDecimal[] secondVector;
-  private final Integer rowIndex;
-  private final Integer columnIndex;
+  private Integer rowIndex;
+  private Integer columnIndex;
   private BigDecimal product;
 
   public VectorQuery(
@@ -19,6 +19,9 @@ public class VectorQuery extends Query {
     this.rowIndex = rowIndex;
     this.columnIndex = columnIndex;
   }
+
+  @SuppressWarnings("unused")
+  public VectorQuery() {}
 
   public static VectorQuery from(Quartet<BigDecimal[], BigDecimal[], Integer, Integer> vectorPair) {
     return new VectorQuery(vectorPair.getValue0(), vectorPair.getValue1(), vectorPair.getValue2(), vectorPair.getValue3());
