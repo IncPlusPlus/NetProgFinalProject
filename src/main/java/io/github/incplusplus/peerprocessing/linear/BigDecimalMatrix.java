@@ -1,6 +1,6 @@
 package io.github.incplusplus.peerprocessing.linear;
 
-import org.javatuples.Pair;
+import org.javatuples.Quartet;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randBigDec;
 import static java.math.BigDecimal.ZERO;
-import static org.javatuples.Pair.with;
+import static org.javatuples.Quartet.with;
 
 public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
   private BigDecimal[][] matrix;
@@ -67,14 +67,14 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
   }
 
   @Override
-  public List<Pair<BigDecimal[], BigDecimal[]>> getVectorsForMultiplyingWith(
+  public List<Quartet<BigDecimal[], BigDecimal[], Integer, Integer>> getVectorsForMultiplyingWith(
       RealMatrix<BigDecimal> other) {
-    List<Pair<BigDecimal[], BigDecimal[]>> vectorPairs =
+    List<Quartet<BigDecimal[], BigDecimal[], Integer, Integer>> vectorPairs =
         new ArrayList<>(getNumRows() * other.getNumCols());
 
     for (int i = 0; i < getNumRows(); i++) {
       for (int j = 0; j < other.getNumCols(); j++) {
-        vectorPairs.add(with(getRow(i), other.getCol(j)));
+        vectorPairs.add(with(getRow(i), other.getCol(j),i,j));
       }
     }
     return vectorPairs;

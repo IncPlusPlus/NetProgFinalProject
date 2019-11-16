@@ -1,6 +1,6 @@
 package io.github.incplusplus.peerprocessing.linear;
 
-import org.javatuples.Pair;
+import org.javatuples.Quartet;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,8 +31,17 @@ public abstract class RealMatrix<T> extends Matrix<T> {
 	 * @return this matrix multiplied by the specified matrix
 	 */
 	public abstract RealMatrix<T> multiply(RealMatrix<T> other);
-	
-	public abstract List<Pair<BigDecimal[], BigDecimal[]>> getVectorsForMultiplyingWith(RealMatrix<T> other);
+
+	/**
+	 * Get the vectors required to compute a matrix multiplication operation
+	 * this * other.
+	 * @param other the matrix to multiply this matrix by
+	 * @return a Quartet where the first BigDecimal[] is the first vector and
+	 * the second BigDecimal[] is the second vector. The third item and fourth items
+	 * (Integers) are the row and column index respectively that the result of this operation
+	 * would be placed in when creating the product matrix.
+	 */
+	public abstract List<Quartet<BigDecimal[], BigDecimal[], Integer, Integer>> getVectorsForMultiplyingWith(RealMatrix<T> other);
 	
 	public abstract T[] multiply(T[] vector);
 	
