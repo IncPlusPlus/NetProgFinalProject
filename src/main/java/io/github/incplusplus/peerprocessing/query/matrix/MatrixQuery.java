@@ -22,7 +22,8 @@ public class MatrixQuery extends BatchQuery {
   private List<VectorQuery> vectorQueries;
   private BigDecimalMatrix resultMatrix;
 
-  public MatrixQuery(Operation operation, BigDecimalMatrix bigDecimalMatrix) {}
+  @SuppressWarnings("unused")
+  public MatrixQuery() {}
 
   public MatrixQuery(
       Operation operation, BigDecimalMatrix bigDecimalMatrix1, BigDecimalMatrix bigDecimalMatrix2) {
