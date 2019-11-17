@@ -25,7 +25,7 @@ Features in order of priority
 - [ ] Have the slaves each send a constant heartbeat to the server which will also tell the server the utilization of the slave. The server will then determine how many tasks to give to each slave to optimize utilization.
 - [ ] The commands can be sophisticated and invoked using reflection (likely won’t happen)
 - [ ] The tasks can be transported and executed using bytecode manipulation (way too ambitious)
-- [ ] The server will be able to deal with big matrices.
+- [x] The server will be able to deal with big matrices.
 
 ## Team members
 
