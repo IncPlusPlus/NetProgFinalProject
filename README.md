@@ -20,12 +20,12 @@ Features in order of priority
 - [x] The server can communicate with a client
 - [x] The server can communicate with slave nodes
 - [x] A user can send individual math expressions to be processed.
-- [ ] An API user can provide some sort of list of commands to the server which will be processed and returned
+- [x] An API user can provide some sort of list of commands to the server which will be processed and returned
 - [ ] The server can offload individual commands to slaves and send back the aggregate result to the client
 - [ ] Have the slaves each send a constant heartbeat to the server which will also tell the server the utilization of the slave. The server will then determine how many tasks to give to each slave to optimize utilization.
 - [ ] The commands can be sophisticated and invoked using reflection (likely won’t happen)
 - [ ] The tasks can be transported and executed using bytecode manipulation (way too ambitious)
-- [ ] The server will be able to deal with big matrices.
+- [x] The server will be able to deal with big matrices.
 
 ## Team members
 
@@ -55,6 +55,6 @@ If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Ma
 
 The Java library portion of this project is in a very rough state and is merely for demo purposes so please don't use it to calculate rocket trajectories!
 
-To use this as a library in your own project, you may either add it by importing it using your build tool of choice by adding it from [JitPack](https://jitpack.io/#IncPlusPlus/NetProgFinalProject) or by downloading the JAR from the releases page and adding it to your classpath.
+To use this as a library in your own project, you may either add it by importing it using your build tool of choice on [JitPack](https://jitpack.io/#IncPlusPlus/NetProgFinalProject) or by downloading [the JAR from the releases page](https://github.com/IncPlusPlus/NetProgFinalProject/releases/latest) and adding it to your classpath.
 
-There aren't many functions available yet and it's certainly not polished. However, there is a JavaDoc available online at [JitPack](https://jitpack.io/com/github/IncPlusPlus/NetProgFinalProject/latest/javadoc/).
+There aren't many functions available yet and it's certainly not polished. However, there is a [JavaDoc available online at JitPack](https://jitpack.io/com/github/IncPlusPlus/NetProgFinalProject/latest/javadoc/).
