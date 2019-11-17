@@ -20,7 +20,7 @@ Features in order of priority
 - [x] The server can communicate with a client
 - [x] The server can communicate with slave nodes
 - [x] A user can send individual math expressions to be processed.
-- [ ] An API user can provide some sort of list of commands to the server which will be processed and returned
+- [x] An API user can provide some sort of list of commands to the server which will be processed and returned
 - [ ] The server can offload individual commands to slaves and send back the aggregate result to the client
 - [ ] Have the slaves each send a constant heartbeat to the server which will also tell the server the utilization of the slave. The server will then determine how many tasks to give to each slave to optimize utilization.
 - [ ] The commands can be sophisticated and invoked using reflection (likely won’t happen)
