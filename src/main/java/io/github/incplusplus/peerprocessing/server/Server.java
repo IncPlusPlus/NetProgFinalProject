@@ -515,7 +515,8 @@ public class Server {
 						storedQuery.setResult(completedQuery.getResult());
 						storedQuery.setCompleted(true);
 						submitCompletedJob(storedQuery);
-						jobsResponsibleFor.remove(storedQuery.getQueryId());
+						boolean definitelyShouldStillPossessJob = jobsResponsibleFor.remove(storedQuery.getQueryId());
+						assert definitelyShouldStillPossessJob;
 					}
 					else if (header.equals(IDENTIFY)) {
 						getOutToClient().println(
