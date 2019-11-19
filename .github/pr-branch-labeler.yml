@@ -12,3 +12,5 @@ bug:
   head: ["bugfix/*", "fix/*", "hotfix/*"]
 🛠 Improvement:
   head: "improvement/*"
+feature:
+  head: "feature/*"
