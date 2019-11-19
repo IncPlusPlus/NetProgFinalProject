@@ -234,8 +234,12 @@ public class Server {
 	 */
 	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			//TODO add responsibility reassignment if the slave held jobs
 			slaves.remove(connectedEntity.getConnectionUUID());
+			//for each of the queries the slave was processing
+			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
+				//put them in the queue to get processed
+				jobsAwaitingProcessing.add(queries.get(uuid));
+			}
 		}
 		else if (connectedEntity instanceof ClientObj) {
 			clients.remove(connectedEntity.getConnectionUUID());
