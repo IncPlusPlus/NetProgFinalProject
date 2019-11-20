@@ -14,3 +14,5 @@ hotfix:
   head: "hotfix/*"
 🛠 Improvement:
   head: "improvement/*"
+feature:
+  head: "feature/*"
