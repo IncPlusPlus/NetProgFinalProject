@@ -49,13 +49,15 @@ class QueryProcessingReassignmentIT {
       mySlave.init();
       mySlave.begin();
       task = myClient.multiply(matrix1,matrix2);
+      //noinspection StatementWithEmptyBody
       while (!myClient.isPolite()){}
+      //noinspection StatementWithEmptyBody
       while (!mySlave.isPolite()){}
       ExecutorService executor = Executors.newFixedThreadPool(2);
       executor.submit(task);
       //wait until the slave is responsible for some tasks
       //noinspection StatementWithEmptyBody
-      while(server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size()<1) {}
+      while(server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size()<5) {}
       mySlave.disconnect();
       Thread thread = new Thread(() -> {
         try {
