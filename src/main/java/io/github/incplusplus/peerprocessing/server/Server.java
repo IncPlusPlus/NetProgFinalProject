@@ -385,15 +385,15 @@ public class Server {
 						debug("Job ingestion thread ate a poison pill and is shutting down.");
 						break;
 					}
-					if(currentJob instanceof AlgebraicQuery) {
-						sendToLeastBusySlave(currentJob);
-					}
 					if(currentJob instanceof BatchQuery) {
 						currentJob.setQueryState(WAITING_ON_SLAVE);
 						for(Query individualJob : ((BatchQuery) currentJob).getQueries()) {
 							queries.put(individualJob.getQueryId(),individualJob);
-							sendToLeastBusySlave(individualJob);
+							jobsAwaitingProcessing.add(individualJob);
 						}
+					}
+					else {
+						sendToLeastBusySlave(currentJob);
 					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {
