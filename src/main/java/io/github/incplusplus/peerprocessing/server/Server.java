@@ -239,7 +239,8 @@ public class Server {
 			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
 				//put them in the queue to get processed
 				debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
-				jobsAwaitingProcessing.add(queries.get(uuid));
+				boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
+				assert abandonedJobAdded;
 			}
 		}
 		else if (connectedEntity instanceof ClientObj) {
