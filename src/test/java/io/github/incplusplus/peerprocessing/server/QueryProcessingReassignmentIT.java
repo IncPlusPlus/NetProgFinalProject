@@ -1,4 +1,4 @@
-package io.github.incplusplus.peerprocessing;
+package io.github.incplusplus.peerprocessing.server;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
