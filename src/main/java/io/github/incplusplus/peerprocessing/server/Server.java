@@ -234,7 +234,8 @@ public class Server {
 	 */
 	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			slaves.remove(connectedEntity.getConnectionUUID());
+			SlaveObj shouldBeNonNull = slaves.remove(connectedEntity.getConnectionUUID());
+			assert nonNull(shouldBeNonNull);
 			//for each of the queries the slave was processing
 			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
 				//put them in the queue to get processed
