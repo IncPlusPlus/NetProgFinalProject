@@ -106,7 +106,7 @@ public class BigDecimalMatrixTest {
     assertFalse(dumb4x3.isSquare());
   }
 
-  @RepeatedTest(10)
+  @RepeatedTest(4)
   void randomMultiplicationTest() {
     int aRows = randInt(100, 1000);
     int aColsAndBRows = randInt(100, 1000);
