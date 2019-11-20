@@ -1,4 +1,6 @@
 coverage:
+  notify:
+    after_n_builds: 4
   status:
     project:
       unittests:
