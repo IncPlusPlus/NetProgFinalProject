@@ -238,6 +238,7 @@ public class Server {
 			//for each of the queries the slave was processing
 			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
 				//put them in the queue to get processed
+				debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
 				jobsAwaitingProcessing.add(queries.get(uuid));
 			}
 		}
