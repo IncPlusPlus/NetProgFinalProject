@@ -481,7 +481,7 @@ public class Server {
 	}
 	
 	class SlaveObj extends ConnectedEntity {
-		private final List<UUID> jobsResponsibleFor = new ArrayList<>();
+		private final List<UUID> jobsResponsibleFor = Collections.synchronizedList(new ArrayList<>());
 		
 		SlaveObj(PrintWriter outToClient, BufferedReader inFromClient, Socket socket,
 		         UUID connectionUUID) {super(outToClient, inFromClient, socket, connectionUUID);}
@@ -520,7 +520,8 @@ public class Server {
 						storedQuery.setResult(completedQuery.getResult());
 						storedQuery.setCompleted(true);
 						submitCompletedJob(storedQuery);
-						jobsResponsibleFor.remove(storedQuery.getQueryId());
+						boolean definitelyShouldStillPossessJob = jobsResponsibleFor.remove(storedQuery.getQueryId());
+						assert definitelyShouldStillPossessJob;
 					}
 					else if (header.equals(IDENTIFY)) {
 						getOutToClient().println(
