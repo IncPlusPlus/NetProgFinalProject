@@ -53,6 +53,9 @@ class QueryProcessingReassignmentIT {
       while (!mySlave.isPolite()){}
       ExecutorService executor = Executors.newFixedThreadPool(2);
       executor.submit(task);
+      //wait until the slave is responsible for some tasks
+      //noinspection StatementWithEmptyBody
+      while(server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size()<1) {}
       mySlave.disconnect();
       Thread thread = new Thread(() -> {
         try {
