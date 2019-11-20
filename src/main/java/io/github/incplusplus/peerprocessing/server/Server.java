@@ -45,7 +45,7 @@ public class Server {
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
-	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
+	final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
 	 * Should probably be replaced with {@link Executors#newCachedThreadPool()} at some point.
 	 * Elements of this list exist while an incoming connection is established and are removed
