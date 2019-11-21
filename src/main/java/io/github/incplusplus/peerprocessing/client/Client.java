@@ -107,6 +107,16 @@ public class Client implements ProperClient, Personable {
 		introduction.setSenderType(MemberType.CLIENT);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), IDENTITY));
 	}
+
+
+
+	public String getDestinationHostname() {
+		return serverHostname;
+	}
+
+	public int getDestinationPort() {
+		return serverPort;
+	}
 	
 	/**
 	 * Closes this stream and releases any system resources associated

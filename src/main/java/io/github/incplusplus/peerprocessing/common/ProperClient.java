@@ -49,4 +49,8 @@ public interface ProperClient extends Closeable {
 	default void disconnect() throws IOException {
 		close();
 	}
+
+	String getDestinationHostname();
+
+	int getDestinationPort();
 }

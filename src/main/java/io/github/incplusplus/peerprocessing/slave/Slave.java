@@ -96,6 +96,14 @@ public class Slave implements ProperClient, Personable {
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
 	}
+
+	public String getDestinationHostname() {
+		return serverHostname;
+	}
+
+	public int getDestinationPort() {
+		return serverPort;
+	}
 	
 	/**
 	 * Closes this stream and releases any system resources associated
