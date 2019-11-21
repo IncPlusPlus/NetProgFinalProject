@@ -292,11 +292,8 @@ public class Server {
 		if(isNull(removedJob)){
 			removedJob=batchQueries.remove(queryId);
 			if(isNull(removedJob))
-				throw new IllegalArgumentException("Tried to remove a job that existed in neither 'queries' nor 'batchQueries'.");
+				debug("Tried to remove a job that existed in neither 'queries' nor 'batchQueries'.");
 		}
-		boolean sanity = removedJob.getQueryState().equals(WAITING_ON_SLAVE);
-		assert sanity;
-		removedJob.setQueryState(SENDING_TO_CLIENT);
 		return removedJob;
 	}
 	
@@ -316,13 +313,15 @@ public class Server {
 				debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
 				if(responsibleBatchQuery.isCompleted()) {
 					debug("Completed batch " + responsibleBatchQuery.getQueryId());
-					removeJob(responsibleBatchQuery.getQueryId());
+					Query removedJob = removeJob(responsibleBatchQuery.getQueryId());
 					responsibleBatchQuery.setCompleted(true);
+					removedJob.setQueryState(SENDING_TO_CLIENT);
 					relayToAppropriateClient(responsibleBatchQuery);
 				}
 			}
 		}
 		else {
+			query.setQueryState(SENDING_TO_CLIENT);
 			relayToAppropriateClient(query);
 		}
 	}
