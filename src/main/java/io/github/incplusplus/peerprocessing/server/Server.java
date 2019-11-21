@@ -306,20 +306,22 @@ public class Server {
 	private void submitCompletedJob(Query query) throws JsonProcessingException {
 		UUID batchQueryId = query.getParentBatchId();
 		if (nonNull(batchQueryId)) {
-			BatchQuery responsibleBatchQuery = batchQueries.get(batchQueryId);
-			if(nonNull(responsibleBatchQuery)){
-				boolean sanityCheck = responsibleBatchQuery.offer(query);
-				assert sanityCheck;
-				debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
-				if(responsibleBatchQuery.isCompleted()) {
-					debug("Completed batch " + responsibleBatchQuery.getQueryId());
-					Query removedJob = removeJob(responsibleBatchQuery.getQueryId());
-					responsibleBatchQuery.setCompleted(true);
-					removedJob.setQueryState(SENDING_TO_CLIENT);
-					relayToAppropriateClient(responsibleBatchQuery);
-				}
-			}
-		}
+          synchronized (batchQueries) {
+            BatchQuery responsibleBatchQuery = batchQueries.get(batchQueryId);
+            if(nonNull(responsibleBatchQuery)){
+                boolean sanityCheck = responsibleBatchQuery.offer(query);
+                assert sanityCheck;
+                debug("Completed job " + query.getQueryId() + " in batch " + responsibleBatchQuery.getQueryId());
+                if(responsibleBatchQuery.isCompleted()) {
+                    debug("Completed batch " + responsibleBatchQuery.getQueryId());
+                    Query removedJob = removeJob(responsibleBatchQuery.getQueryId());
+                    responsibleBatchQuery.setCompleted(true);
+                    removedJob.setQueryState(SENDING_TO_CLIENT);
+                    relayToAppropriateClient(responsibleBatchQuery);
+                }
+            }
+          }
+        }
 		else {
 			query.setQueryState(SENDING_TO_CLIENT);
 			relayToAppropriateClient(query);
