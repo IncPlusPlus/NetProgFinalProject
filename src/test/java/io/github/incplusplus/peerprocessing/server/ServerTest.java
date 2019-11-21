@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
@@ -21,7 +22,8 @@ class ServerTest {
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
+		// noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
 	

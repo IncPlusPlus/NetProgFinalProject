@@ -25,13 +25,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Timeout(value = 5,unit = TimeUnit.MINUTES)
 public class SingleSlaveIT {
+	/**
+	 * This should always stay at zero. When at zero,
+	 * the server will use whatever port is available.
+	 *
+	 * For local testing, you can make this nonzero and have
+	 * {@linkplain io.github.incplusplus.peerprocessing.slave.PersistentSlaveRunner}s
+	 * to help when you're running the tests.
+	 */
+	public static final int INITIAL_SERVER_PORT = 0;
 	public static final boolean VERBOSE_TEST_OUTPUT = false;
 	private static int serverPort;
 	private static final Server server = new Server();
 	
 	@BeforeAll
 	static void setUp() throws IOException {
-		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
 		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
