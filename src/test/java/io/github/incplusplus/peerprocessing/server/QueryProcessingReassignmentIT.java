@@ -59,6 +59,8 @@ class QueryProcessingReassignmentIT {
       //noinspection StatementWithEmptyBody
       while(server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size()<5) {}
       mySlave.disconnect();
+      //noinspection StatementWithEmptyBody
+      while (mySlave.isClosed()) {}
       Thread thread = new Thread(() -> {
         try {
           task.get();
