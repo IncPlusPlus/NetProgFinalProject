@@ -10,10 +10,7 @@ class SlaveTest {
 	@Test
 	void failIfNoServer() {
 		Slave mySlave = new Slave("localhost", 9999);
-		IllegalStateException thrown =
-				assertThrows(IllegalStateException.class,
-						mySlave::begin);
-		assertEquals(thrown.getMessage(), "Socket not initialized properly. " +
-				"Did you remember to check the boolean value of Slave.begin()?!");
+		assertThrows(java.net.ConnectException.class,
+				mySlave::begin);
 	}
 }

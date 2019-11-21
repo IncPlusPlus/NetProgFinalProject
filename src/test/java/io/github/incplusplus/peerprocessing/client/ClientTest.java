@@ -9,7 +9,7 @@ class ClientTest {
 	
 	@Test()
 	void failIfNoServer() {
-		Client myClient = new Client("localhost", 1234);
+		Client myClient = new Client("localhost", 9999);
 		assertThrows(java.net.ConnectException.class,
 				myClient::begin);
 	}
