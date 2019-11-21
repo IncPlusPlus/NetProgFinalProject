@@ -63,7 +63,7 @@ public class Slave implements ProperClient, Personable {
 			enable();
 	}
 	
-	public boolean isClosed() {
+	public synchronized boolean isClosed() {
 		return !running.get();
 	}
 	
@@ -79,7 +79,7 @@ public class Slave implements ProperClient, Personable {
 	 * Begin reading or writing as expected.
 	 */
 	@Override
-	public void begin() {
+	public synchronized void begin() {
 		boolean firstStart = running.compareAndSet(false, true);
 		assert firstStart;
 		dealWithServer();
@@ -111,7 +111,7 @@ public class Slave implements ProperClient, Personable {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		boolean notAlreadyClosed = running.compareAndSet(true, false);
 		assert notAlreadyClosed;
 		outToServer.println(DISCONNECT);
