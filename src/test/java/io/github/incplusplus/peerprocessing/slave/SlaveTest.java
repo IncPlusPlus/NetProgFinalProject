@@ -9,7 +9,7 @@ class SlaveTest {
 	
 	@Test
 	void failIfNoServer() {
-		Slave mySlave = new Slave("localhost", 1234);
+		Slave mySlave = new Slave("localhost", 9999);
 		IllegalStateException thrown =
 				assertThrows(IllegalStateException.class,
 						mySlave::begin);
