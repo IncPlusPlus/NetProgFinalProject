@@ -62,7 +62,8 @@ public class StupidSimpleLogger {
 			}
 		}
 	}
-	
+
+	/** Super buggy at the moment. Don't use */
 	public static void error(String message) {
 		if (enabled) {
 			synchronized (cp) {
