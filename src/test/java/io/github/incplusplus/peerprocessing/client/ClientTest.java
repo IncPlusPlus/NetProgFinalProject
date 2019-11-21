@@ -10,8 +10,6 @@ class ClientTest {
 	@Test()
 	void failIfNoServer() {
 		Client myClient = new Client("localhost", 1234);
-		boolean initSuccess = myClient.init();
-		assert !initSuccess;
 		IllegalStateException thrown =
 				assertThrows(IllegalStateException.class,
 						myClient::begin);

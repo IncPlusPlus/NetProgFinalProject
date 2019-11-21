@@ -28,7 +28,6 @@ final class ClientRunner {
 		Scanner in = new Scanner(System.in);
 		mainClient.setVerbose(true);
 		info("Connecting...");
-		mainClient.init();
 		mainClient.begin();
 		//noinspection StatementWithEmptyBody
 		while (!mainClient.isPolite()) {}

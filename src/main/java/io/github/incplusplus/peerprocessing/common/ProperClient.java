@@ -5,19 +5,11 @@ import java.io.IOException;
 import java.util.UUID;
 
 public interface ProperClient extends Closeable {
-	/**
-	 * Initialize any connections, readers, and writers necessary.
-	 * No exception will be thrown here. It is the user's responsibility
-	 * to ensure the boolean returned by this method call is true.
-	 *
-	 * @return whether or not initialization was successful.
-	 */
-	boolean init();
 	
 	/**
 	 * Begin reading or writing as expected.
 	 */
-	void begin();
+	void begin() throws IOException;
 	
 	/**
 	 * @return whether or not this client is still connected

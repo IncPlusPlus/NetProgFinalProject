@@ -73,7 +73,6 @@ class ServerTest {
 		assertTimeoutPreemptively(ofMinutes(1), () -> {
 			final UUID slaveId;
 			Slave mySlave = new Slave("localhost", serverPort);
-			mySlave.init();
 			mySlave.begin();
 			while (!mySlave.isPolite()) {}
 			slaveId = mySlave.getConnectionId();
@@ -89,7 +88,6 @@ class ServerTest {
 		assertTimeoutPreemptively(ofMinutes(1), () -> {
 			final UUID clientId;
 			Client myClient = new Client("localhost", serverPort);
-			myClient.init();
 			myClient.begin();
 			while (!myClient.isPolite()) {}
 			clientId = myClient.getConnectionId();

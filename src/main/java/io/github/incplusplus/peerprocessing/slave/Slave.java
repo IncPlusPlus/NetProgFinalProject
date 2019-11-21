@@ -44,20 +44,7 @@ public class Slave implements ProperClient, Personable {
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
 	}
-	
-	public boolean init() {
-		try {
-			this.sock = new Socket(serverHostname, serverPort);
-			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-			return true;
-		}
-		catch (IOException e) {
-			printStackTrace(e);
-			return false;
-		}
-	}
-	
+
 	public void setVerbose(boolean verbose) {
 		if (verbose)
 			enable();
@@ -79,7 +66,10 @@ public class Slave implements ProperClient, Personable {
 	 * Begin reading or writing as expected.
 	 */
 	@Override
-	public void begin() {
+	public void begin() throws IOException {
+	    this.sock = new Socket(serverHostname, serverPort);
+	    this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+        this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		boolean firstStart = running.compareAndSet(false, true);
 		assert firstStart;
 		dealWithServer();

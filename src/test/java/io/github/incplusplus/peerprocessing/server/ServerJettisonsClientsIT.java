@@ -135,8 +135,12 @@ class ServerJettisonsClientsIT {
 		List<ProperClient> properClientList = asList(properClients);
 		properClientList.forEach(properClient -> {
 			properClient.setVerbose(VERBOSE_TEST_OUTPUT);
-			assertTrue(properClient.init());
-			properClient.begin();
+			try {
+				properClient.begin();
+			} catch (IOException e) {
+				e.printStackTrace();
+				assert false;
+			}
 		});
 		//Wait for all clients to have introduced themselves
 		//noinspection StatementWithEmptyBody

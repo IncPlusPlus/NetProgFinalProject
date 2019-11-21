@@ -10,8 +10,6 @@ class SlaveTest {
 	@Test
 	void failIfNoServer() {
 		Slave mySlave = new Slave("localhost", 1234);
-		boolean initSuccess = mySlave.init();
-		assert !initSuccess;
 		IllegalStateException thrown =
 				assertThrows(IllegalStateException.class,
 						mySlave::begin);

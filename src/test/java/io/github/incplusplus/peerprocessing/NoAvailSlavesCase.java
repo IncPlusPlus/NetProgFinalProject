@@ -51,7 +51,6 @@ class NoAvailSlavesCase {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
-			myClient.init();
 			myClient.begin();
 			//noinspection StatementWithEmptyBody
 			while (!myClient.isPolite()){}
