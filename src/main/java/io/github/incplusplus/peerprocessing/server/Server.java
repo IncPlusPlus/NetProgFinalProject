@@ -236,6 +236,8 @@ public class Server {
 		if (connectedEntity instanceof SlaveObj) {
 			SlaveObj shouldBeNonNull = slaves.remove(connectedEntity.getConnectionUUID());
 			assert nonNull(shouldBeNonNull);
+			//noinspection StatementWithEmptyBody
+			while(nonNull(slaves.get(connectedEntity.getConnectionUUID()))) {}
 			//for each of the queries the slave was processing
 			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
 				//put them in the queue to get processed
@@ -358,11 +360,19 @@ public class Server {
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to a random slave.
 		 */
-		//noinspection RedundantCast because if we don't cast, IntelliJ warns about suspicious call to Map.get()
-		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
-		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
-		debug("Sending query " + job.getQueryId() + " to slave " + designatedSlave.getConnectionUUID());
-		designatedSlave.accept(job);
+		SlaveObj leastBusySlave;
+		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
+		synchronized (slaves) {
+			leastBusySlave = slaves.entrySet().parallelStream()
+					//find the slave that is responsible for the fewest jobs
+					.min(Comparator.comparingInt(mapEntry -> mapEntry.getValue().getJobsResponsibleFor().size()))
+					//get the actual SlaveObj from the MapEntry<UUID, SlaveObj> or else
+					//commit suicide
+					.map(Map.Entry::getValue).orElseThrow();
+		}
+		job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
+		debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
+		leastBusySlave.accept(job);
 	}
 	
 	private void poisonJobIngestionThread() {

@@ -83,6 +83,7 @@ class QueryProcessingReassignmentIT {
       mySlave.init();
       thread.interrupt();
       mySlave.begin();
+      //noinspection StatementWithEmptyBody
       while (!mySlave.isPolite()){}
       task.get();
       executor.shutdown();
