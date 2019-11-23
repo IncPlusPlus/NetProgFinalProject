@@ -43,10 +43,8 @@ class QueryProcessingReassignmentIT {
     try (Client myClient = new Client("localhost", serverPort)) {
       Slave mySlave = new Slave("localhost", serverPort);
       myClient.setVerbose(VERBOSE_TEST_OUTPUT);
-      myClient.init();
       myClient.begin();
       mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
-      mySlave.init();
       mySlave.begin();
       task = myClient.multiply(matrix1,matrix2);
       //noinspection StatementWithEmptyBody
@@ -82,7 +80,6 @@ class QueryProcessingReassignmentIT {
       assertFalse(task.isDone());
       mySlave = new Slave("localhost", serverPort);
       mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
-      mySlave.init();
       thread.interrupt();
       mySlave.begin();
       //noinspection StatementWithEmptyBody
