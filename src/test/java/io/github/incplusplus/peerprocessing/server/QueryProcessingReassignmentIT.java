@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.util.concurrent.*;
 
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
 import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.iterateAndAssertEquals;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
@@ -26,7 +27,7 @@ class QueryProcessingReassignmentIT {
 
   @BeforeAll
   static void setUp() throws IOException {
-    serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+    serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
     //noinspection StatementWithEmptyBody
     while (!server.started()) {}
   }
@@ -38,7 +39,9 @@ class QueryProcessingReassignmentIT {
 
   @ParameterizedTest
   @MethodSource("io.github.incplusplus.peerprocessing.SingleSlaveIT#provideMatrices")
-  void whenSlaveDisconnects_IfSlaveHeldJobs_ThenJobsGetReassigned(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) throws IOException, ExecutionException, InterruptedException {
+  void whenSlaveDisconnects_IfSlaveHeldJobs_ThenJobsGetReassigned(
+      BigDecimalMatrix matrix1, BigDecimalMatrix matrix2)
+      throws IOException, ExecutionException, InterruptedException {
     FutureTask<BigDecimalMatrix> task;
     try (Client myClient = new Client("localhost", serverPort)) {
       Slave mySlave = new Slave("localhost", serverPort);
@@ -46,34 +49,40 @@ class QueryProcessingReassignmentIT {
       myClient.begin();
       mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
       mySlave.begin();
-      task = myClient.multiply(matrix1,matrix2);
+      task = myClient.multiply(matrix1, matrix2);
       //noinspection StatementWithEmptyBody
-      while (!myClient.isPolite()){}
+      while (!myClient.isPolite()) {}
       //noinspection StatementWithEmptyBody
-      while (!mySlave.isPolite()){}
+      while (!mySlave.isPolite()) {}
       ExecutorService executor = Executors.newFixedThreadPool(2);
       executor.submit(task);
-      //At this point, the slave should be dealing with some tasks
-      Thread.sleep(2000);
-      mySlave.disconnect();
+      // Wait until the server starts assigning the slave some jobs
+      while (server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size() < 5) {
+        Thread.sleep(100);
+      }
+      synchronized (server.slaves) {
+        assert server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size() != 0;
+        mySlave.disconnect();
+      }
       //noinspection StatementWithEmptyBody
       while (!mySlave.isClosed()) {}
-      Thread thread = new Thread(() -> {
-        try {
-          task.get();
-          //we should never get here
-          assert false;
-        } catch (InterruptedException ignored) {
-          //we intend to interrupt this thread
-          debug("Execution waiting thread interrupted as normal.");
-        }
-        catch (ExecutionException e) {
-          //fail
-          assert false;
-        }
-      });
+      Thread thread =
+          new Thread(
+              () -> {
+                try {
+                  task.get();
+                  // we should never get here
+                  assert false;
+                } catch (InterruptedException ignored) {
+                  // we intend to interrupt this thread
+                  debug("Execution waiting thread interrupted as normal.");
+                } catch (ExecutionException e) {
+                  // fail
+                  assert false;
+                }
+              });
       thread.start();
-      //Let the current thread sleep (not the created thread!)
+      // Let the current thread sleep (not the created thread!)
       Thread.sleep(5000);
       assertTrue(thread.isAlive());
       assertFalse(task.isDone());
@@ -82,7 +91,7 @@ class QueryProcessingReassignmentIT {
       thread.interrupt();
       mySlave.begin();
       //noinspection StatementWithEmptyBody
-      while (!mySlave.isPolite()){}
+      while (!mySlave.isPolite()) {}
       task.get();
       executor.shutdown();
       mySlave.disconnect();
