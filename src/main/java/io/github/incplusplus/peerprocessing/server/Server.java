@@ -523,7 +523,14 @@ public class Server {
 			while (!getSocket().isClosed()) {
 				try {
 					lineFromSlave = getInFromClient().readLine();
-					Header header = getHeader(lineFromSlave);
+					Header header = null;
+					try {
+						header = getHeader(lineFromSlave);
+					}
+					catch (NullPointerException e) {
+						error("Got NPE when lineFromSlave='"+lineFromSlave+"'. Shutting down...");
+						continue;
+					}
 					if (header.equals(RESULT)) {
 						Query completedQuery = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromSlave)), Query.class);
 						Query storedQuery = removeJob(completedQuery.getQueryId());
