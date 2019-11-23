@@ -126,7 +126,6 @@ public class Slave implements ProperClient, Personable {
 		boolean notAlreadyClosed = running.compareAndSet(true, false);
 		assert notAlreadyClosed;
 		outToServer.println(DISCONNECT);
-		outToServer.flush();
 		kill();
 	}
 	
