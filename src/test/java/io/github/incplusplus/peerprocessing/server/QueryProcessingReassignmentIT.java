@@ -54,7 +54,7 @@ class QueryProcessingReassignmentIT {
       ExecutorService executor = Executors.newFixedThreadPool(2);
       executor.submit(task);
       //At this point, the slave should be dealing with some tasks
-      Thread.sleep(100);
+      Thread.sleep(2000);
       mySlave.disconnect();
       //noinspection StatementWithEmptyBody
       while (!mySlave.isClosed()) {}
