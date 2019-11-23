@@ -359,7 +359,7 @@ public class Server {
 		/*
 		 * TODO: Determining the business of slaves is not yet implemented as the
 		 *  heartbeat system has not yet been implemented. For now this method
-		 *  just sends the job to a random slave.
+		 *  just sends the job to the slave dealing with the fewest jobs.
 		 */
 		SlaveObj leastBusySlave;
 		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
