@@ -353,19 +353,17 @@ public class Server {
 	}
 	
 	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
+		SlaveObj leastBusySlave;
 		while (slaves.size() < 1) {
-			long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
-					"However, no slaves were available. Job queue thread sleeping " +
-					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " second(s)...");
-			Thread.sleep(NO_SLAVES_SLEEP_TIME);
+					"However, no slaves were available. Job queue thread sleeping.");
+			Thread.sleep(250);
 		}
 		/*
 		 * TODO: Determining the business of slaves is not yet implemented as the
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to the slave dealing with the fewest jobs.
 		 */
-		SlaveObj leastBusySlave;
 		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
 		synchronized (slaves) {
 			leastBusySlave = slaves.entrySet().parallelStream()
@@ -421,6 +419,12 @@ public class Server {
 				}
 				catch (InterruptedException | JsonProcessingException e) {
 					printStackTrace(e);
+					try {
+						//If job ingestion thread dies, kill off server
+						this.stop();
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			}
 		});
