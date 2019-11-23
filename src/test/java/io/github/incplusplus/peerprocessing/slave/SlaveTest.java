@@ -1,14 +1,15 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import io.github.incplusplus.peerprocessing.common.ProperClient;
 import io.github.incplusplus.peerprocessing.server.Server;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Timeout(10)
 class SlaveTest {
   private volatile AtomicBoolean slaveCallbackRan = new AtomicBoolean();
 
