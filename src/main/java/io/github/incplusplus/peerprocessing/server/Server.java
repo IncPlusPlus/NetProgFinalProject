@@ -234,16 +234,18 @@ public class Server {
 	 */
 	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			SlaveObj shouldBeNonNull = slaves.remove(connectedEntity.getConnectionUUID());
-			assert nonNull(shouldBeNonNull);
-			//noinspection StatementWithEmptyBody
-			while(nonNull(slaves.get(connectedEntity.getConnectionUUID()))) {}
-			//for each of the queries the slave was processing
-			for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
-				//put them in the queue to get processed
-				debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
-				boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
-				assert abandonedJobAdded;
+			synchronized (slaves) {
+				SlaveObj shouldBeNonNull = slaves.remove(connectedEntity.getConnectionUUID());
+				assert nonNull(shouldBeNonNull);
+				//noinspection StatementWithEmptyBody
+				while(nonNull(slaves.get(connectedEntity.getConnectionUUID()))) {}
+				//for each of the queries the slave was processing
+				for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
+					//put them in the queue to get processed
+					debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
+					boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
+					assert abandonedJobAdded;
+				}
 			}
 		}
 		else if (connectedEntity instanceof ClientObj) {
