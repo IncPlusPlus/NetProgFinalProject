@@ -1,6 +1,8 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
@@ -552,32 +554,32 @@ public class Server {
 					}
 				}
 				catch (NullPointerException npe) {
-					try {
-						debug("Slave " + getConnectionUUID() + " violently disconnected.");
-						deRegister(this);
-						disconnect();
-					} catch (IOException e) {
-						try {
-							getSocket().close();
-						}
-						catch (IOException ex) {
-							ex.printStackTrace();
-						}
-					}
+					slaveDisconnected(true);
 				}
 				catch (SocketException e) {
-					debug("Slave " + getConnectionUUID() + " disconnected.");
-					deRegister(this);
-					try {
-						getSocket().close();
-					}
-					catch (IOException ex) {
-						ex.printStackTrace();
-					}
+					slaveDisconnected(false);
 				}
 				catch (IOException e) {
-					printStackTrace(e);
+					if (e instanceof JsonMappingException) {
+						if (e.getCause() instanceof JsonEOFException) {
+							slaveDisconnected(true);
+						}
+					}
+					else {
+						printStackTrace(e);
+					}
 				}
+			}
+		}
+
+		private void slaveDisconnected(boolean violently) {
+			debug("Slave " + getConnectionUUID() + (violently ? " violently" : "") + " disconnected.");
+			deRegister(this);
+			try {
+				getSocket().close();
+			}
+			catch (IOException ex) {
+				ex.printStackTrace();
 			}
 		}
 		
