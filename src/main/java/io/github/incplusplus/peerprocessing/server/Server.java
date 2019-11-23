@@ -523,6 +523,8 @@ public class Server {
 			while (!getSocket().isClosed()) {
 				try {
 					lineFromSlave = getInFromClient().readLine();
+					if (isNull(lineFromSlave))
+						disconnect();
 					Header header = getHeader(lineFromSlave);
 					if (header.equals(RESULT)) {
 						Query completedQuery = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromSlave)), Query.class);
