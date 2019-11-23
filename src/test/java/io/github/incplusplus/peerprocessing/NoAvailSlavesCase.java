@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
@@ -32,7 +33,7 @@ class NoAvailSlavesCase {
 	
 	@BeforeAll
 	static void setUp() throws IOException {
-		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
 		// noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 		executor = Executors.newFixedThreadPool(20);
@@ -50,7 +51,6 @@ class NoAvailSlavesCase {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
-			myClient.init();
 			myClient.begin();
 			//noinspection StatementWithEmptyBody
 			while (!myClient.isPolite()){}

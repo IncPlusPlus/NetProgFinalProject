@@ -9,13 +9,8 @@ class ClientTest {
 	
 	@Test()
 	void failIfNoServer() {
-		Client myClient = new Client("localhost", 1234);
-		boolean initSuccess = myClient.init();
-		assert !initSuccess;
-		IllegalStateException thrown =
-				assertThrows(IllegalStateException.class,
-						myClient::begin);
-		assertEquals(thrown.getMessage(), "Socket not initialized properly. " +
-				"Did you remember to check the boolean value of Client.begin()?!");
+		Client myClient = new Client("localhost", 9999);
+		assertThrows(java.net.ConnectException.class,
+				myClient::begin);
 	}
 }

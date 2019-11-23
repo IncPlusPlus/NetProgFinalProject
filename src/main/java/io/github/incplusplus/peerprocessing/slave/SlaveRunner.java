@@ -9,13 +9,12 @@ import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHos
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
 
 class SlaveRunner {
-	public static void main(String[] args) throws IOException {
-		enable();
-		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
-		Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-		mainSlave.init();
-		mainSlave.begin();
-		new Scanner(System.in).nextLine();
-		mainSlave.close();
-	}
+  public static void main(String[] args) throws IOException {
+    enable();
+    Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
+    Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
+    mainSlave.begin();
+    new Scanner(System.in).nextLine();
+    mainSlave.close();
+  }
 }

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.*;
 
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -25,7 +26,7 @@ class BumpySingleSlaveIT {
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
 		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
@@ -42,10 +43,8 @@ class BumpySingleSlaveIT {
 		try (Client myClient = new Client("localhost", serverPort);
 		     Slave mySlave = new Slave("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
-			myClient.init();
 			myClient.begin();
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
-			mySlave.init();
 			mySlave.begin();
 			task = myClient.evaluateExpression(input);
 			ExecutorService executor = Executors.newFixedThreadPool(2);
