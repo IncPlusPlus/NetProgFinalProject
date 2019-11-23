@@ -30,6 +30,8 @@ class SlaveTest {
     server.stop();
     //noinspection StatementWithEmptyBody
     while (!slave.isClosed()) {}
+    //noinspection StatementWithEmptyBody
+    while (slave.isDisconnectCallbackAlive()) {}
     assertTrue(slaveCallbackRan);
   }
 }

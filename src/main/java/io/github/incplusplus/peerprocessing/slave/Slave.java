@@ -41,6 +41,7 @@ public class Slave implements ProperClient, Personable {
 	private BufferedReader inFromServer;
 	private volatile UUID uuid = UUID.randomUUID();
 	private Runnable disconnectCallback;
+	private Thread callBackThread;
 
 	public Slave(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
@@ -101,8 +102,10 @@ public class Slave implements ProperClient, Personable {
       this.disconnectCallback = runnable;
     }
 
-    public Runnable getDisconnectCallable() {
-      return this.disconnectCallback;
+    public boolean isDisconnectCallbackAlive() {
+      if (nonNull(this.callBackThread))
+      	return this.callBackThread.isAlive();
+      return false;
     }
 
 	/**
@@ -139,6 +142,7 @@ public class Slave implements ProperClient, Personable {
 			callBackThread.setDaemon(true);
 			callBackThread.setName(this.toString() + " disconnect callback thread");
 			callBackThread.start();
+			this.callBackThread = callBackThread;
 		}
 	}
 
