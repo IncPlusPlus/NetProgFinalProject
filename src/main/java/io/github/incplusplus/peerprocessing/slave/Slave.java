@@ -26,6 +26,7 @@ import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class Slave implements ProperClient, Personable {
 	private final String serverHostname;
@@ -39,30 +40,19 @@ public class Slave implements ProperClient, Personable {
 	private PrintWriter outToServer;
 	private BufferedReader inFromServer;
 	private volatile UUID uuid = UUID.randomUUID();
-	
+	private Runnable disconnectCallback;
+	private Thread callBackThread;
+
 	public Slave(String serverHostname, int serverPort) {
 		this.serverHostname = serverHostname;
 		this.serverPort = serverPort;
 	}
-	
-	public boolean init() {
-		try {
-			this.sock = new Socket(serverHostname, serverPort);
-			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-			return true;
-		}
-		catch (IOException e) {
-			printStackTrace(e);
-			return false;
-		}
-	}
-	
+
 	public void setVerbose(boolean verbose) {
 		if (verbose)
 			enable();
 	}
-	
+
 	public synchronized boolean isClosed() {
 		return !running.get();
 	}
@@ -79,7 +69,10 @@ public class Slave implements ProperClient, Personable {
 	 * Begin reading or writing as expected.
 	 */
 	@Override
-	public synchronized void begin() {
+	public synchronized void begin() throws IOException {
+	    this.sock = new Socket(serverHostname, serverPort);
+	    this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+        this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		boolean firstStart = running.compareAndSet(false, true);
 		assert firstStart;
 		dealWithServer();
@@ -96,7 +89,25 @@ public class Slave implements ProperClient, Personable {
 		introduction.setSenderType(MemberType.SLAVE);
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
 	}
-	
+
+	public String getDestinationHostname() {
+		return serverHostname;
+	}
+
+	public int getDestinationPort() {
+		return serverPort;
+	}
+
+    public void setDisconnectCallback(Runnable runnable) {
+      this.disconnectCallback = runnable;
+    }
+
+    public boolean isDisconnectCallbackAlive() {
+      if (nonNull(this.callBackThread))
+      	return this.callBackThread.isAlive();
+      return false;
+    }
+
 	/**
 	 * Closes this stream and releases any system resources associated
 	 * with it. If the stream is already closed then invoking this
@@ -122,6 +133,17 @@ public class Slave implements ProperClient, Personable {
 		outToServer.close();
 		inFromServer.close();
 		sock.close();
+		runDisconnectCallback();
+	}
+
+	private void runDisconnectCallback() {
+		if(nonNull(this.disconnectCallback)) {
+			Thread callBackThread = new Thread(this.disconnectCallback);
+			callBackThread.setDaemon(true);
+			callBackThread.setName(this.toString() + " disconnect callback thread");
+			callBackThread.start();
+			this.callBackThread = callBackThread;
+		}
 	}
 	
 	private void dealWithServer() {

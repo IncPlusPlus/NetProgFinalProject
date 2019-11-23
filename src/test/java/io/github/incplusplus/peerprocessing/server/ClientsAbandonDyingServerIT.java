@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
+import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
 import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,7 @@ class ClientsAbandonDyingServerIT {
 	
 	@BeforeEach
 	void setUp() throws IOException {
-		serverPort = server.start(0, VERBOSE_TEST_OUTPUT);
+		serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
 		//noinspection StatementWithEmptyBody
 		while (!server.started()) {}
 	}
@@ -139,9 +140,13 @@ class ClientsAbandonDyingServerIT {
 		List<ProperClient> properClientList = asList(properClients);
 		properClientList.forEach(properClient -> {
 			properClient.setVerbose(VERBOSE_TEST_OUTPUT);
-			assertTrue(properClient.init());
-			properClient.begin();
-		});
+          try {
+            properClient.begin();
+          } catch (IOException e) {
+            e.printStackTrace();
+            assert false;
+          }
+        });
 		//Wait for all clients to have introduced themselves
 		//noinspection StatementWithEmptyBody
 		while (properClientList.stream().map(ProperClient::isPolite).anyMatch(isPolite -> !isPolite)) {}
