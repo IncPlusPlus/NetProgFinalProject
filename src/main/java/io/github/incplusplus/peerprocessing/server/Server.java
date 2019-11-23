@@ -367,11 +367,12 @@ public class Server {
 		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
 		synchronized (slaves) {
 			leastBusySlave = slaves.entrySet().parallelStream()
+					.map(Map.Entry::getValue)
 					//find the slave that is responsible for the fewest jobs
-					.min(Comparator.comparingInt(mapEntry -> mapEntry.getValue().getJobsResponsibleFor().size()))
-					//get the actual SlaveObj from the MapEntry<UUID, SlaveObj> or else
+					.min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
+					//get the actual SlaveObj or else
 					//commit suicide
-					.map(Map.Entry::getValue).orElseThrow();
+					.orElseThrow();
 		}
 		job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
 		debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
