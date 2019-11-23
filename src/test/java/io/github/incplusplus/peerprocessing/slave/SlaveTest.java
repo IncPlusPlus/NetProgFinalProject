@@ -5,11 +5,12 @@ import io.github.incplusplus.peerprocessing.server.Server;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SlaveTest {
-  private volatile boolean slaveCallbackRan = false;
+  private volatile AtomicBoolean slaveCallbackRan = new AtomicBoolean();
 
   @Test
   void failIfNoServer() {
@@ -22,16 +23,16 @@ class SlaveTest {
     Server server = new Server();
     int serverPort = server.start(0, false);
     Slave slave = new Slave("localhost", serverPort);
-    slave.setDisconnectCallback(() -> slaveCallbackRan=true);
+    slave.setDisconnectCallback(() -> slaveCallbackRan.compareAndSet(false, true));
     slave.begin();
     //noinspection StatementWithEmptyBody
     while (!slave.isPolite()) {}
-    assertFalse(slaveCallbackRan);
+    assertFalse(slaveCallbackRan.get());
     server.stop();
     //noinspection StatementWithEmptyBody
     while (!slave.isClosed()) {}
     //noinspection StatementWithEmptyBody
     while (slave.isDisconnectCallbackAlive()) {}
-    assertTrue(slaveCallbackRan);
+    assertTrue(slaveCallbackRan.get());
   }
 }
