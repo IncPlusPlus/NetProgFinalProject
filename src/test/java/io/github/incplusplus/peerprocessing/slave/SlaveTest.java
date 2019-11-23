@@ -19,7 +19,7 @@ class SlaveTest {
   }
 
   @Test
-  void testCallbackAction() throws IOException {
+  void testCallbackAction() throws IOException, InterruptedException {
     Server server = new Server();
     int serverPort = server.start(0, false);
     Slave slave = new Slave("localhost", serverPort);
@@ -33,6 +33,10 @@ class SlaveTest {
     while (!slave.isClosed()) {}
     //noinspection StatementWithEmptyBody
     while (slave.isDisconnectCallbackAlive()) {}
+    //I don't know why this takes so long to update on Travis but this hack fixes it
+    while(!slaveCallbackRan.get()) {
+      Thread.sleep(50);
+    }
     assertTrue(slaveCallbackRan.get());
   }
 }
