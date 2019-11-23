@@ -523,8 +523,6 @@ public class Server {
 			while (!getSocket().isClosed()) {
 				try {
 					lineFromSlave = getInFromClient().readLine();
-					if (isNull(lineFromSlave))
-						disconnect();
 					Header header = getHeader(lineFromSlave);
 					if (header.equals(RESULT)) {
 						Query completedQuery = SHARED_MAPPER.readValue(Objects.requireNonNull(decode(lineFromSlave)), Query.class);
@@ -550,6 +548,20 @@ public class Server {
 						//we don't want to write back
 						kill();
 						break;
+					}
+				}
+				catch (NullPointerException npe) {
+					try {
+						debug("Slave " + getConnectionUUID() + " violently disconnected.");
+						deRegister(this);
+						disconnect();
+					} catch (IOException e) {
+						try {
+							getSocket().close();
+						}
+						catch (IOException ex) {
+							ex.printStackTrace();
+						}
 					}
 				}
 				catch (SocketException e) {
