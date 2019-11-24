@@ -47,7 +47,7 @@ class BumpyIT {
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
 			task = myClient.evaluateExpression(input);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
 		}

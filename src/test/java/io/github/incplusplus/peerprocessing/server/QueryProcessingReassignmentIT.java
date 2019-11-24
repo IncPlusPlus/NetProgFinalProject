@@ -51,7 +51,7 @@ class QueryProcessingReassignmentIT {
       while (!myClient.isPolite()) {}
       //noinspection StatementWithEmptyBody
       while (!mySlave.isPolite()) {}
-      ExecutorService executor = Executors.newFixedThreadPool(2);
+      ExecutorService executor = Executors.newSingleThreadExecutor();
       executor.submit(task);
       // Wait until the server starts assigning the slave some jobs
       while (server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size() < 5) {

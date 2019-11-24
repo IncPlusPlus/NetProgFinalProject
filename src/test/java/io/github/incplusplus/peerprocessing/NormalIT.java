@@ -75,7 +75,7 @@ public class NormalIT {
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
 			task = myClient.evaluateExpression(input);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
 		}
@@ -95,7 +95,7 @@ public class NormalIT {
 			firstSlave.begin();
 			secondSlave.begin();
 			task = myClient.evaluateExpression(input);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
 		}
@@ -112,7 +112,7 @@ public class NormalIT {
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
 			task = myClient.multiply(matrix1,matrix2);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			iterateAndAssertEquals(task.get(),matrix1.multiply(matrix2));
 		}
