@@ -372,15 +372,22 @@ public class Server {
 					.min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
 					//get the actual SlaveObj or else
 					//commit suicide
-					.orElseThrow();
+					.orElse(null);
 		}
-		//make sure they're still registered
-		if (slaves.containsKey(leastBusySlave.getConnectionUUID())) {
+		//if no slave ended up being found
+		if (isNull(leastBusySlave)) {
+			//try again
+			sendToLeastBusySlave(job);
+		}
+		//make sure they're still registered if present
+		else if (slaves.containsKey(leastBusySlave.getConnectionUUID())) {
 			job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
 			debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
 			leastBusySlave.accept(job);
 		}
+		//if not registered anymore
 		else {
+			//try again
 			sendToLeastBusySlave(job);
 		}
 	}
