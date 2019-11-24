@@ -24,7 +24,7 @@ import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.i
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Timeout(value = 5,unit = TimeUnit.MINUTES)
-public class SingleSlaveIT {
+public class NormalIT {
 	/**
 	 * This should always stay at zero. When at zero,
 	 * the server will use whatever port is available.

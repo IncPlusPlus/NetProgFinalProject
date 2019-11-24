@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.UUID;
 
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.NormalIT.INITIAL_SERVER_PORT;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;

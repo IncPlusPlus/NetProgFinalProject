@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.NormalIT.INITIAL_SERVER_PORT;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

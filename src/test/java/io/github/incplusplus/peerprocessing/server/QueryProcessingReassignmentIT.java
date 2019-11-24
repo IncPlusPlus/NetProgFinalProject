@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.server;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
-import io.github.incplusplus.peerprocessing.server.Server;
 import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,9 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.util.concurrent.*;
 
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
-import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.iterateAndAssertEquals;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +35,7 @@ class QueryProcessingReassignmentIT {
   }
 
   @ParameterizedTest
-  @MethodSource("io.github.incplusplus.peerprocessing.SingleSlaveIT#provideMatrices")
+  @MethodSource("io.github.incplusplus.peerprocessing.NormalIT#provideMatrices")
   void whenSlaveDisconnects_IfSlaveHeldJobs_ThenJobsGetReassigned(
       BigDecimalMatrix matrix1, BigDecimalMatrix matrix2)
       throws IOException, ExecutionException, InterruptedException {

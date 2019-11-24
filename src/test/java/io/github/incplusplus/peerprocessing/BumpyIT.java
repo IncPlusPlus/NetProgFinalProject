@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.concurrent.*;
 
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.NormalIT.INITIAL_SERVER_PORT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * starting up and shutting down between tests.
  */
 @Timeout(value = 2,unit = TimeUnit.MINUTES)
-class BumpySingleSlaveIT {
+class BumpyIT {
 	private int serverPort;
 	private final Server server = new Server();
 	
