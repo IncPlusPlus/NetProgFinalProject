@@ -597,14 +597,7 @@ public class Server {
 			query.setQueryState(WAITING_ON_SLAVE);
 			jobsResponsibleFor.add(query.getQueryId());
 			debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
-			new Thread(() -> {
-				try {
-					getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-			}).start();
-//			getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
+			getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
 		}
 		
 		/**
