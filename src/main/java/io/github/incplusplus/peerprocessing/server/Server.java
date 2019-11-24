@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
@@ -242,12 +244,17 @@ public class Server {
 				//noinspection StatementWithEmptyBody
 				while(nonNull(slaves.get(connectedEntity.getConnectionUUID()))) {}
 				//for each of the queries the slave was processing
-				for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
-					//put them in the queue to get processed
-					debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
-					boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
-					assert abandonedJobAdded;
-				}
+				//put them in the queue to get processed
+				debug("Slave " + connectedEntity.getConnectionUUID() + " abandoned jobs " +
+						Arrays.toString(((SlaveObj) connectedEntity).getJobsResponsibleFor().toArray()));
+				jobsAwaitingProcessing.addAll(
+						((SlaveObj) connectedEntity).getJobsResponsibleFor().stream()
+								.map(queries::get).collect(Collectors.toList()));
+//				for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
+//					debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
+//					boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
+//					assert abandonedJobAdded;
+//				}
 			}
 		}
 		else if (connectedEntity instanceof ClientObj) {
@@ -351,32 +358,47 @@ public class Server {
 			requestSource.acceptCompleted(query);
 		}
 	}
-	
-	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
+
+	private void sendToLeastBusySlave(Query... jobs) throws InterruptedException, JsonProcessingException {
+		//if we sync on slaves but there aren't any anymore
+		//we want to re-run this method
+		boolean noSlavesAfterSync = false;
 		SlaveObj leastBusySlave;
 		while (slaves.size() < 1) {
-			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
-					"However, no slaves were available. Job queue thread sleeping.");
+      debug(
+          "Tried to send job with id "
+              + Arrays.toString(Arrays.stream(jobs).map(Query::getQueryId).toArray())
+              + " to a slave. "
+              + "However, no slaves were available. Job queue thread sleeping.");
 			Thread.sleep(250);
 		}
+		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
+		synchronized (slaves) {
+			//check again after sync
+			if (slaves.size() < 1) {
+				noSlavesAfterSync = true;
+			} else {
+				for (Query individualJob : jobs) {
+					leastBusySlave = slaves.entrySet().parallelStream()
+							.map(Map.Entry::getValue)
+							//find the slave that is responsible for the fewest jobs
+							.min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
+							//get the actual SlaveObj or else
+							//commit suicide
+							.orElseThrow();
+					individualJob.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
+					debug("Sending query " + individualJob.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
+					leastBusySlave.accept(individualJob);
+				}
+			}
+		}
+		if (noSlavesAfterSync)
+			sendToLeastBusySlave(jobs);
 		/*
 		 * TODO: Determining the business of slaves is not yet implemented as the
 		 *  heartbeat system has not yet been implemented. For now this method
 		 *  just sends the job to the slave dealing with the fewest jobs.
 		 */
-		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
-		synchronized (slaves) {
-			leastBusySlave = slaves.entrySet().parallelStream()
-					.map(Map.Entry::getValue)
-					//find the slave that is responsible for the fewest jobs
-					.min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
-					//get the actual SlaveObj or else
-					//commit suicide
-					.orElseThrow();
-		}
-		job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
-		debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
-		leastBusySlave.accept(job);
 	}
 	
 	private void poisonJobIngestionThread() {
@@ -401,20 +423,40 @@ public class Server {
 			}
 			while (started()) {
 				try {
-					Query currentJob = jobsAwaitingProcessing.take();
-					if (currentJob instanceof PoisonPill) {
+					List<Query> pendingJobs = new ArrayList<>();
+					//block on the call to take(). This is usually less intensive then
+					//repeatedly calling size() because that requires reentrant locks
+					pendingJobs.add(jobsAwaitingProcessing.take());
+					int obtainedJobs = jobsAwaitingProcessing.drainTo(pendingJobs);
+					List<PoisonPill> poisonPills = new ArrayList<>(1);
+					List<BatchQuery> batchQueries = new ArrayList<>();
+					List<Query> normalQueries = new ArrayList<>();
+					//iterate once over the pending jobs and get the various query types
+					pendingJobs.forEach(query -> {
+						if (query instanceof PoisonPill) {
+							poisonPills.add((PoisonPill) query);
+						}
+						else if (query instanceof BatchQuery) {
+							batchQueries.add((BatchQuery) query);
+						}
+						else {
+							normalQueries.add(query);
+						}
+					});
+					if (poisonPills.size() > 0) {
 						debug("Job ingestion thread ate a poison pill and is shutting down.");
 						break;
 					}
-					if(currentJob instanceof BatchQuery) {
+					batchQueries.forEach(currentJob -> {
+						List<Query> childQueries = currentJob.getQueries();
 						currentJob.setQueryState(WAITING_ON_SLAVE);
-						for(Query individualJob : ((BatchQuery) currentJob).getQueries()) {
-							queries.put(individualJob.getQueryId(),individualJob);
-							jobsAwaitingProcessing.add(individualJob);
-						}
-					}
-					else {
-						sendToLeastBusySlave(currentJob);
+						queries.putAll(childQueries
+								.stream()
+								.collect(Collectors.toMap(Query::getQueryId, Function.identity())));
+						jobsAwaitingProcessing.addAll(childQueries);
+					});
+					if (normalQueries.size() > 0) {
+						sendToLeastBusySlave(normalQueries.toArray(Query[]::new));
 					}
 				}
 				catch (InterruptedException | JsonProcessingException e) {
