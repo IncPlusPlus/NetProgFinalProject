@@ -66,7 +66,7 @@ public class NormalIT {
 
 	@ParameterizedTest
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
-	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+	void mathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort);
 			 Slave mySlave = new Slave("localhost", serverPort)) {
@@ -83,7 +83,7 @@ public class NormalIT {
 
 	@ParameterizedTest
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
-	void singleMathQueryTwoSlaves(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+	void mathQueryTwoSlaves(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort);
 			 Slave firstSlave = new Slave("localhost", serverPort);

@@ -38,7 +38,7 @@ class BumpyIT {
 	
 	@ParameterizedTest
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
-	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+	void mathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort);
 		     Slave mySlave = new Slave("localhost", serverPort)) {
