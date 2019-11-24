@@ -66,8 +66,8 @@ class QueryProcessingReassignmentIT {
       }
       //noinspection StatementWithEmptyBody
       while (!mySlave.isClosed()) {}
-      //If this test hangs up the build, change this to 100. That shouldn't happen though
-      Thread.sleep(50);
+      //this is probably the source of all suffering and woes
+      Thread.sleep(100);
       Thread thread =
           new Thread(
               () -> {
