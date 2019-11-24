@@ -213,7 +213,7 @@ public class Client implements ProperClient, Personable {
 						disconnect();
 					}
 					catch (IOException ex) {
-						debug("There was an exception during the disconnect which began due to a previous exception!");
+						error("There was an exception during the disconnect which began due to a previous exception!");
 						printStackTrace(ex);
 					}
 					break;

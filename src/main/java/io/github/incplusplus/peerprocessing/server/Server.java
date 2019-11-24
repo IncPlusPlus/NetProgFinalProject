@@ -1,6 +1,8 @@
 package io.github.incplusplus.peerprocessing.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import io.github.incplusplus.peerprocessing.common.*;
 import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
@@ -45,7 +47,7 @@ public class Server {
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
 	private final Map<UUID, ClientObj> clients = new ConcurrentHashMap<>();
-	private final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
+	final Map<UUID, SlaveObj> slaves = new ConcurrentHashMap<>();
 	/**
 	 * Should probably be replaced with {@link Executors#newCachedThreadPool()} at some point.
 	 * Elements of this list exist while an incoming connection is established and are removed
@@ -234,8 +236,19 @@ public class Server {
 	 */
 	private void deRegister(ConnectedEntity connectedEntity) {
 		if (connectedEntity instanceof SlaveObj) {
-			//TODO add responsibility reassignment if the slave held jobs
-			slaves.remove(connectedEntity.getConnectionUUID());
+			synchronized (slaves) {
+				SlaveObj shouldBeNonNull = slaves.remove(connectedEntity.getConnectionUUID());
+				assert nonNull(shouldBeNonNull);
+				//noinspection StatementWithEmptyBody
+				while(nonNull(slaves.get(connectedEntity.getConnectionUUID()))) {}
+				//for each of the queries the slave was processing
+				for (UUID uuid : ((SlaveObj) connectedEntity).getJobsResponsibleFor()) {
+					//put them in the queue to get processed
+					debug("Slave " + connectedEntity.getConnectionUUID()+ " abandoned job " + uuid);
+					boolean abandonedJobAdded = jobsAwaitingProcessing.add(queries.get(uuid));
+					assert abandonedJobAdded;
+				}
+			}
 		}
 		else if (connectedEntity instanceof ClientObj) {
 			clients.remove(connectedEntity.getConnectionUUID());
@@ -340,23 +353,43 @@ public class Server {
 	}
 	
 	private void sendToLeastBusySlave(Query job) throws InterruptedException, JsonProcessingException {
+		SlaveObj leastBusySlave;
 		while (slaves.size() < 1) {
-			long NO_SLAVES_SLEEP_TIME = 1000 * 2;
 			debug("Tried to send job with id " + job.getQueryId() + " to a slave. " +
-					"However, no slaves were available. Job queue thread sleeping " +
-					"for " + NO_SLAVES_SLEEP_TIME / 1000 + " second(s)...");
-			Thread.sleep(NO_SLAVES_SLEEP_TIME);
+					"However, no slaves were available. Job queue thread sleeping.");
+			Thread.sleep(250);
 		}
 		/*
 		 * TODO: Determining the business of slaves is not yet implemented as the
 		 *  heartbeat system has not yet been implemented. For now this method
-		 *  just sends the job to a random slave.
+		 *  just sends the job to the slave dealing with the fewest jobs.
 		 */
-		//noinspection RedundantCast because if we don't cast, IntelliJ warns about suspicious call to Map.get()
-		SlaveObj designatedSlave = slaves.get((UUID) slaves.keySet().toArray()[randInt(0, slaves.size() - 1)]);
-		job.setSolvingSlaveUUID(designatedSlave.getConnectionUUID());
-		debug("Sending query " + job.getQueryId() + " to slave " + designatedSlave.getConnectionUUID());
-		designatedSlave.accept(job);
+		//just because it's a ConcurrentHashMap doesn't mean everything is safe!
+		synchronized (slaves) {
+			leastBusySlave = slaves.entrySet().parallelStream()
+					.map(Map.Entry::getValue)
+					//find the slave that is responsible for the fewest jobs
+					.min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
+					//get the actual SlaveObj or else
+					//commit suicide
+					.orElse(null);
+		}
+		//if no slave ended up being found
+		if (isNull(leastBusySlave)) {
+			//try again
+			sendToLeastBusySlave(job);
+		}
+		//make sure they're still registered if present
+		else if (slaves.containsKey(leastBusySlave.getConnectionUUID())) {
+			job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
+			debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
+			leastBusySlave.accept(job);
+		}
+		//if not registered anymore
+		else {
+			//try again
+			sendToLeastBusySlave(job);
+		}
 	}
 	
 	private void poisonJobIngestionThread() {
@@ -399,6 +432,12 @@ public class Server {
 				}
 				catch (InterruptedException | JsonProcessingException e) {
 					printStackTrace(e);
+					try {
+						//If job ingestion thread dies, kill off server
+						this.stop();
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			}
 		});
@@ -531,19 +570,33 @@ public class Server {
 						break;
 					}
 				}
+				catch (NullPointerException npe) {
+					slaveDisconnected(true);
+				}
 				catch (SocketException e) {
-					debug("Slave " + getConnectionUUID() + " disconnected.");
-					deRegister(this);
-					try {
-						getSocket().close();
-					}
-					catch (IOException ex) {
-						ex.printStackTrace();
-					}
+					slaveDisconnected(false);
 				}
 				catch (IOException e) {
-					printStackTrace(e);
+					if (e instanceof JsonMappingException) {
+						if (e.getCause() instanceof JsonEOFException) {
+							slaveDisconnected(true);
+						}
+					}
+					else {
+						printStackTrace(e);
+					}
 				}
+			}
+		}
+
+		private void slaveDisconnected(boolean violently) {
+			debug("Slave " + getConnectionUUID() + (violently ? " violently" : "") + " disconnected.");
+			deRegister(this);
+			try {
+				getSocket().close();
+			}
+			catch (IOException ex) {
+				ex.printStackTrace();
 			}
 		}
 		
