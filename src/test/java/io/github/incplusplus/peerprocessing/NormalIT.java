@@ -24,7 +24,7 @@ import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.i
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Timeout(value = 5,unit = TimeUnit.MINUTES)
-public class SingleSlaveIT {
+public class NormalIT {
 	/**
 	 * This should always stay at zero. When at zero,
 	 * the server will use whatever port is available.
@@ -66,16 +66,36 @@ public class SingleSlaveIT {
 
 	@ParameterizedTest
 	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
-	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+	void mathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort);
-		     Slave mySlave = new Slave("localhost", serverPort)) {
+			 Slave mySlave = new Slave("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.begin();
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
 			task = myClient.evaluateExpression(input);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			executor.submit(task);
+			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
+	void mathQueryTwoSlaves(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+		FutureTask<BigDecimal> task;
+		try (Client myClient = new Client("localhost", serverPort);
+			 Slave firstSlave = new Slave("localhost", serverPort);
+			 Slave secondSlave = new Slave("localhost", serverPort)) {
+			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
+			myClient.begin();
+			firstSlave.setVerbose(VERBOSE_TEST_OUTPUT);
+			secondSlave.setVerbose(VERBOSE_TEST_OUTPUT);
+			firstSlave.begin();
+			secondSlave.begin();
+			task = myClient.evaluateExpression(input);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
 		}
@@ -92,7 +112,45 @@ public class SingleSlaveIT {
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
 			task = myClient.multiply(matrix1,matrix2);
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			executor.submit(task);
+			iterateAndAssertEquals(task.get(),matrix1.multiply(matrix2));
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideMatrices")
+	void matrixQueryManySlaves(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) throws IOException, ExecutionException, InterruptedException {
+		FutureTask<BigDecimalMatrix> task;
+		try (Client myClient = new Client("localhost", serverPort);
+			 Slave slave1 = new Slave("localhost", serverPort);
+			 Slave slave2 = new Slave("localhost", serverPort);
+			 Slave slave3 = new Slave("localhost", serverPort);
+			 Slave slave4 = new Slave("localhost", serverPort);
+			 Slave slave5 = new Slave("localhost", serverPort);
+			 Slave slave6 = new Slave("localhost", serverPort);
+			 Slave slave7 = new Slave("localhost", serverPort);
+			 Slave slave8 = new Slave("localhost", serverPort)) {
+			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
+			myClient.begin();
+			slave1.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave1.begin();
+			slave2.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave2.begin();
+			slave3.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave3.begin();
+			slave4.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave4.begin();
+			slave5.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave5.begin();
+			slave6.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave6.begin();
+			slave7.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave7.begin();
+			slave8.setVerbose(VERBOSE_TEST_OUTPUT);
+			slave8.begin();
+			task = myClient.multiply(matrix1,matrix2);
+			ExecutorService executor = Executors.newSingleThreadExecutor();
 			executor.submit(task);
 			iterateAndAssertEquals(task.get(),matrix1.multiply(matrix2));
 		}

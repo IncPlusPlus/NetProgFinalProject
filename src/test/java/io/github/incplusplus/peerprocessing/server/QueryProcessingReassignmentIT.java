@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.server;
 
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
-import io.github.incplusplus.peerprocessing.server.Server;
 import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,14 +10,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.*;
 
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.INITIAL_SERVER_PORT;
-import static io.github.incplusplus.peerprocessing.SingleSlaveIT.VERBOSE_TEST_OUTPUT;
-import static io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest.iterateAndAssertEquals;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 
 @Timeout(value = 5, unit = TimeUnit.MINUTES)
 class QueryProcessingReassignmentIT {
@@ -38,65 +36,114 @@ class QueryProcessingReassignmentIT {
   }
 
   @ParameterizedTest
-  @MethodSource("io.github.incplusplus.peerprocessing.SingleSlaveIT#provideMatrices")
+  @MethodSource("io.github.incplusplus.peerprocessing.NormalIT#provideMatrices")
   void whenSlaveDisconnects_IfSlaveHeldJobs_ThenJobsGetReassigned(
       BigDecimalMatrix matrix1, BigDecimalMatrix matrix2)
       throws IOException, ExecutionException, InterruptedException {
     FutureTask<BigDecimalMatrix> task;
     try (Client myClient = new Client("localhost", serverPort)) {
-      Slave mySlave = new Slave("localhost", serverPort);
+      ExecutorService executor = Executors.newSingleThreadExecutor();
+      SlaveFuzzer slaveFuzzer = new SlaveFuzzer("localhost", serverPort, 10);
       myClient.setVerbose(VERBOSE_TEST_OUTPUT);
       myClient.begin();
-      mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
-      mySlave.begin();
+      slaveFuzzer.begin();
       task = myClient.multiply(matrix1, matrix2);
       //noinspection StatementWithEmptyBody
       while (!myClient.isPolite()) {}
-      //noinspection StatementWithEmptyBody
-      while (!mySlave.isPolite()) {}
-      ExecutorService executor = Executors.newFixedThreadPool(2);
       executor.submit(task);
-      // Wait until the server starts assigning the slave some jobs
-      while (server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size() < 5) {
-        Thread.sleep(100);
-      }
-      synchronized (server.slaves) {
-        assert server.slaves.get(mySlave.getConnectionId()).getJobsResponsibleFor().size() != 0;
-        mySlave.disconnect();
-      }
-      //noinspection StatementWithEmptyBody
-      while (!mySlave.isClosed()) {}
-      //this is the source of all suffering
-      Thread.sleep(100);
-      Thread thread =
-          new Thread(
-              () -> {
-                try {
-                  task.get();
-                  // we should never get here
-                  assert false;
-                } catch (InterruptedException ignored) {
-                  // we intend to interrupt this thread
-                  debug("Execution waiting thread interrupted as normal.");
-                } catch (ExecutionException e) {
-                  // fail
-                  assert false;
-                }
-              });
-      thread.start();
-      // Let the current thread sleep (not the created thread!)
-      Thread.sleep(5000);
-      assertTrue(thread.isAlive());
-      assertFalse(task.isDone());
-      mySlave = new Slave("localhost", serverPort);
-      mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
-      thread.interrupt();
-      mySlave.begin();
-      //noinspection StatementWithEmptyBody
-      while (!mySlave.isPolite()) {}
       task.get();
       executor.shutdown();
-      mySlave.disconnect();
+      slaveFuzzer.stop();
+    }
+  }
+
+  private class SlaveFuzzer {
+    private final String hostname;
+    private final int portNum;
+    final List<Slave> slaveList = Collections.synchronizedList(new ArrayList<>());
+    Thread randomSlaveSlayer;
+    Thread randomSlaveCreator;
+
+    SlaveFuzzer(String hostname, int portNum, int initNumSlaves) {
+      this.hostname = hostname;
+      this.portNum = portNum;
+      for (int i = 0; i < initNumSlaves; i++) {
+        slaveList.add(new Slave(hostname, portNum));
+      }
+      randomSlaveSlayer =
+          new Thread(
+              () -> {
+                while (true) {
+                  // If we've obviously overhunted, wait a while longer
+                  if (slaveList.size() < initNumSlaves / 2) {
+                    try {
+                      Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                      break;
+                      // we could get interrupted here. It's fine
+                    }
+                  }
+                  int index = randInt(1, slaveList.size());
+                  Slave sacrificialLamb = slaveList.get(index);
+                  // if the slave to kill hasn't introduced itself yet
+                  // go looking somewhere else
+                  if (!sacrificialLamb.isPolite()) continue;
+                  try {
+                    synchronized (slaveList) {
+                      slaveList.remove(sacrificialLamb);
+                      sacrificialLamb.close();
+                    }
+                    // Don't be constantly killing slaves or nothing will ever get done
+                    Thread.sleep(500);
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                  } catch (InterruptedException ignored) {
+                    break;
+                    // we expect to be interrupted. Don't panic
+                  }
+                }
+              });
+      randomSlaveSlayer.setDaemon(true);
+      randomSlaveSlayer.setName("Random slave slayer");
+
+      randomSlaveCreator =
+          new Thread(
+              () -> {
+                while (true) {
+                  Slave newSlave = new Slave(this.hostname, this.portNum);
+                  try {
+                    newSlave.begin();
+                    slaveList.add(newSlave);
+                    // don't expand the list infinitely
+                    Thread.sleep(500);
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                  } catch (InterruptedException ignored) {
+                    break;
+                    // we expect to be interrupted. Don't panic
+                  }
+                }
+              });
+      randomSlaveCreator.setDaemon(true);
+      randomSlaveCreator.setName("Random slave creator");
+    }
+
+    void begin() throws IOException {
+      for (Slave i : slaveList) {
+        i.begin();
+      }
+      randomSlaveCreator.start();
+      randomSlaveSlayer.start();
+    }
+
+    void stop() throws IOException {
+      randomSlaveCreator.interrupt();
+      randomSlaveSlayer.interrupt();
+      synchronized (slaveList) {
+        for (Slave i : slaveList) {
+          i.close();
+        }
+      }
     }
   }
 }

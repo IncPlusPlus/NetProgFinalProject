@@ -79,8 +79,8 @@ public class MiscUtils {
 		return Header.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
 	}
 	
-	public static int randInt(int lowerBoundInclusive, int upperBoundInclusive) {
-		return new SplittableRandom().nextInt(lowerBoundInclusive, upperBoundInclusive + 1);
+	public static int randInt(int lowerBoundInclusive, int upperBoundExclusive) {
+		return new SplittableRandom().nextInt(lowerBoundInclusive, upperBoundExclusive );
 	}
 	
 	/**
