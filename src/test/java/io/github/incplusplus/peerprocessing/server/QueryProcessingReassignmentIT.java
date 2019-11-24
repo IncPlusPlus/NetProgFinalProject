@@ -27,7 +27,7 @@ class QueryProcessingReassignmentIT {
 
   @BeforeAll
   static void setUp() throws IOException {
-    serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
+    serverPort = server.start(9999, VERBOSE_TEST_OUTPUT);
     //noinspection StatementWithEmptyBody
     while (!server.started()) {}
   }
