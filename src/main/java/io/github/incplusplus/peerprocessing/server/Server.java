@@ -374,9 +374,15 @@ public class Server {
 					//commit suicide
 					.orElseThrow();
 		}
-		job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
-		debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
-		leastBusySlave.accept(job);
+		//make sure they're still registered
+		if (slaves.containsKey(leastBusySlave.getConnectionUUID())) {
+			job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
+			debug("Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
+			leastBusySlave.accept(job);
+		}
+		else {
+			sendToLeastBusySlave(job);
+		}
 	}
 	
 	private void poisonJobIngestionThread() {
