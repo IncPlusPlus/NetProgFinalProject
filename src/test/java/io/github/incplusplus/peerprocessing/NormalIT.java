@@ -69,11 +69,31 @@ public class NormalIT {
 	void singleMathQuerySingleSlave(String input, String expected) throws IOException, ExecutionException, InterruptedException {
 		FutureTask<BigDecimal> task;
 		try (Client myClient = new Client("localhost", serverPort);
-		     Slave mySlave = new Slave("localhost", serverPort)) {
+			 Slave mySlave = new Slave("localhost", serverPort)) {
 			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
 			myClient.begin();
 			mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
 			mySlave.begin();
+			task = myClient.evaluateExpression(input);
+			ExecutorService executor = Executors.newFixedThreadPool(2);
+			executor.submit(task);
+			assertEquals(task.get().compareTo(new BigDecimal(expected)),0);
+		}
+	}
+
+	@ParameterizedTest
+	@CsvFileSource(resources = "/SimpleMathProblems.csv", numLinesToSkip = 1)
+	void singleMathQueryTwoSlaves(String input, String expected) throws IOException, ExecutionException, InterruptedException {
+		FutureTask<BigDecimal> task;
+		try (Client myClient = new Client("localhost", serverPort);
+			 Slave firstSlave = new Slave("localhost", serverPort);
+			 Slave secondSlave = new Slave("localhost", serverPort)) {
+			myClient.setVerbose(VERBOSE_TEST_OUTPUT);
+			myClient.begin();
+			firstSlave.setVerbose(VERBOSE_TEST_OUTPUT);
+			secondSlave.setVerbose(VERBOSE_TEST_OUTPUT);
+			firstSlave.begin();
+			secondSlave.begin();
 			task = myClient.evaluateExpression(input);
 			ExecutorService executor = Executors.newFixedThreadPool(2);
 			executor.submit(task);
