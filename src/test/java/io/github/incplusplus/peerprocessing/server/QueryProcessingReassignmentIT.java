@@ -66,6 +66,7 @@ class QueryProcessingReassignmentIT {
       }
       //noinspection StatementWithEmptyBody
       while (!mySlave.isClosed()) {}
+      System.out.println("Slave is now closed!");
       Thread thread =
           new Thread(
               () -> {
