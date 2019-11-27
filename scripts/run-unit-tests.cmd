@@ -1,0 +1,1 @@
+../mvnw -f ../pom.xml test -DskipIntegrationTests

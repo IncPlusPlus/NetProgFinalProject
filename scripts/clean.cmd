@@ -1,0 +1,1 @@
+../mvnw -f ../pom.xml clean
