@@ -1,7 +1,8 @@
 package io.github.incplusplus.peerprocessing.linear;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.javatuples.Quartet;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randBigDec;
+import static java.math.BigDecimal.ZERO;
+import static org.javatuples.Quartet.with;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,10 +11,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.randBigDec;
-import static java.math.BigDecimal.ZERO;
-import static org.javatuples.Quartet.with;
+import org.javatuples.Quartet;
 
 public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
   private BigDecimal[][] matrix;
@@ -75,7 +73,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 
     for (int i = 0; i < getNumRows(); i++) {
       for (int j = 0; j < other.getNumCols(); j++) {
-        vectorPairs.add(with(getRow(i), other.getCol(j),i,j));
+        vectorPairs.add(with(getRow(i), other.getCol(j), i, j));
       }
     }
     return vectorPairs;
@@ -151,8 +149,7 @@ public class BigDecimalMatrix extends RealMatrix<BigDecimal> {
 
   @Override
   public int getNumCols() {
-    if (matrix.length == 0)
-      return 0;
+    if (matrix.length == 0) return 0;
     return matrix[0].length;
   }
 

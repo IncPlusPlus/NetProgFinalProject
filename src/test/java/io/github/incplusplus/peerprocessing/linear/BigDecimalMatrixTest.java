@@ -1,14 +1,13 @@
 package io.github.incplusplus.peerprocessing.linear;
 
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.math.BigDecimal;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 public class BigDecimalMatrixTest {
   // <editor-fold desc="Various matrices">
