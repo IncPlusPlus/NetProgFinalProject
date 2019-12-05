@@ -186,7 +186,14 @@ public class Slave implements ProperClient, Personable {
 				}
 				catch (NullPointerException e) {
 					if (running.get()) {
+						error("The server suddenly disconnected");
 						printStackTrace(e);
+						try {
+							kill();
+						}
+						catch (IOException ex) {
+							printStackTrace(ex);
+						}
 					}
 				}
 				catch (SocketException e) {
