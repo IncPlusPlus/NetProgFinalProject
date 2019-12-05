@@ -12,9 +12,33 @@ import java.util.Scanner;
 import java.util.SplittableRandom;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 import static org.javatuples.Pair.with;
 
 public class MiscUtils {
+
+	/**
+	 * Runs {@link #promptForHostPortTuple()} unless args are provided in the proper format
+	 * such that the first arg is an IPv4 address or resolvable hostname like 'localhost'
+	 * or 'google.com' and the second arg is a port number that is not in use.
+	 * @param args a hostname or IPv4 address followed by a port number.
+	 *             If not supplied, this function prompts the user using a {@link Scanner}.
+	 * @return a tuple of the hostname and port
+	 */
+	public static Pair<String, Integer> conditionallyPromptForHostPortTuple(String[] args) {
+		if (args.length != 2) return promptForHostPortTuple();
+		int port;
+		try {
+			port = Integer.parseInt(args[0]);
+		} catch (NumberFormatException e) {
+			printStackTrace(e);
+			error("Invalid port provided in args. Prompting instead.");
+			return promptForHostPortTuple();
+		}
+		return with(args[0], port);
+	}
+
 	public static Pair<String, Integer> promptForHostPortTuple() {
 		Scanner in = new Scanner(System.in);
 		String host;
@@ -27,19 +51,19 @@ public class MiscUtils {
 		in.nextLine();
 		return with(host, port);
 	}
-	
+
 	public static Socket promptForSocket() throws IOException {
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
 		return new Socket(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
 	}
-	
+
 	public static Triplet<String, Integer, Socket> promptForHostPortSocket() throws IOException {
 		Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
 		String host = hostAndPortPair.getValue0();
 		int port = hostAndPortPair.getValue1();
 		return Triplet.with(host, port, new Socket(host, port));
 	}
-	
+
 	/**
 	 * Prefixes the provided string such that it begins with
 	 * the some provided header value
@@ -54,7 +78,7 @@ public class MiscUtils {
 				HEADER_SEPARATOR +
 				intendedMessage;
 	}
-	
+
 	/**
 	 * Decodes a message. This strips the header from the message
 	 * and returns only the payload.
@@ -68,7 +92,7 @@ public class MiscUtils {
 			return split[1];
 		return null;
 	}
-	
+
 	/**
 	 * Gets the header of a message which contains a header and a payload.
 	 *
@@ -78,11 +102,11 @@ public class MiscUtils {
 	public static Header getHeader(String fullPayload) {
 		return Header.valueOf(fullPayload.split(Character.toString(HEADER_SEPARATOR))[0]);
 	}
-	
+
 	public static int randInt(int lowerBoundInclusive, int upperBoundExclusive) {
 		return new SplittableRandom().nextInt(lowerBoundInclusive, upperBoundExclusive );
 	}
-	
+
 	/**
 	 * Credit to https://stackoverflow.com/a/38342964 for this elegant solution
 	 * @return the most likely local IP address of this machine
@@ -95,7 +119,7 @@ public class MiscUtils {
 			return socket.getLocalAddress().getHostAddress();
 		}
 	}
-	
+
 	/**
 	 * Generates an integer uniformly at random between 0 (inclusive) and
 	 * the specified ceiling (exclusive) and creates a BigDecimal

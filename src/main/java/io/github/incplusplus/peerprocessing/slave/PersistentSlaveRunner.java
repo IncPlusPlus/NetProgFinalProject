@@ -5,6 +5,7 @@ import org.javatuples.Pair;
 import java.io.IOException;
 import java.util.Scanner;
 
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.conditionallyPromptForHostPortTuple;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 
@@ -15,7 +16,7 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 public class PersistentSlaveRunner {
   public static void main(String[] args) throws IOException {
     enable();
-    Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
+    Pair<String, Integer> hostAndPortPair = conditionallyPromptForHostPortTuple(args);
     Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
     mainSlave.setDisconnectCallback(reInitConnection(mainSlave));
     mainSlave.begin();
