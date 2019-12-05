@@ -1,5 +1,5 @@
 # Alpine Linux with OpenJDK JRE
-FROM balenalib/raspberrypi4-64-debian-openjdk
+FROM arm32v7/adoptopenjdk
 #RUN apt update
 #RUN apt install bash sudo curl -y
 
