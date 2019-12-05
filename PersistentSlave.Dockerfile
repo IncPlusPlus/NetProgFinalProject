@@ -1,5 +1,5 @@
 # Alpine Linux with OpenJDK JRE
-FROM openjdk:14-jdk-buster
+FROM adoptopenjdk/openjdk11-openj9:latest
 RUN apt update
 RUN apt install bash sudo curl -y
 
