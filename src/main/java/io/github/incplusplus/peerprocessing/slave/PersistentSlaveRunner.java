@@ -32,9 +32,9 @@ public class PersistentSlaveRunner {
       boolean initSuccess = false;
       while (!initSuccess) {
         try {
+          debug("PersistentSlave attempting to reconnect");
           newSlave.begin();
           initSuccess = true;
-          debug("PersistentSlave attempting to reconnect");
         } catch (java.net.ConnectException e) {
           info(
               "PersistentSlave couldn't connect to "
@@ -42,7 +42,7 @@ public class PersistentSlaveRunner {
                   + ":"
                   + newSlave.getDestinationPort());
           try {
-            Thread.sleep(15000);
+            Thread.sleep(1000);
           } catch (InterruptedException ex) {
             error("reInitConnection callback was slaughtered in its sleep!");
             printStackTrace(ex);
