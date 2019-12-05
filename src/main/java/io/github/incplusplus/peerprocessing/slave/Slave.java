@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Objects;
@@ -56,28 +57,32 @@ public class Slave implements ProperClient, Personable {
 	public synchronized boolean isClosed() {
 		return !running.get();
 	}
-	
+
 	public boolean isPolite() {
 		return polite.get();
 	}
-	
+
 	public UUID getConnectionId() {
 		return uuid;
 	}
-	
+
 	/**
 	 * Begin reading or writing as expected.
 	 */
 	@Override
 	public synchronized void begin() throws IOException {
-	    this.sock = new Socket(serverHostname, serverPort);
-	    this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-        this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		boolean firstStart = running.compareAndSet(false, true);
-		assert firstStart;
-		dealWithServer();
+		try {
+			this.sock = new Socket(serverHostname, serverPort);
+			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			boolean firstStart = running.compareAndSet(false, true);
+			assert firstStart;
+			dealWithServer();
+		} catch (ConnectException e) {
+			runDisconnectCallback();
+		}
 	}
-	
+
 	/**
 	 * Introduces this {@linkplain Personable} object to a server.
 	 */
@@ -128,7 +133,7 @@ public class Slave implements ProperClient, Personable {
 		outToServer.println(DISCONNECT);
 		kill();
 	}
-	
+
 	private void kill() throws IOException {
 		outToServer.close();
 		inFromServer.close();
@@ -145,7 +150,7 @@ public class Slave implements ProperClient, Personable {
 			this.callBackThread = callBackThread;
 		}
 	}
-	
+
 	private void dealWithServer() {
 		if (isNull(sock))
 			throw new IllegalStateException("Socket not initialized properly. " +
@@ -211,7 +216,7 @@ public class Slave implements ProperClient, Personable {
 		serverInteractionThread.setName("Slave server interaction");
 		serverInteractionThread.start();
 	}
-	
+
 	/**
 	 * Solves and returns a algebraicQuery. If an exception occurs,
 	 * it will be contained in the query enclosed by the specified algebraicQuery.
@@ -235,7 +240,7 @@ public class Slave implements ProperClient, Personable {
 		}
 		return algebraicQuery;
 	}
-	
+
 	private Query evaluate(Query query) {
 		if (query instanceof AlgebraicQuery) {
 			return solve((AlgebraicQuery) query);
@@ -248,11 +253,11 @@ public class Slave implements ProperClient, Personable {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	private void sendEvaluatedQuery(Query query) throws JsonProcessingException {
 		outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Slave" + (uuid != null ? " " + uuid : "");
