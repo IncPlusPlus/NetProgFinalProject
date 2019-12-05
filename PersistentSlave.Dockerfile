@@ -1,5 +1,5 @@
 # Alpine Linux with OpenJDK JRE
-FROM arm32v7/adoptopenjdk
+FROM arm32v7/adoptopenjdk:11-jdk-hotspot
 #RUN apt update
 #RUN apt install bash sudo curl -y
 
