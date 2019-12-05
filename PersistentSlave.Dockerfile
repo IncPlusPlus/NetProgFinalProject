@@ -1,5 +1,5 @@
 # Alpine Linux with OpenJDK JRE
-FROM adoptopenjdk/openjdk11-openj9:latest
+FROM balenalib/raspberrypi4-64-debian-openjdk:11-latest
 RUN apt update
 RUN apt install bash sudo curl -y
 
