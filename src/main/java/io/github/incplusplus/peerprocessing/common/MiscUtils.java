@@ -30,7 +30,7 @@ public class MiscUtils {
 		if (args.length != 2) return promptForHostPortTuple();
 		int port;
 		try {
-			port = Integer.parseInt(args[0]);
+			port = Integer.parseInt(args[1]);
 		} catch (NumberFormatException e) {
 			printStackTrace(e);
 			error("Invalid port provided in args. Prompting instead.");
