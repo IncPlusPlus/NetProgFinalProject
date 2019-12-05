@@ -1,7 +1,7 @@
 # Alpine Linux with OpenJDK JRE
 FROM arm32v7/ubuntu
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
+    apt-get install -y software-properties-common
 RUN add-apt-repository ppa:openjdk-r/ppa -y \
     && apt-get update -q \
     && apt install -y openjdk-11-jdk -y
