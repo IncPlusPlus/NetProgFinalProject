@@ -5,7 +5,7 @@ FROM bellsoft/liberica-openjdk-debian:latest
 #RUN add-apt-repository ppa:openjdk-r/ppa -y \
 #    && apt update -q \
 #    && apt install openjdk-11-jdk -y
-RUN apt add bash sudo curl -y
+RUN apt install bash sudo curl -y
 
 # copy source, POM, mvnw, and script
 ADD pom.xml /pom.xml
