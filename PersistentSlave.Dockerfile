@@ -1,11 +1,11 @@
 # Alpine Linux with OpenJDK JRE
 FROM adoptopenjdk/openjdk11:armv7l-debian-jdk-11.0.5_10-slim
-#RUN apt-get update && \
-#    apt-get install -y software-properties-common
-#RUN add-apt-repository ppa:openjdk-r/ppa -y \
-#    && apt-get update -q \
-#    && apt install -y openjdk-11-jdk -y
-#RUN apt install bash sudo curl -y
+RUN apt update && \
+    apt install -y software-properties-common
+RUN add-apt-repository ppa:openjdk-r/ppa -y \
+    && apt update -q \
+    && apt install -y openjdk-11-jdk -y
+RUN apt install bash sudo curl -y
 
 # copy source, POM, mvnw, and script
 ADD pom.xml /pom.xml
