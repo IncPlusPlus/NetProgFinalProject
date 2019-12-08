@@ -1,5 +1,5 @@
 # Alpine Linux with OpenJDK JRE
-FROM adoptopenjdk/openjdk11:armv7l-debian-jdk-11.0.5_10-slim
+FROM adoptopenjdk/openjdk11:armv7l-ubuntu-jdk11u-nightly-slim
 RUN apt update && \
     apt install -y software-properties-common
 RUN add-apt-repository ppa:openjdk-r/ppa -y \
