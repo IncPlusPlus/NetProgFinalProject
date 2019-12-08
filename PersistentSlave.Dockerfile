@@ -4,7 +4,7 @@ RUN apt update
 #RUN add-apt-repository ppa:openjdk-r/ppa -y \
 #    && apt update -q \
 #    && apt install openjdk-11-jdk -y
-RUN apt install bash sudo curl -y
+RUN apt install bash sudo curl -y --allow-unauthenticated
 
 # copy source, POM, mvnw, and script
 ADD pom.xml /pom.xml
