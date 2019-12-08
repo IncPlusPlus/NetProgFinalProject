@@ -1,9 +1,10 @@
 # Alpine Linux with OpenJDK JRE
 FROM bellsoft/liberica-openjdk-debian:latest
-RUN apt update
-RUN add-apt-repository ppa:openjdk-r/ppa -y \
-    && apt update -q \
-    && apt install openjdk-11-jdk -y
+#RUN apt update && \
+#    apt install -y software-properties-common apt-utils
+#RUN add-apt-repository ppa:openjdk-r/ppa -y \
+#    && apt update -q \
+#    && apt install openjdk-11-jdk -y
 RUN apt add bash sudo curl -y
 
 # copy source, POM, mvnw, and script
