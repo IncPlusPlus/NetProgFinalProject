@@ -1,6 +1,6 @@
 # Alpine Linux with OpenJDK JRE
 FROM bellsoft/liberica-openjdk-centos:latest
-RUN yum update -y
+RUN yum check-update
 #RUN add-apt-repository ppa:openjdk-r/ppa -y \
 #    && apt update -q \
 #    && apt install openjdk-11-jdk -y
