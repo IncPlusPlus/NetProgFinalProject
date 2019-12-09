@@ -138,9 +138,9 @@ public class Slave implements ProperClient, Personable {
 	}
 
 	private void kill() throws IOException {
-		outToServer.close();
-		inFromServer.close();
-		sock.close();
+		if(nonNull(outToServer)) outToServer.close();
+		if(nonNull(inFromServer)) inFromServer.close();
+		if(nonNull(sock)) sock.close();
 		runDisconnectCallback();
 	}
 
