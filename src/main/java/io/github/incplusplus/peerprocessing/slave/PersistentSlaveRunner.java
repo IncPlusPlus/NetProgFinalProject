@@ -1,13 +1,15 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import org.javatuples.Pair;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.conditionallyPromptForHostPortTuple;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 
 import java.io.IOException;
 import java.util.Scanner;
-
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.conditionallyPromptForHostPortTuple;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
+import org.javatuples.Pair;
 
 /**
  * This class is just like {@linkplain} except is attempts to reconnect even if the server abandons

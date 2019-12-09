@@ -3,9 +3,8 @@ package io.github.incplusplus.peerprocessing.query;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
-import org.javatuples.Quartet;
-
 import java.math.BigDecimal;
+import org.javatuples.Quartet;
 
 public class VectorQuery extends Query {
   private BigDecimal[] firstVector;
@@ -26,7 +25,11 @@ public class VectorQuery extends Query {
   public VectorQuery() {}
 
   public static VectorQuery from(Quartet<BigDecimal[], BigDecimal[], Integer, Integer> vectorPair) {
-    return new VectorQuery(vectorPair.getValue0(), vectorPair.getValue1(), vectorPair.getValue2(), vectorPair.getValue3());
+    return new VectorQuery(
+        vectorPair.getValue0(),
+        vectorPair.getValue1(),
+        vectorPair.getValue2(),
+        vectorPair.getValue3());
   }
 
   public BigDecimal[] getFirstVector() {

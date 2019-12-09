@@ -3,7 +3,6 @@ package io.github.incplusplus.peerprocessing.query;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
-
 import java.util.List;
 
 /**
@@ -33,8 +32,7 @@ public abstract class BatchQuery extends Query {
   /** @return whether or not all of the queries managed by this class have been answered yet. */
   @Override
   public boolean isCompleted() {
-    if (super.isCompleted())
-      performCompletionAction();
+    if (super.isCompleted()) performCompletionAction();
     return super.isCompleted();
   }
 
@@ -42,8 +40,9 @@ public abstract class BatchQuery extends Query {
    * Subclasses can optionally override this method to be notified when their batch is complete.
    * That way, they can compile the information themselves when it's all available. This will be
    * triggered when {@link #isCompleted()} is called UNDER THE CONDITION THAT THE METHOD CALL
-   * RETURNED TRUE. Additionally, the call to performCompletionAction() will happen every time isCompleted()
-   * is called. To avoid wasting resources, keep track of whether you have already run this method before.
+   * RETURNED TRUE. Additionally, the call to performCompletionAction() will happen every time
+   * isCompleted() is called. To avoid wasting resources, keep track of whether you have already run
+   * this method before.
    */
   public void performCompletionAction() {
     // do nothing

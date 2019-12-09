@@ -80,6 +80,20 @@
 
     <build>
         <plugins>
+            <!--<editor-fold desc="FMT Maven Plugin">-->
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--</editor-fold>-->
             <!--<editor-fold desc="Maven Compiler Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

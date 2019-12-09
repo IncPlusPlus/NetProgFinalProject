@@ -1,14 +1,12 @@
 package io.github.incplusplus.peerprocessing.server;
 
-import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Scanner;
-
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.getIp;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
 import static io.github.incplusplus.peerprocessing.server.Server.serverName;
+
+import io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger;
+import java.io.IOException;
+import java.util.Scanner;
 
 /** A class to start an instance of a {@linkplain Server}. */
 class ServerRunner {

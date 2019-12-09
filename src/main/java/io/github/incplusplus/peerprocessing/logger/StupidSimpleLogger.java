@@ -2,7 +2,6 @@ package io.github.incplusplus.peerprocessing.logger;
 
 import com.diogonunes.jcdp.color.ColoredPrinter;
 import com.diogonunes.jcdp.color.api.Ansi;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
