@@ -17,4 +17,4 @@ ADD entrypoint.sh /entrypoint.sh
 ADD persistentSlave.sh /persistentSlave.sh
 
 # runs application
-CMD ["sh"]
+CMD ["/entrypoint.sh", "persistentSlave.sh", "192.168.191.0", "1234"]
