@@ -3,10 +3,10 @@ cache:
   directories:
   - "$HOME/.m2/repository"
 script:
-- mvn clean jacoco:prepare-agent install -DskipIntegrationTests jacoco:report
+- mvn clean jacoco:prepare-agent verify -DskipIntegrationTests=true jacoco:report
 after_success:
 - bash <(curl -s https://codecov.io/bash) -c -F unittests
-- mvn jacoco:prepare-agent integration-test jacoco:report -DskipUnitTests
+- mvn jacoco:prepare-agent verify jacoco:report -DskipUnitTests=true
 - bash <(curl -s https://codecov.io/bash) -c -F integration
 deploy:
   provider: releases
