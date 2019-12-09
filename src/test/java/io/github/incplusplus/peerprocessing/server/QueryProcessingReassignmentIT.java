@@ -1,22 +1,21 @@
 package io.github.incplusplus.peerprocessing.server;
 
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
+
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.slave.Slave;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
-
-import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @Timeout(value = 5, unit = TimeUnit.MINUTES)
 class QueryProcessingReassignmentIT {

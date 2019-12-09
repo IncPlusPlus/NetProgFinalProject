@@ -1,5 +1,8 @@
 package io.github.incplusplus.peerprocessing.query.matrix;
 
+import static io.github.incplusplus.peerprocessing.query.matrix.Operation.MULTIPLY;
+import static java.util.Objects.isNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
@@ -7,15 +10,9 @@ import io.github.incplusplus.peerprocessing.query.BatchQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
 import io.github.incplusplus.peerprocessing.query.VectorQuery;
 import io.github.incplusplus.peerprocessing.server.QueryState;
-
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static io.github.incplusplus.peerprocessing.query.matrix.Operation.MULTIPLY;
-import static java.util.Objects.isNull;
 
 public class MatrixQuery extends BatchQuery {
   private Operation operation;
@@ -23,6 +20,7 @@ public class MatrixQuery extends BatchQuery {
   private BigDecimalMatrix matrix2;
   /** Used only in the case that VectorQueries are required (i.e. a batch dot product operation) */
   private Map<UUID, VectorQuery> vectorQueries;
+
   private BigDecimalMatrix resultMatrix;
 
   @SuppressWarnings("unused")
@@ -61,11 +59,15 @@ public class MatrixQuery extends BatchQuery {
 
   @Override
   public void performCompletionAction() {
-    if(operation.equals(MULTIPLY)){
-      if(isNull(resultMatrix)) {
+    if (operation.equals(MULTIPLY)) {
+      if (isNull(resultMatrix)) {
         BigDecimal[][] productMatrix = new BigDecimal[matrix1.getNumRows()][matrix2.getNumCols()];
-        vectorQueries.values().forEach(vectorQuery ->
-            productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] = (BigDecimal) vectorQuery.getResult());
+        vectorQueries
+            .values()
+            .forEach(
+                vectorQuery ->
+                    productMatrix[vectorQuery.getRowIndex()][vectorQuery.getColumnIndex()] =
+                        (BigDecimal) vectorQuery.getResult());
         resultMatrix = new BigDecimalMatrix(productMatrix);
       }
     }
@@ -98,18 +100,31 @@ public class MatrixQuery extends BatchQuery {
   @JsonIgnore
   public List<Query> getQueries() {
     if (getOperation().equals(MULTIPLY)) {
-      if (vectorQueries==null){
+      if (vectorQueries == null) {
         vectorQueries =
-            Maps.uniqueIndex(matrix1.getVectorsForMultiplyingWith(matrix2)
-                .parallelStream()
-                .map(VectorQuery::from)
-                .collect(Collectors.toList()), Query::getQueryId);
-        vectorQueries.values().parallelStream().forEach(vectorQuery -> {vectorQuery.setRequestingClientUUID(this.getRequestingClientUUID());vectorQuery.setParentBatchId(getQueryId());});
+            Maps.uniqueIndex(
+                matrix1
+                    .getVectorsForMultiplyingWith(matrix2)
+                    .parallelStream()
+                    .map(VectorQuery::from)
+                    .collect(Collectors.toList()),
+                Query::getQueryId);
+        vectorQueries
+            .values()
+            .parallelStream()
+            .forEach(
+                vectorQuery -> {
+                  vectorQuery.setRequestingClientUUID(this.getRequestingClientUUID());
+                  vectorQuery.setParentBatchId(getQueryId());
+                });
       }
-      //return all vectorQueries that have not yet been solved
-      return vectorQueries.values().parallelStream().filter(vectorQuery -> !vectorQuery.isCompleted()).collect(Collectors.toList());
-    }
-    else {
+      // return all vectorQueries that have not yet been solved
+      return vectorQueries
+          .values()
+          .parallelStream()
+          .filter(vectorQuery -> !vectorQuery.isCompleted())
+          .collect(Collectors.toList());
+    } else {
       // if this is not something that supports splitting into multiple queries
       // return a single element array containing this single query.
       return Collections.singletonList(this);
@@ -118,8 +133,7 @@ public class MatrixQuery extends BatchQuery {
 
   @Override
   public boolean offer(Query query) {
-    Query internallyStoredCorrespondingQuery =
-        vectorQueries.get(query.getQueryId());
+    Query internallyStoredCorrespondingQuery = vectorQueries.get(query.getQueryId());
 
     if (isNull(internallyStoredCorrespondingQuery)) {
       return false;

@@ -1,13 +1,12 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import io.github.incplusplus.peerprocessing.server.Server;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.incplusplus.peerprocessing.server.Server;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 @Timeout(10)
 class SlaveTest {
@@ -34,8 +33,8 @@ class SlaveTest {
     while (!slave.isClosed()) {}
     //noinspection StatementWithEmptyBody
     while (slave.isDisconnectCallbackAlive()) {}
-    //I don't know why this takes so long to update on Travis but this hack fixes it
-    while(!slaveCallbackRan.get()) {
+    // I don't know why this takes so long to update on Travis but this hack fixes it
+    while (!slaveCallbackRan.get()) {
       Thread.sleep(50);
     }
     assertTrue(slaveCallbackRan.get());

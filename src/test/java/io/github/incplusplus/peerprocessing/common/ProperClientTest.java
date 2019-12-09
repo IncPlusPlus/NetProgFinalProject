@@ -1,11 +1,11 @@
 package io.github.incplusplus.peerprocessing.common;
 
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
+import static org.junit.jupiter.api.Assertions.*;
+
 import io.github.incplusplus.peerprocessing.client.Client;
 import io.github.incplusplus.peerprocessing.slave.Slave;
 import org.junit.jupiter.api.Test;
-
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ProperClientTest {
 
