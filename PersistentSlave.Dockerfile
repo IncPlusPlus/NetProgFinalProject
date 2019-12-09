@@ -2,7 +2,7 @@
 FROM raspbian/jessie
 RUN apt update
 RUN apt update -q && \
-    apt install -y software-properties-common apt-utils
+    yes | apt install -y software-properties-common apt-utils
 RUN add-apt-repository ppa:openjdk-r/ppa -y \
     && apt update -q \
     && apt install openjdk-11-jdk -y
