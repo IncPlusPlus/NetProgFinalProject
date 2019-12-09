@@ -123,7 +123,7 @@ public class Slave implements ProperClient, Personable {
   @Override
   public synchronized void close() throws IOException {
     boolean notAlreadyClosed = running.compareAndSet(true, false);
-    assert notAlreadyClosed;
+    if (!notAlreadyClosed) debug("Warning: Closing a slave that is already closed.");
     try {
       outToServer.println(DISCONNECT);
     } catch (NullPointerException e) {

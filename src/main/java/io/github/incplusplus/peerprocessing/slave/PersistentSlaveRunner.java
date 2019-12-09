@@ -28,7 +28,7 @@ public class PersistentSlaveRunner {
     mainSlave.close();
   }
 
-  private static Runnable reInitConnection(Slave slaveToReset) {
+  static Runnable reInitConnection(Slave slaveToReset) {
     return () -> {
       Slave newSlave =
           new Slave(slaveToReset.getDestinationHostname(), slaveToReset.getDestinationPort());
