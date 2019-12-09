@@ -71,16 +71,12 @@ public class Slave implements ProperClient, Personable {
 	 */
 	@Override
 	public synchronized void begin() throws IOException {
-		try {
-			this.sock = new Socket(serverHostname, serverPort);
-			this.outToServer = new PrintWriter(sock.getOutputStream(), true);
-			this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-			boolean firstStart = running.compareAndSet(false, true);
-			assert firstStart;
-			dealWithServer();
-		} catch (ConnectException e) {
-			runDisconnectCallback();
-		}
+		this.sock = new Socket(serverHostname, serverPort);
+		this.outToServer = new PrintWriter(sock.getOutputStream(), true);
+		this.inFromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+		boolean firstStart = running.compareAndSet(false, true);
+		assert firstStart;
+		dealWithServer();
 	}
 
 	/**
@@ -130,7 +126,14 @@ public class Slave implements ProperClient, Personable {
 	public synchronized void close() throws IOException {
 		boolean notAlreadyClosed = running.compareAndSet(true, false);
 		assert notAlreadyClosed;
-		outToServer.println(DISCONNECT);
+		try {
+			outToServer.println(DISCONNECT);
+		} catch (NullPointerException e) {
+			debug(
+					"No disconnect message could be sent from "
+							+ this
+							+ " as there was no open PrintWriter.");
+		}
 		kill();
 	}
 

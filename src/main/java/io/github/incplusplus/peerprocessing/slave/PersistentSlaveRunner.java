@@ -18,8 +18,10 @@ public class PersistentSlaveRunner {
     enable();
     Pair<String, Integer> hostAndPortPair = conditionallyPromptForHostPortTuple(args);
     Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-    mainSlave.setDisconnectCallback(reInitConnection(mainSlave));
-    mainSlave.begin();
+    Thread mainSlaveThread = new Thread(() -> reInitConnection(mainSlave).run());
+    mainSlaveThread.setName("Main PersistentSlave Thread");
+    mainSlaveThread.setDaemon(true);
+    mainSlaveThread.start();
     new Scanner(System.in).nextLine();
     mainSlave.close();
   }
@@ -32,7 +34,7 @@ public class PersistentSlaveRunner {
       boolean initSuccess = false;
       while (!initSuccess) {
         try {
-          debug("PersistentSlave attempting to reconnect");
+          debug("PersistentSlave attempting to connect...");
           newSlave.begin();
           initSuccess = true;
         } catch (java.net.ConnectException e) {
