@@ -34,8 +34,10 @@ public class SmallBigDecimalMatrixCase {
   }
 
   @ParameterizedTest
-  @MethodSource("io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest#provideSmallMatrices")
-  void matrixQuerySingleSlave(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2) throws IOException, ExecutionException, InterruptedException {
+  @MethodSource(
+      "io.github.incplusplus.peerprocessing.linear.BigDecimalMatrixTest#provideSmallMatrices")
+  void matrixQuerySingleSlave(BigDecimalMatrix matrix1, BigDecimalMatrix matrix2)
+      throws IOException, ExecutionException, InterruptedException {
     FutureTask<BigDecimalMatrix> task;
     try (Client myClient = new Client("localhost", serverPort);
         Slave mySlave = new Slave("localhost", serverPort)) {
@@ -43,10 +45,10 @@ public class SmallBigDecimalMatrixCase {
       myClient.begin();
       mySlave.setVerbose(VERBOSE_TEST_OUTPUT);
       mySlave.begin();
-      task = myClient.multiply(matrix1,matrix2);
+      task = myClient.multiply(matrix1, matrix2);
       ExecutorService executor = Executors.newSingleThreadExecutor();
       executor.submit(task);
-      iterateAndAssertEquals(task.get(),matrix1.multiply(matrix2));
+      iterateAndAssertEquals(task.get(), matrix1.multiply(matrix2));
     }
   }
 }

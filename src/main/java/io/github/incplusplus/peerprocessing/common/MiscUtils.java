@@ -21,26 +21,27 @@ import org.javatuples.Triplet;
 
 public class MiscUtils {
 
-	/**
-	 * Runs {@link #promptForHostPortTuple()} unless args are provided in the proper format
-	 * such that the first arg is an IPv4 address or resolvable hostname like 'localhost'
-	 * or 'google.com' and the second arg is a port number that is not in use.
-	 * @param args a hostname or IPv4 address followed by a port number.
-	 *             If not supplied, this function prompts the user using a {@link Scanner}.
-	 * @return a tuple of the hostname and port
-	 */
-	public static Pair<String, Integer> conditionallyPromptForHostPortTuple(String[] args) {
-		if (args.length != 2) return promptForHostPortTuple();
-		int port;
-		try {
-			port = Integer.parseInt(args[1]);
-		} catch (NumberFormatException e) {
-			printStackTrace(e);
-			error("Invalid port provided in args. Prompting instead.");
-			return promptForHostPortTuple();
-		}
-		return with(args[0], port);
-	}
+  /**
+   * Runs {@link #promptForHostPortTuple()} unless args are provided in the proper format such that
+   * the first arg is an IPv4 address or resolvable hostname like 'localhost' or 'google.com' and
+   * the second arg is a port number that is not in use.
+   *
+   * @param args a hostname or IPv4 address followed by a port number. If not supplied, this
+   *     function prompts the user using a {@link Scanner}.
+   * @return a tuple of the hostname and port
+   */
+  public static Pair<String, Integer> conditionallyPromptForHostPortTuple(String[] args) {
+    if (args.length != 2) return promptForHostPortTuple();
+    int port;
+    try {
+      port = Integer.parseInt(args[1]);
+    } catch (NumberFormatException e) {
+      printStackTrace(e);
+      error("Invalid port provided in args. Prompting instead.");
+      return promptForHostPortTuple();
+    }
+    return with(args[0], port);
+  }
 
   public static Pair<String, Integer> promptForHostPortTuple() {
     Scanner in = new Scanner(System.in);

@@ -124,21 +124,21 @@ public class Slave implements ProperClient, Personable {
   public synchronized void close() throws IOException {
     boolean notAlreadyClosed = running.compareAndSet(true, false);
     assert notAlreadyClosed;
-		try {
-			outToServer.println(DISCONNECT);
-		} catch (NullPointerException e) {
-			debug(
-					"No disconnect message could be sent from "
-							+ this
-							+ " as there was no open PrintWriter.");
-		}
+    try {
+      outToServer.println(DISCONNECT);
+    } catch (NullPointerException e) {
+      debug(
+          "No disconnect message could be sent from "
+              + this
+              + " as there was no open PrintWriter.");
+    }
     kill();
   }
 
   private void kill() throws IOException {
-		if(nonNull(outToServer)) outToServer.close();
-		if(nonNull(inFromServer)) inFromServer.close();
-		if(nonNull(sock)) sock.close();
+    if (nonNull(outToServer)) outToServer.close();
+    if (nonNull(inFromServer)) inFromServer.close();
+    if (nonNull(sock)) sock.close();
     runDisconnectCallback();
   }
 
@@ -188,16 +188,15 @@ public class Slave implements ProperClient, Personable {
                     debug("Disconnected.");
                   }
                 } catch (NullPointerException e) {
-									if (running.get()) {
-										error("The server suddenly disconnected");
-										printStackTrace(e);
-										try {
-											kill();
-										}
-										catch (IOException ex) {
-											printStackTrace(ex);
-										}
-									}
+                  if (running.get()) {
+                    error("The server suddenly disconnected");
+                    printStackTrace(e);
+                    try {
+                      kill();
+                    } catch (IOException ex) {
+                      printStackTrace(ex);
+                    }
+                  }
                 } catch (SocketException e) {
                   if (running.get()) {
                     error("The server suddenly disconnected");
