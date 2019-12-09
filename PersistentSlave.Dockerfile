@@ -2,7 +2,7 @@
 FROM raspbian/jessie
 RUN apt update
 RUN wget https://download.bell-sw.com/java/13.0.1/bellsoft-jdk13.0.1-linux-arm32-vfp-hflt-lite.deb
-RUN apt install ./bellsoft-jdk13.0.1-linux-arm32-vfp-hflt-lite.deb
+RUN apt install bellsoft-jdk13.0.1-linux-arm32-vfp-hflt-lite.deb
 RUN update-alternatives --config java
 RUN update-alternatives --config javac
 #RUN add-apt-repository ppa:openjdk-r/ppa -y
