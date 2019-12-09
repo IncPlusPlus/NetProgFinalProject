@@ -1,6 +1,6 @@
 # Alpine Linux with OpenJDK JRE
 FROM raspbian/jessie
-RUN apt update
+RUN apt update && apt install -y apt-transport-https ca-certificates
 RUN wget -q -O - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | apt-key add -
 RUN echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | tee /etc/apt/sources.list.d/bellsoft.list
 RUN apt-get update
