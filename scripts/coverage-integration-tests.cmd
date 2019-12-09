@@ -1,1 +1,1 @@
-../mvnw -f ../pom.xml jacoco:prepare-agent test jacoco:report -DskipUnitTests
+../mvnw -f ../pom.xml jacoco:prepare-agent test jacoco:report -DskipUnitTests=true

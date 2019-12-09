@@ -1,1 +1,1 @@
-../mvnw -f ../pom.xml test -DskipUnitTests
+../mvnw -f ../pom.xml test -DskipUnitTests=true

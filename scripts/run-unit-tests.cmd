@@ -1,1 +1,1 @@
-../mvnw -f ../pom.xml test -DskipIntegrationTests
+../mvnw -f ../pom.xml test -DskipIntegrationTests=true

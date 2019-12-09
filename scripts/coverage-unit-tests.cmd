@@ -1,1 +1,1 @@
-../mvnw -f ../pom.xml jacoco:prepare-agent test jacoco:report -DskipIntegrationTests
+../mvnw -f ../pom.xml jacoco:prepare-agent test jacoco:report -DskipIntegrationTests=true
