@@ -1,10 +1,11 @@
 # Alpine Linux with OpenJDK JRE
 FROM raspbian/jessie
 RUN apt update
-RUN wget https://download.bell-sw.com/java/13.0.1/bellsoft-jdk13.0.1-linux-arm32-vfp-hflt-lite.deb
-RUN apt install bellsoft-jdk13.0.1-linux-arm32-vfp-hflt-lite.deb
-RUN update-alternatives --config java
-RUN update-alternatives --config javac
+RUN wget -q -O - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | sudo apt-key add -
+RUN echo "deb [arch=amd64] https://apt.bell-sw.com/ stable main" | sudo tee /etc/apt/sources.list.d/bellsoft.list
+RUN apt-get update
+RUN apt-get install bellsoft-java13
+
 #RUN add-apt-repository ppa:openjdk-r/ppa -y
 #RUN apt update -q
 #RUN apt install openjdk-11-jdk -y
