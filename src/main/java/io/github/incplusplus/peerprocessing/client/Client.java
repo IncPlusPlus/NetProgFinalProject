@@ -133,10 +133,6 @@ public class Client implements ProperClient, Personable {
   }
 
   private void dealWithServer() {
-    if (isNull(sock))
-      throw new IllegalStateException(
-          "Socket not initialized properly. "
-              + "Did you remember to check the boolean value of Client.begin()?!");
     Thread serverInteractionThread =
         new Thread(
             () -> {

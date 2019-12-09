@@ -136,10 +136,6 @@ public class Slave implements ProperClient, Personable {
   }
 
   private void dealWithServer() {
-    if (isNull(sock))
-      throw new IllegalStateException(
-          "Socket not initialized properly. "
-              + "Did you remember to check the boolean value of Slave.begin()?!");
     Thread serverInteractionThread =
         new Thread(
             () -> {
