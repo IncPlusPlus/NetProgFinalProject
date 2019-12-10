@@ -70,6 +70,7 @@ public class StupidSimpleLogger {
   }
 
   /** Super buggy at the moment. Don't use */
+  @Deprecated
   public static void error(String message) {
     synchronized (cp) {
       cp.clear();
@@ -83,6 +84,7 @@ public class StupidSimpleLogger {
     }
   }
 
+  @Deprecated
   public static void printStackTrace(Exception e) {
     synchronized (cp) {
       StringWriter errors = new StringWriter();

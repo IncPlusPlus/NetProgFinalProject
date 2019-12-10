@@ -1,7 +1,11 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.promptForHostPortTuple;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.conditionallyPromptForHostPortTuple;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -14,15 +18,17 @@ import org.javatuples.Pair;
 public class PersistentSlaveRunner {
   public static void main(String[] args) throws IOException {
     enable();
-    Pair<String, Integer> hostAndPortPair = promptForHostPortTuple();
+    Pair<String, Integer> hostAndPortPair = conditionallyPromptForHostPortTuple(args);
     Slave mainSlave = new Slave(hostAndPortPair.getValue0(), hostAndPortPair.getValue1());
-    mainSlave.setDisconnectCallback(reInitConnection(mainSlave));
-    mainSlave.begin();
+    Thread mainSlaveThread = new Thread(() -> reInitConnection(mainSlave).run());
+    mainSlaveThread.setName("Main PersistentSlave Thread");
+    mainSlaveThread.setDaemon(true);
+    mainSlaveThread.start();
     new Scanner(System.in).nextLine();
     mainSlave.close();
   }
 
-  private static Runnable reInitConnection(Slave slaveToReset) {
+  static Runnable reInitConnection(Slave slaveToReset) {
     return () -> {
       Slave newSlave =
           new Slave(slaveToReset.getDestinationHostname(), slaveToReset.getDestinationPort());
@@ -30,9 +36,9 @@ public class PersistentSlaveRunner {
       boolean initSuccess = false;
       while (!initSuccess) {
         try {
+          debug("PersistentSlave attempting to connect...");
           newSlave.begin();
           initSuccess = true;
-          debug("PersistentSlave attempting to reconnect");
         } catch (java.net.ConnectException e) {
           info(
               "PersistentSlave couldn't connect to "
@@ -40,7 +46,7 @@ public class PersistentSlaveRunner {
                   + ":"
                   + newSlave.getDestinationPort());
           try {
-            Thread.sleep(15000);
+            Thread.sleep(1000);
           } catch (InterruptedException ex) {
             error("reInitConnection callback was slaughtered in its sleep!");
             printStackTrace(ex);

@@ -87,6 +87,7 @@
                 <version>2.9</version>
                 <executions>
                     <execution>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -125,6 +126,7 @@
                         <exclude>**/*Logger.*</exclude>
                         <exclude>**/*Runner.*</exclude>
                         <exclude>**/*ConsoleUtils.*</exclude>
+                        <exclude>**/*MiscUtils.*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

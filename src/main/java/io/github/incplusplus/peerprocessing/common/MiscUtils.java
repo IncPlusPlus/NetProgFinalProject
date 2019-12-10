@@ -1,12 +1,18 @@
 package io.github.incplusplus.peerprocessing.common;
 
 import static io.github.incplusplus.peerprocessing.common.Constants.HEADER_SEPARATOR;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 import static org.javatuples.Pair.with;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.SplittableRandom;
@@ -14,6 +20,29 @@ import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 public class MiscUtils {
+
+  /**
+   * Runs {@link #promptForHostPortTuple()} unless args are provided in the proper format such that
+   * the first arg is an IPv4 address or resolvable hostname like 'localhost' or 'google.com' and
+   * the second arg is a port number that is not in use.
+   *
+   * @param args a hostname or IPv4 address followed by a port number. If not supplied, this
+   *     function prompts the user using a {@link Scanner}.
+   * @return a tuple of the hostname and port
+   */
+  public static Pair<String, Integer> conditionallyPromptForHostPortTuple(String[] args) {
+    if (args.length != 2) return promptForHostPortTuple();
+    int port;
+    try {
+      port = Integer.parseInt(args[1]);
+    } catch (NumberFormatException e) {
+      printStackTrace(e);
+      error("Invalid port provided in args. Prompting instead.");
+      return promptForHostPortTuple();
+    }
+    return with(args[0], port);
+  }
+
   public static Pair<String, Integer> promptForHostPortTuple() {
     Scanner in = new Scanner(System.in);
     String host;

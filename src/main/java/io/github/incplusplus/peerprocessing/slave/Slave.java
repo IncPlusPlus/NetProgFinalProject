@@ -3,17 +3,26 @@ package io.github.incplusplus.peerprocessing.slave;
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
 import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.getHeader;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.msg;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.udojava.evalex.Expression;
-import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.common.Header;
+import io.github.incplusplus.peerprocessing.common.Introduction;
+import io.github.incplusplus.peerprocessing.common.MemberType;
+import io.github.incplusplus.peerprocessing.common.Personable;
+import io.github.incplusplus.peerprocessing.common.ProperClient;
+import io.github.incplusplus.peerprocessing.common.Responses;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
 import io.github.incplusplus.peerprocessing.query.VectorQuery;
@@ -113,15 +122,23 @@ public class Slave implements ProperClient, Personable {
   @Override
   public synchronized void close() throws IOException {
     boolean notAlreadyClosed = running.compareAndSet(true, false);
-    assert notAlreadyClosed;
-    outToServer.println(DISCONNECT);
+    if (!notAlreadyClosed) debug("Warning: Closing a slave that is already closed.");
+    try {
+      outToServer.println(DISCONNECT);
+    } catch (NullPointerException e) {
+      debug(
+          "No disconnect message could be sent from "
+              + this
+              + " as there was no open PrintWriter.");
+    }
     kill();
   }
 
   private void kill() throws IOException {
-    outToServer.close();
-    inFromServer.close();
-    sock.close();
+    running.set(false);
+    if (nonNull(outToServer)) outToServer.close();
+    if (nonNull(inFromServer)) inFromServer.close();
+    if (nonNull(sock)) sock.close();
     runDisconnectCallback();
   }
 
@@ -170,13 +187,9 @@ public class Slave implements ProperClient, Personable {
                     disconnect();
                     debug("Disconnected.");
                   }
-                } catch (NullPointerException e) {
+                } catch (NullPointerException | SocketException e) {
                   if (running.get()) {
-                    printStackTrace(e);
-                  }
-                } catch (SocketException e) {
-                  if (running.get()) {
-                    error("The server suddenly disconnected");
+                    debug("The server suddenly disconnected");
                     try {
                       kill();
                     } catch (IOException ex) {

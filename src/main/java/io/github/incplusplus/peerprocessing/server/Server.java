@@ -450,6 +450,14 @@ public class Server {
     ingestionThread.start();
   }
 
+  /**
+   * Close this server's socket and do nothing else. THIS METHOD IS FOR TESTING ONLY AND LEAVES THE
+   * SERVER IN AN UNSTABLE STATE.
+   */
+  void slay() throws IOException {
+    socket.close();
+  }
+
   class ClientObj extends ConnectedEntity {
     ClientObj(
         PrintWriter outToClient, BufferedReader inFromClient, Socket socket, UUID connectionUUID) {

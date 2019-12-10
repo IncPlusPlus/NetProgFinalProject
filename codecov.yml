@@ -9,3 +9,4 @@ ignore:
   - "**/*StupidSimpleLogger.java"
   - "**/*Runner.java"
   - "**/*ConsoleUtils.java"
+  - "**/*MiscUtils.java"

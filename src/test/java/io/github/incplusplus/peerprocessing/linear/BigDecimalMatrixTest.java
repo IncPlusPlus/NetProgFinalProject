@@ -3,11 +3,16 @@ package io.github.incplusplus.peerprocessing.linear;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.randInt;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 
 public class BigDecimalMatrixTest {
   // <editor-fold desc="Various matrices">
@@ -43,7 +48,7 @@ public class BigDecimalMatrixTest {
           });
 
   // <editor-fold desc="A, B">
-  private final BigDecimalMatrix A =
+  private static final BigDecimalMatrix A =
       new BigDecimalMatrix(
           new BigDecimal[][] {
             {w("-4"), w("5"), w("2"), w("3")},
@@ -51,7 +56,7 @@ public class BigDecimalMatrixTest {
             {w("6"), w("7"), w("-2"), w("8")}
           });
 
-  private final BigDecimalMatrix B =
+  private static final BigDecimalMatrix B =
       new BigDecimalMatrix(
           new BigDecimal[][] {
             {w("9"), w("5"), w("10")},
@@ -69,7 +74,7 @@ public class BigDecimalMatrixTest {
           });
   // </editor-fold>
   // <editor-fold desc="C, D">
-  private final BigDecimalMatrix C =
+  private static final BigDecimalMatrix C =
       new BigDecimalMatrix(
           new BigDecimal[][] {
             {w("-1"), w("-4"), w("-3"), w("1")},
@@ -78,7 +83,7 @@ public class BigDecimalMatrixTest {
             {w("8"), w("9"), w("10"), w("11")}
           });
 
-  private final BigDecimalMatrix D =
+  private static final BigDecimalMatrix D =
       new BigDecimalMatrix(
           new BigDecimal[][] {
             {w("12"), w("13"), w("14"), w("15")},
@@ -169,6 +174,10 @@ public class BigDecimalMatrixTest {
   void testMultiply() {
     iterateAndAssertEquals(AB, A.multiply(B));
     iterateAndAssertEquals(CD, C.multiply(D));
+  }
+
+  private static Stream<Arguments> provideSmallMatrices() {
+    return Stream.of(Arguments.of(A, B), Arguments.of(C, D));
   }
 
   @Test
