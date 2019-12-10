@@ -187,13 +187,9 @@ public class Client implements ProperClient, Personable {
                               + " but wasn't expecting it.");
                     }
                   }
-                } catch (NullPointerException e) {
+                } catch (NullPointerException | SocketException e) {
                   if (running.get()) {
-                    printStackTrace(e);
-                  }
-                } catch (SocketException e) {
-                  if (running.get()) {
-                    error("The server suddenly disconnected");
+                    debug("The server suddenly disconnected");
                     try {
                       kill();
                     } catch (IOException ex) {
