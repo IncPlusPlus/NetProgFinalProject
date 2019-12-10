@@ -189,7 +189,7 @@ public class Slave implements ProperClient, Personable {
                   }
                 } catch (NullPointerException e) {
                   if (running.get()) {
-                    error("The server suddenly disconnected");
+                    debug("The server suddenly disconnected");
                     printStackTrace(e);
                     try {
                       kill();
@@ -199,7 +199,7 @@ public class Slave implements ProperClient, Personable {
                   }
                 } catch (SocketException e) {
                   if (running.get()) {
-                    error("The server suddenly disconnected");
+                    debug("The server suddenly disconnected");
                     try {
                       kill();
                     } catch (IOException ex) {
