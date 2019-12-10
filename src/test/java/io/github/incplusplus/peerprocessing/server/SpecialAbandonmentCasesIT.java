@@ -21,7 +21,8 @@ public class SpecialAbandonmentCasesIT {
    * @throws IOException if the server fails to start
    */
   @Test
-  void ensureClientsAbandonServerIfCutOffMidTransmission() throws IOException, InterruptedException {
+  void ensureClientsAbandonServerIfCutOffMidTransmission()
+      throws IOException, InterruptedException {
     final Server server = new Server();
     int serverPort = server.start(INITIAL_SERVER_PORT, VERBOSE_TEST_OUTPUT);
     Slave slave = new Slave("localhost", serverPort);
@@ -33,7 +34,7 @@ public class SpecialAbandonmentCasesIT {
     while (!slave.isPolite() && !server.isConnected(slave.getConnectionId())) {}
     server.slaves.get(slave.getConnectionId()).getOutToClient().close();
     server.slay();
-    //Give the slave a sec to finish disconnecting
+    // Give the slave a sec to finish disconnecting
     Thread.sleep(1500);
     assertTrue(slave.isClosed());
   }

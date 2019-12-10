@@ -11,7 +11,6 @@ import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
