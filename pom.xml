@@ -87,6 +87,7 @@
                 <version>2.9</version>
                 <executions>
                     <execution>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
