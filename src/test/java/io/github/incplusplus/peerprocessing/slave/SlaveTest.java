@@ -1,6 +1,11 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static io.github.incplusplus.peerprocessing.NormalIT.VERBOSE_TEST_OUTPUT;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.slave.PersistentSlaveRunner.reInitConnection;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.incplusplus.peerprocessing.server.Server;
 import java.io.IOException;
@@ -16,6 +21,18 @@ class SlaveTest {
   void failIfNoServer() {
     Slave mySlave = new Slave("localhost", 9999);
     assertThrows(java.net.ConnectException.class, mySlave::begin);
+  }
+
+  @Test
+  void dontUseNullReadersAndWriters() throws IOException, InterruptedException {
+    if (VERBOSE_TEST_OUTPUT) enable();
+    Slave slave = new Slave("localhost", 9999);
+    Thread mainSlaveThread = new Thread(() -> reInitConnection(slave).run());
+    mainSlaveThread.setName("Testing PersistentSlave Thread");
+    mainSlaveThread.setDaemon(true);
+    mainSlaveThread.start();
+    Thread.sleep(5000);
+    slave.close();
   }
 
   @Test

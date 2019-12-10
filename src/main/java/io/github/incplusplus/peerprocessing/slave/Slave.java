@@ -122,15 +122,23 @@ public class Slave implements ProperClient, Personable {
   @Override
   public synchronized void close() throws IOException {
     boolean notAlreadyClosed = running.compareAndSet(true, false);
-    assert notAlreadyClosed;
-    outToServer.println(DISCONNECT);
+    if (!notAlreadyClosed) debug("Warning: Closing a slave that is already closed.");
+    try {
+      outToServer.println(DISCONNECT);
+    } catch (NullPointerException e) {
+      debug(
+          "No disconnect message could be sent from "
+              + this
+              + " as there was no open PrintWriter.");
+    }
     kill();
   }
 
   private void kill() throws IOException {
-    outToServer.close();
-    inFromServer.close();
-    sock.close();
+    running.set(false);
+    if (nonNull(outToServer)) outToServer.close();
+    if (nonNull(inFromServer)) inFromServer.close();
+    if (nonNull(sock)) sock.close();
     runDisconnectCallback();
   }
 
@@ -175,13 +183,9 @@ public class Slave implements ProperClient, Personable {
                     disconnect();
                     debug("Disconnected.");
                   }
-                } catch (NullPointerException e) {
+                } catch (NullPointerException | SocketException e) {
                   if (running.get()) {
-                    printStackTrace(e);
-                  }
-                } catch (SocketException e) {
-                  if (running.get()) {
-                    error("The server suddenly disconnected");
+                    debug("The server suddenly disconnected");
                     try {
                       kill();
                     } catch (IOException ex) {
