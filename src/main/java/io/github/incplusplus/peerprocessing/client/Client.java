@@ -113,12 +113,20 @@ public class Client implements ProperClient, Personable {
   @Override
   public void close() throws IOException {
     boolean notAlreadyClosed = running.compareAndSet(true, false);
-    assert notAlreadyClosed;
-    outToServer.println(DISCONNECT);
+    if (!notAlreadyClosed) debug("Warning: Closing a client that is already closed.");
+    try {
+      outToServer.println(DISCONNECT);
+    } catch (NullPointerException e) {
+      debug(
+          "No disconnect message could be sent from "
+              + this
+              + " as there was no open PrintWriter.");
+    }
     kill();
   }
 
   private void kill() throws IOException {
+    running.set(false);
     outToServer.close();
     inFromServer.close();
     sock.close();

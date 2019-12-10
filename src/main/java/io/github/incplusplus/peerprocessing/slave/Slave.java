@@ -136,6 +136,7 @@ public class Slave implements ProperClient, Personable {
   }
 
   private void kill() throws IOException {
+    running.set(false);
     if (nonNull(outToServer)) outToServer.close();
     if (nonNull(inFromServer)) inFromServer.close();
     if (nonNull(sock)) sock.close();
