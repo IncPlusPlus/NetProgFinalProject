@@ -84,7 +84,6 @@ public class StupidSimpleLogger {
     }
   }
 
-  @Deprecated
   public static void printStackTrace(Exception e) {
     synchronized (cp) {
       StringWriter errors = new StringWriter();
