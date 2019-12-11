@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Slave implements ProperClient, Personable {
@@ -208,6 +209,9 @@ public class Slave implements ProperClient, Personable {
                       printStackTrace(ex);
                     }
                   }
+                } catch (RejectedExecutionException rex) {
+                  debug(
+                      "Tried to enqueue another task but " + this + " was already shutting down.");
                 } catch (IOException e) {
                   printStackTrace(e);
                   try {
