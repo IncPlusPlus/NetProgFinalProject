@@ -368,9 +368,7 @@ public class Server {
     // just because it's a ConcurrentHashMap doesn't mean everything is safe!
     synchronized (slaves) {
       leastBusySlave =
-          slaves
-              .values()
-              .stream()
+          slaves.values().stream()
               // find the slave that is responsible for the fewest jobs
               .min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
               // get the actual SlaveObj or else
