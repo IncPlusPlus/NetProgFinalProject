@@ -369,9 +369,8 @@ public class Server {
     synchronized (slaves) {
       leastBusySlave =
           slaves
-              .entrySet()
-              .parallelStream()
-              .map(Map.Entry::getValue)
+              .values()
+              .stream()
               // find the slave that is responsible for the fewest jobs
               .min(Comparator.comparingInt(slaveObj -> slaveObj.getJobsResponsibleFor().size()))
               // get the actual SlaveObj or else
