@@ -5,15 +5,24 @@ import static io.github.incplusplus.peerprocessing.client.ConsoleUtils.printSolu
 import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
 import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
-import static io.github.incplusplus.peerprocessing.common.MiscUtils.*;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.getHeader;
+import static io.github.incplusplus.peerprocessing.common.MiscUtils.msg;
 import static io.github.incplusplus.peerprocessing.common.Responses.IDENTITY;
 import static io.github.incplusplus.peerprocessing.common.Responses.RESULT;
 import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNECT;
-import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.*;
-import static java.util.Objects.isNull;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.error;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.info;
+import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.incplusplus.peerprocessing.common.*;
+import io.github.incplusplus.peerprocessing.common.Header;
+import io.github.incplusplus.peerprocessing.common.Introduction;
+import io.github.incplusplus.peerprocessing.common.MemberType;
+import io.github.incplusplus.peerprocessing.common.Personable;
+import io.github.incplusplus.peerprocessing.common.ProperClient;
 import io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix;
 import io.github.incplusplus.peerprocessing.query.AlgebraicQuery;
 import io.github.incplusplus.peerprocessing.query.Query;
@@ -141,10 +150,6 @@ public class Client implements ProperClient, Personable {
   }
 
   private void dealWithServer() {
-    if (isNull(sock))
-      throw new IllegalStateException(
-          "Socket not initialized properly. "
-              + "Did you remember to check the boolean value of Client.begin()?!");
     Thread serverInteractionThread =
         new Thread(
             () -> {
