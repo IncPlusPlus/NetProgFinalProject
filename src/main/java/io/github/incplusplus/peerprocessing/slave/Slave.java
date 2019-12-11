@@ -144,11 +144,11 @@ public class Slave implements ProperClient, Personable {
               + " as there was no open PrintWriter.");
     }
     kill();
-    executor.shutdown();
   }
 
   private void kill() throws IOException {
     running.set(false);
+    executor.shutdown();
     if (nonNull(outToServer)) outToServer.close();
     if (nonNull(inFromServer)) inFromServer.close();
     if (nonNull(sock)) sock.close();
