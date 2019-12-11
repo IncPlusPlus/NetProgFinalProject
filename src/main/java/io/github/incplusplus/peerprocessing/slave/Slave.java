@@ -256,16 +256,7 @@ public class Slave implements ProperClient, Personable {
       try {
         close();
       } catch (IOException ex) {
-        try {
-          kill();
-        } catch (IOException exc) {
-          exc.printStackTrace();
-          debug(
-              "Failed to close "
-                  + this
-                  + " and failed to kill it when encountering"
-                  + "a JsonProcessingException. TIME TO PANIC!!!");
-        }
+        throw new RuntimeException(ex);
       }
     }
   }
