@@ -1,6 +1,5 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
 import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
@@ -15,6 +14,8 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.pri
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Introduction;
@@ -50,11 +51,20 @@ public class Slave implements ProperClient, Personable {
   private volatile UUID uuid = UUID.randomUUID();
   private Runnable disconnectCallback;
   private Thread callBackThread;
+  private ObjectMapper mapper;
   private ExecutorService executor = Executors.newFixedThreadPool(20);
 
   public Slave(String serverHostname, int serverPort) {
+    this(
+        serverHostname,
+        serverPort,
+        new ObjectMapper().activateDefaultTyping(BasicPolymorphicTypeValidator.builder().build()));
+  }
+
+  Slave(String serverHostname, int serverPort, ObjectMapper mapper) {
     this.serverHostname = serverHostname;
     this.serverPort = serverPort;
+    this.mapper = mapper;
   }
 
   public void setVerbose(boolean verbose) {
@@ -91,7 +101,7 @@ public class Slave implements ProperClient, Personable {
     Introduction introduction = new Introduction();
     introduction.setSenderId(uuid);
     introduction.setSenderType(MemberType.SLAVE);
-    outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
+    outToServer.println(msg(mapper.writeValueAsString(introduction), Responses.IDENTITY));
   }
 
   public String getDestinationHostname() {
@@ -170,14 +180,14 @@ public class Slave implements ProperClient, Personable {
                     outToServer.println(IDENTIFY);
                   } else if (header.equals(IDENTITY)) {
                     Introduction introduction =
-                        SHARED_MAPPER.readValue(
+                        mapper.readValue(
                             Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
                     this.uuid = introduction.getReceiverId();
                     debug(this + " connected");
                     this.polite.compareAndSet(false, true);
                   } else if (header.equals(QUERY)) {
                     Query query =
-                        SHARED_MAPPER.readValue(
+                        mapper.readValue(
                             Objects.requireNonNull(decode(lineFromServer)), Query.class);
                     executor.submit(
                         () -> {
@@ -249,11 +259,16 @@ public class Slave implements ProperClient, Personable {
     }
   }
 
-  private void sendEvaluatedQuery(Query query) {
+  void sendEvaluatedQuery(Query query) {
     try {
-      outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
+      outToServer.println(msg(mapper.writeValueAsString(query), RESULT));
     } catch (JsonProcessingException e) {
       try {
+        printStackTrace(e);
+        debug(
+            this
+                + " encountered a JsonProcessingException while trying to send "
+                + "a query result to the server. Committing suicide...");
         close();
       } catch (IOException ex) {
         throw new RuntimeException(ex);
