@@ -682,8 +682,9 @@ public class Server {
             "Failed to accept incoming connection from "
                 + socket.getLocalAddress().getHostAddress()
                 + ". Not bothering with "
-                + "further interaction in ConnectionHandler thread.");
-
+                + "further interaction in ConnectionHandler thread. "
+                + "Error was:");
+        System.out.println(e.toString());
       } finally {
         // Remove this ConnectionHandler from the connectionHandlers list
         deRegister(this);
