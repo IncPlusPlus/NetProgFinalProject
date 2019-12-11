@@ -33,6 +33,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Slave implements ProperClient, Personable {
@@ -48,6 +50,7 @@ public class Slave implements ProperClient, Personable {
   private volatile UUID uuid = UUID.randomUUID();
   private Runnable disconnectCallback;
   private Thread callBackThread;
+  private ExecutorService executor = Executors.newFixedThreadPool(20);
 
   public Slave(String serverHostname, int serverPort) {
     this.serverHostname = serverHostname;
@@ -131,6 +134,7 @@ public class Slave implements ProperClient, Personable {
               + " as there was no open PrintWriter.");
     }
     kill();
+    executor.shutdown();
   }
 
   private void kill() throws IOException {
@@ -175,8 +179,11 @@ public class Slave implements ProperClient, Personable {
                     Query query =
                         SHARED_MAPPER.readValue(
                             Objects.requireNonNull(decode(lineFromServer)), Query.class);
-                    debug("Solving: " + query.getQueryId());
-                    sendEvaluatedQuery(evaluate(query));
+                    executor.submit(
+                        () -> {
+                          debug("Solving: " + query.getQueryId());
+                          sendEvaluatedQuery(evaluate(query));
+                        });
                   } else if (header.equals(DISCONNECT)) {
                     debug("Told by server to disconnect. Disconnecting..");
                     disconnect();
