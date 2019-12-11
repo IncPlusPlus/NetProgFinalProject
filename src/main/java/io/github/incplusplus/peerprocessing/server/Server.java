@@ -677,8 +677,13 @@ public class Server {
           debug("Registering new slave");
           register(slave);
         }
-      } catch (IOException e) {
-        printStackTrace(e);
+      } catch (Exception e) {
+        System.out.println(
+            "Failed to accept incoming connection from "
+                + socket.getLocalAddress().getHostAddress()
+                + ". Not bothering with "
+                + "further interaction in ConnectionHandler thread.");
+
       } finally {
         // Remove this ConnectionHandler from the connectionHandlers list
         deRegister(this);
