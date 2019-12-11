@@ -52,7 +52,7 @@ public class Slave implements ProperClient, Personable {
   private Runnable disconnectCallback;
   private Thread callBackThread;
   private ObjectMapper mapper;
-  private ExecutorService executor = Executors.newFixedThreadPool(20);
+  private ExecutorService executor = Executors.newWorkStealingPool();
 
   public Slave(String serverHostname, int serverPort) {
     this(
