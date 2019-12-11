@@ -116,7 +116,11 @@ class QueryProcessingReassignmentIT {
                     // don't expand the list infinitely
                     Thread.sleep(500);
                   } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(
+                        "Encountered an error in SlaveFuzzer. "
+                            + "This could be expected behavior. "
+                            + "Message below:");
+                    System.out.println(e.toString());
                   } catch (InterruptedException ignored) {
                     break;
                     // we expect to be interrupted. Don't panic
