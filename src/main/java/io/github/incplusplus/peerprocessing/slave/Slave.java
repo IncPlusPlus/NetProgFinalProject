@@ -12,7 +12,6 @@ import static io.github.incplusplus.peerprocessing.common.VariousEnums.DISCONNEC
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.debug;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.enable;
 import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.printStackTrace;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -153,10 +152,6 @@ public class Slave implements ProperClient, Personable {
   }
 
   private void dealWithServer() {
-    if (isNull(sock))
-      throw new IllegalStateException(
-          "Socket not initialized properly. "
-              + "Did you remember to check the boolean value of Slave.begin()?!");
     Thread serverInteractionThread =
         new Thread(
             () -> {
