@@ -110,9 +110,9 @@ class QueryProcessingReassignmentIT {
               () -> {
                 while (true) {
                   Slave newSlave = new Slave(this.hostname, this.portNum);
+                  slaveList.add(newSlave);
                   try {
                     newSlave.begin();
-                    slaveList.add(newSlave);
                     // don't expand the list infinitely
                     Thread.sleep(500);
                   } catch (IOException e) {
