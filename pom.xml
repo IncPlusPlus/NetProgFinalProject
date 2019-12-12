@@ -6,7 +6,7 @@
 
     <groupId>io.github.incplusplus</groupId>
     <artifactId>peer-processing</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,6 +56,14 @@
             <version>2.0.3.1</version>
         </dependency>
         <!--</editor-fold>-->
+        <!--<editor-fold desc="Mockito">-->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!--</editor-fold>-->
         <!--<editor-fold desc="JUnit">-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -80,6 +88,21 @@
 
     <build>
         <plugins>
+            <!--<editor-fold desc="FMT Maven Plugin">-->
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--</editor-fold>-->
             <!--<editor-fold desc="Maven Compiler Plugin">-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -111,6 +134,7 @@
                         <exclude>**/*Logger.*</exclude>
                         <exclude>**/*Runner.*</exclude>
                         <exclude>**/*ConsoleUtils.*</exclude>
+                        <exclude>**/*MiscUtils.*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

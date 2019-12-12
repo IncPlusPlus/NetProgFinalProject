@@ -9,6 +9,10 @@ ignore-master-sync:
 chore:
   head: ["chore/*", "maintenance/*"]
 bug:
-  head: ["bugfix/*", "fix/*", "hotfix/*"]
+  head: ["bugfix/*", "fix/*"]
+hotfix:
+  head: "hotfix/*"
 🛠 Improvement:
   head: "improvement/*"
+feature:
+  head: "feature/*"
