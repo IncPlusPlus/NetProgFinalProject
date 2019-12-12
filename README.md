@@ -32,6 +32,12 @@ Features in order of priority
 * Ryan Cloherty ([@IncPlusPlus](https://github.com/IncPlusPlus)), Team Lead, Developer
 * Joey Demeo([@demeoj1](https://github.com/demeoj1)), Developer
 
+## Contributing
+
+Pull requests are welcome but not expected. If you make one, please branch from `develop` and make the base of the PR `develop`.
+This project **_strictly_** conforms to [Google Java Style](https://google.github.io/styleguide/javaguide.html).
+This project also conforms to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
+
 ## Usage
 
 There are two ways to use this project. The first, is manually through a console window. The second, is as a usable API in your own Java code.
