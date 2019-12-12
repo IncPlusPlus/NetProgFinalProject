@@ -1,6 +1,5 @@
 package io.github.incplusplus.peerprocessing.slave;
 
-import static io.github.incplusplus.peerprocessing.common.Constants.SHARED_MAPPER;
 import static io.github.incplusplus.peerprocessing.common.Demands.IDENTIFY;
 import static io.github.incplusplus.peerprocessing.common.Demands.QUERY;
 import static io.github.incplusplus.peerprocessing.common.MiscUtils.decode;
@@ -15,6 +14,8 @@ import static io.github.incplusplus.peerprocessing.logger.StupidSimpleLogger.pri
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.udojava.evalex.Expression;
 import io.github.incplusplus.peerprocessing.common.Header;
 import io.github.incplusplus.peerprocessing.common.Introduction;
@@ -33,6 +34,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Slave implements ProperClient, Personable {
@@ -48,10 +52,20 @@ public class Slave implements ProperClient, Personable {
   private volatile UUID uuid = UUID.randomUUID();
   private Runnable disconnectCallback;
   private Thread callBackThread;
+  private ObjectMapper mapper;
+  private ExecutorService executor = Executors.newWorkStealingPool();
 
   public Slave(String serverHostname, int serverPort) {
+    this(
+        serverHostname,
+        serverPort,
+        new ObjectMapper().activateDefaultTyping(BasicPolymorphicTypeValidator.builder().build()));
+  }
+
+  Slave(String serverHostname, int serverPort, ObjectMapper mapper) {
     this.serverHostname = serverHostname;
     this.serverPort = serverPort;
+    this.mapper = mapper;
   }
 
   public void setVerbose(boolean verbose) {
@@ -88,7 +102,7 @@ public class Slave implements ProperClient, Personable {
     Introduction introduction = new Introduction();
     introduction.setSenderId(uuid);
     introduction.setSenderType(MemberType.SLAVE);
-    outToServer.println(msg(SHARED_MAPPER.writeValueAsString(introduction), Responses.IDENTITY));
+    outToServer.println(msg(mapper.writeValueAsString(introduction), Responses.IDENTITY));
   }
 
   public String getDestinationHostname() {
@@ -135,6 +149,7 @@ public class Slave implements ProperClient, Personable {
 
   private void kill() throws IOException {
     running.set(false);
+    executor.shutdown();
     if (nonNull(outToServer)) outToServer.close();
     if (nonNull(inFromServer)) inFromServer.close();
     if (nonNull(sock)) sock.close();
@@ -166,17 +181,20 @@ public class Slave implements ProperClient, Personable {
                     outToServer.println(IDENTIFY);
                   } else if (header.equals(IDENTITY)) {
                     Introduction introduction =
-                        SHARED_MAPPER.readValue(
+                        mapper.readValue(
                             Objects.requireNonNull(decode(lineFromServer)), Introduction.class);
                     this.uuid = introduction.getReceiverId();
                     debug(this + " connected");
                     this.polite.compareAndSet(false, true);
                   } else if (header.equals(QUERY)) {
                     Query query =
-                        SHARED_MAPPER.readValue(
+                        mapper.readValue(
                             Objects.requireNonNull(decode(lineFromServer)), Query.class);
-                    debug("Solving: " + query.getQueryId());
-                    sendEvaluatedQuery(evaluate(query));
+                    executor.submit(
+                        () -> {
+                          debug("Solving: " + query.getQueryId());
+                          sendEvaluatedQuery(evaluate(query));
+                        });
                   } else if (header.equals(DISCONNECT)) {
                     debug("Told by server to disconnect. Disconnecting..");
                     disconnect();
@@ -191,6 +209,9 @@ public class Slave implements ProperClient, Personable {
                       printStackTrace(ex);
                     }
                   }
+                } catch (RejectedExecutionException rex) {
+                  debug(
+                      "Tried to enqueue another task but " + this + " was already shutting down.");
                 } catch (IOException e) {
                   printStackTrace(e);
                   try {
@@ -242,8 +263,21 @@ public class Slave implements ProperClient, Personable {
     }
   }
 
-  private void sendEvaluatedQuery(Query query) throws JsonProcessingException {
-    outToServer.println(msg(SHARED_MAPPER.writeValueAsString(query), RESULT));
+  void sendEvaluatedQuery(Query query) {
+    try {
+      outToServer.println(msg(mapper.writeValueAsString(query), RESULT));
+    } catch (JsonProcessingException e) {
+      try {
+        printStackTrace(e);
+        debug(
+            this
+                + " encountered a JsonProcessingException while trying to send "
+                + "a query result to the server. Committing suicide...");
+        close();
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
   }
 
   @Override

@@ -315,11 +315,15 @@ public class Server {
         if (nonNull(responsibleBatchQuery)) {
           boolean sanityCheck = responsibleBatchQuery.offer(query);
           assert sanityCheck;
-          debug(
-              "Completed job "
-                  + query.getQueryId()
-                  + " in batch "
-                  + responsibleBatchQuery.getQueryId());
+          // This gets a little too verbose
+          //          debug(
+          //              "Batch "
+          //                  + batchQueryId
+          //                  + " is "
+          //                  + (long)((float)responsibleBatchQuery.getNumCompleteParts()
+          //                      / responsibleBatchQuery.getTotalNumQueries()
+          //                      * 100)
+          //                  + "% complete.");
           if (responsibleBatchQuery.isCompleted()) {
             debug("Completed batch " + responsibleBatchQuery.getQueryId());
             Query removedJob = removeJob(responsibleBatchQuery.getQueryId());
@@ -353,11 +357,13 @@ public class Server {
       throws InterruptedException, JsonProcessingException {
     SlaveObj leastBusySlave;
     while (slaves.size() < 1) {
-      debug(
-          "Tried to send job with id "
-              + job.getQueryId()
-              + " to a slave. "
-              + "However, no slaves were available. Job queue thread sleeping.");
+      // This is left here for intense debugging but is otherwise way
+      // too verbose for normal debugging.
+      //      debug(
+      //          "Tried to send job with id "
+      //              + job.getQueryId()
+      //              + " to a slave. "
+      //              + "However, no slaves were available. Job queue thread sleeping.");
       Thread.sleep(250);
     }
     /*
@@ -383,8 +389,11 @@ public class Server {
     // make sure they're still registered if present
     else if (slaves.containsKey(leastBusySlave.getConnectionUUID())) {
       job.setSolvingSlaveUUID(leastBusySlave.getConnectionUUID());
-      debug(
-          "Sending query " + job.getQueryId() + " to slave " + leastBusySlave.getConnectionUUID());
+      // This is left here for intense debugging but is otherwise way
+      // too verbose for normal debugging.
+      //      debug(
+      //          "Sending query " + job.getQueryId() + " to slave " +
+      // leastBusySlave.getConnectionUUID());
       leastBusySlave.accept(job);
     }
     // if not registered anymore
@@ -618,7 +627,9 @@ public class Server {
     void accept(Query query) throws JsonProcessingException {
       query.setQueryState(WAITING_ON_SLAVE);
       jobsResponsibleFor.add(query.getQueryId());
-      debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
+      // This is left here for intense debugging but is otherwise way
+      // too verbose for normal debugging.
+      //      debug("Slave " + getConnectionUUID() + " now responsible for " + query.getQueryId());
       getOutToClient().println(msg(SHARED_MAPPER.writeValueAsString(query), QUERY));
     }
 
@@ -653,8 +664,9 @@ public class Server {
     }
 
     public void run() {
+      Introduction clientIntroduction = null;
       try {
-        Introduction clientIntroduction =
+        clientIntroduction =
             SHARED_MAPPER.readValue(
                 negotiate(IDENTIFY, IDENTITY, outToClient, inFromClient), Introduction.class);
         if (clientIntroduction.getSenderType().equals(MemberType.CLIENT)) {
@@ -674,8 +686,15 @@ public class Server {
           debug("Registering new slave");
           register(slave);
         }
-      } catch (IOException e) {
-        printStackTrace(e);
+      } catch (Exception e) {
+        System.out.println(
+            "Failed to accept incoming connection from "
+                + socket.getLocalAddress().getHostAddress()
+                + ". Not bothering with "
+                + "further interaction in ConnectionHandler thread. "
+                + "Error was:");
+        e.printStackTrace();
+        System.out.println("Introduction = " + clientIntroduction);
       } finally {
         // Remove this ConnectionHandler from the connectionHandlers list
         deRegister(this);

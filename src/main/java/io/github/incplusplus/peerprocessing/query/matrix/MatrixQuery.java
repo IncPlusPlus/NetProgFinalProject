@@ -132,6 +132,16 @@ public class MatrixQuery extends BatchQuery {
   }
 
   @Override
+  public long getTotalNumQueries() {
+    return vectorQueries.size();
+  }
+
+  @Override
+  public long getNumCompleteParts() {
+    return vectorQueries.values().stream().filter(Query::isCompleted).count();
+  }
+
+  @Override
   public boolean offer(Query query) {
     Query internallyStoredCorrespondingQuery = vectorQueries.get(query.getQueryId());
 

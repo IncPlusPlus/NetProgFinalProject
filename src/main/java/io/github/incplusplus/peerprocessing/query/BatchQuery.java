@@ -1,5 +1,6 @@
 package io.github.incplusplus.peerprocessing.query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.incplusplus.peerprocessing.query.matrix.MatrixQuery;
@@ -19,6 +20,16 @@ import java.util.List;
 public abstract class BatchQuery extends Query {
   /** @return all the queries that need to be executed from this batch */
   public abstract List<Query> getQueries();
+
+  @JsonIgnore
+  public abstract long getTotalNumQueries();
+
+  /**
+   * @return the number of internal queries, the answer for which has been accepted through the
+   *     {@link #offer(Query)} method.
+   */
+  @JsonIgnore
+  public abstract long getNumCompleteParts();
 
   /**
    * Offer this BatchQuery a Query instance. If this BatchQuery is responsible for this Query, this

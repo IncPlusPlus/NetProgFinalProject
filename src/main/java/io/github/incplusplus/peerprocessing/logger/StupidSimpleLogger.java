@@ -84,14 +84,15 @@ public class StupidSimpleLogger {
     }
   }
 
-  @Deprecated
   public static void printStackTrace(Exception e) {
-    synchronized (cp) {
-      StringWriter errors = new StringWriter();
-      e.printStackTrace(new PrintWriter(errors));
-      cp.clear();
-      cp.errorPrint(errors.toString(), Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
-      cp.clear();
+    if (enabled) {
+      synchronized (cp) {
+        StringWriter errors = new StringWriter();
+        e.printStackTrace(new PrintWriter(errors));
+        cp.clear();
+        cp.errorPrint(errors.toString(), Ansi.Attribute.NONE, Ansi.FColor.CYAN, Ansi.BColor.BLACK);
+        cp.clear();
+      }
     }
   }
 }

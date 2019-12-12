@@ -177,7 +177,12 @@ public class BigDecimalMatrixTest {
   }
 
   private static Stream<Arguments> provideSmallMatrices() {
-    return Stream.of(Arguments.of(A, B), Arguments.of(C, D));
+    return Stream.of(
+        Arguments.of(A, B),
+        Arguments.of(C, D),
+        Arguments.of(D, C),
+        Arguments.of(D, B),
+        Arguments.of(C, B));
   }
 
   @Test
