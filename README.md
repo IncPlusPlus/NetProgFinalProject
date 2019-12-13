@@ -8,12 +8,6 @@
 
 This is the final project for Network Programming (COMP-2100). The goal is to create a prototype distributed processing system. A main server will receive math requests which it will offload onto a pool of slaves. They will then process this request and send the results back to the client via the server.
 
-## Deliverables
-
-- A client class that can send groups of math commands
-- A server class that can distribute commands to slaves
-- A slave class that can process various commands
-
 ## Features 
 
 Features in order of priority
