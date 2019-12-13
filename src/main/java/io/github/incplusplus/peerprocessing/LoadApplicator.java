@@ -17,9 +17,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.javatuples.Pair;
 
-/**
- * This class is merely a scratch-pad for throwing a load at a cluster of slaves.
- */
+/** This class is merely a scratch-pad for throwing a load at a cluster of slaves. */
 public class LoadApplicator {
   static Server server = new Server();
   private static int numMatrices;
