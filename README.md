@@ -16,7 +16,7 @@ There are two ways to use this project. The first, is manually through a console
 
 To run this project, clone this repository yourself and follow the steps below. Alternatively, you can just download it with the big green button or [this link](https://github.com/IncPlusPlus/NetProgFinalProject/archive/master.zip). Extract and open the `NetProgFinalProject-master` folder from the zip if you chose to download this repo.
 
-If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Mac OS or Linux.
+**NOTE:** If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Mac OS or Linux.
 
 1. Run `server.bat` (henceforth referred to as "the server") (at the moment, it doesn't prompt for a port and defaults to 1234). Give it some time as it compiles for the first time.
 1. Run `client.bat` (henceforth referred to as "the client(s)") and enter the IP and port when prompted. As for what IP and port to enter, that will be displayed when `server.bat` is done starting.
