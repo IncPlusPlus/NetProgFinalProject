@@ -54,9 +54,9 @@ Features in order of priority
 - [ ] The commands can be sophisticated and invoked using reflection (likely won’t happen (didn't happen))
 - [ ] The tasks can be transported and executed using bytecode manipulation (way too ambitious (**way too ambitious**))
 
-## Demo video (coming soon)
-
-Sample text
+## Demo videos
+### A slave connecting and processing queries
+[![asciicast](https://asciinema.org/a/u0y7MJ7DulWcK0ORqfGPdt4MU.svg)](https://asciinema.org/a/u0y7MJ7DulWcK0ORqfGPdt4MU)
 
 ## References
 
