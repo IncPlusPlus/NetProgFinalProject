@@ -57,6 +57,8 @@ Features in order of priority
 ## Demo videos
 ### A slave connecting and processing queries
 [![asciicast](https://asciinema.org/a/u0y7MJ7DulWcK0ORqfGPdt4MU.svg)](https://asciinema.org/a/u0y7MJ7DulWcK0ORqfGPdt4MU)
+### A server dispatching matrix multiplication operations for processing
+[![asciicast](https://asciinema.org/a/I9zyvueUdcwgCWd3dZv4V3sAS.svg)](https://asciinema.org/a/I9zyvueUdcwgCWd3dZv4V3sAS)
 
 ## References
 
