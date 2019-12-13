@@ -54,10 +54,22 @@ Features in order of priority
 - [ ] The commands can be sophisticated and invoked using reflection (likely won’t happen (didn't happen))
 - [ ] The tasks can be transported and executed using bytecode manipulation (way too ambitious (**way too ambitious**))
 
+## Demo video (coming soon)
+
+Sample text
+
+## References
+
+The following code sections use a StackOverflow answer in part or in whole.
+- `io.github.incplusplus.peerprocessing.common.MiscUtils.getIp` uses [this SO answer](https://stackoverflow.com/a/38342964)
+- `io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix.zipped` uses [this SO answer](https://stackoverflow.com/a/42787326/1687436)
+- `io.github.incplusplus.peerprocessing.common.MiscUtils.randBigDec` uses [this SO answer](https://stackoverflow.com/a/21863676/1687436)
+- `io.github.incplusplus.peerprocessing.linear.BigDecimalMatrix.getCol` uses [this SO answer](https://stackoverflow.com/a/30426991/1687436)
+
 ## Team members
 
 * Ryan Cloherty ([@IncPlusPlus](https://github.com/IncPlusPlus)), Team Lead, Developer
-* Joey Demeo([@demeoj1](https://github.com/demeoj1)), Developer
+* Joey Demeo ([@demeoj1](https://github.com/demeoj1)), Developer
 
 ## Contributing
 
