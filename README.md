@@ -14,10 +14,12 @@ There are two ways to use this project. The first, is manually through a console
 
 ### Console usage
 
+#### Install
 To run this project, clone this repository yourself and follow the steps below. Alternatively, you can just download it with the big green button or [this link](https://github.com/IncPlusPlus/NetProgFinalProject/archive/master.zip). Extract and open the `NetProgFinalProject-master` folder from the zip if you chose to download this repo.
 
 **NOTE:** If you see `XYZ.bat` named in these steps, use `XYZ.sh` instead if you are on Mac OS or Linux.
 
+#### Run
 1. Run `server.bat` (henceforth referred to as "the server") (at the moment, it doesn't prompt for a port and defaults to 1234). Give it some time as it compiles for the first time.
 1. Run `client.bat` (henceforth referred to as "the client(s)") and enter the IP and port when prompted. As for what IP and port to enter, that will be displayed when `server.bat` is done starting.
 1. Run `slave.bat` (henceforth referred to as "the slave(s)") and enter the same server information as you did for `client.bat`.
@@ -29,11 +31,15 @@ To run this project, clone this repository yourself and follow the steps below. 
 
 ### API Usage
 
-The Java library portion of this project is in a very rough state and is merely for demo purposes so please don't use it to calculate rocket trajectories!
+_The Java library portion of this project is in a very rough state and is merely for demo purposes so please don't use it to calculate rocket trajectories!_
 
-To use this as a library in your own project, you may either add it by importing it using your build tool of choice on [JitPack](https://jitpack.io/#IncPlusPlus/NetProgFinalProject) or by downloading [the JAR from the releases page](https://github.com/IncPlusPlus/NetProgFinalProject/releases/latest) and adding it to your classpath.
+#### Install
+To use this as a library in your own project, you may either add it by importing it using your build tool of choice through a [JitPack](https://jitpack.io/#IncPlusPlus/NetProgFinalProject) artifact repository or by downloading [the JAR from the releases page](https://github.com/IncPlusPlus/NetProgFinalProject/releases/latest) and adding it to your classpath.
 
-There aren't many functions available yet and it's certainly not polished. However, there is a [JavaDoc available online at JitPack](https://jitpack.io/com/github/IncPlusPlus/NetProgFinalProject/latest/javadoc/).
+#### Run/Use
+To use this library, you can create your own `Server` object and run it. Then, you can connect as many `Client` objects or `Slave` objects as you like. Client requests can be submitted via the interactive console specified in the `Console Usage` section above or by using some of the methods in the `Client` class which return a `FutureTask` such as `evaluateExpression()` or `multiply()`. For code examples, please see how matrices are multiplied inside the [LoadApplicator](src/test/java/io/github/incplusplus/peerprocessing/LoadApplicator.java) class.
+
+There aren't many functions available yet and it's certainly not polished (or cleaned for internal-use-only methods). However, there is [JavaDoc available online at JitPack](https://jitpack.io/com/github/IncPlusPlus/NetProgFinalProject/latest/javadoc/).
 
 ## Features 
 
