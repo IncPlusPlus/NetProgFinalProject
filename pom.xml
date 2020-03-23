@@ -14,7 +14,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <junit-platform.version>5.5.2</junit-platform.version>
+        <junit-platform.version>5.6.1</junit-platform.version>
         <!--        Initialize variables. We expect these variables might be specified by the command line.
         However, we don't want to set them with a value here. They are initialized here to prevent
         warnings about unknown properties in the build file.-->
