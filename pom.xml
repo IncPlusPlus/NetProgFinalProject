@@ -118,7 +118,7 @@
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
-                <version>1.6.0</version>
+                <version>3.0.0</version>
                 <configuration>
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>
                 </configuration>
